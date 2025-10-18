@@ -12,6 +12,7 @@ Lấy danh sách hồ sơ ứng viên có hỗ trợ phân trang, lọc, và tì
 - **Headers:**
 
 ```http
+GET /api/v1/candidate?page=1&size=10
 Authorization: Bearer {{token}}
 Content-Type: application/json
 ```

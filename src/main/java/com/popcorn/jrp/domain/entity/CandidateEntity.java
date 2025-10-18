@@ -1,19 +1,19 @@
 package com.popcorn.jrp.domain.entity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "candidates")
-@Data
-public class CandidateEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter
+@Setter
+public class CandidateEntity extends BaseEntity {
 
     @OneToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     private String name;
@@ -26,10 +26,20 @@ public class CandidateEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private Integer experience;
+    @Column(columnDefinition = "DECIMAL(4,2)")
+    private Double experience;
     private String currentSalary;
     private String expectedSalary;
-    private String gender; // male | female
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    public enum Gender {
+        male,
+        female,
+        other
+    }
+
     private String languages;
     private String skills;
     private String educationLevel;

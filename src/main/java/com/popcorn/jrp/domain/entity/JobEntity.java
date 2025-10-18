@@ -1,19 +1,18 @@
 package com.popcorn.jrp.domain.entity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "jobs")
-@Data
-public class JobEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+@Getter
+@Setter
+public class JobEntity extends BaseEntity{
     @ManyToOne
-    @JoinColumn(name = "employerId", nullable = false)
+    @JoinColumn(name = "employer_id", nullable = false)
     private EmployerEntity employer;
 
     @Column(columnDefinition = "TEXT")

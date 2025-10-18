@@ -7,10 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "applications")
 @Data
-public class ApplicationEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class ApplicationEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "candidate_id", nullable = false)
@@ -21,7 +18,7 @@ public class ApplicationEntity {
     private JobEntity job;
 
     @ManyToOne
-    @JoinColumn(name = "resumeId")
+    @JoinColumn(name = "resume_id")
     private ResumeEntity resume;
 
     @Enumerated(EnumType.STRING)

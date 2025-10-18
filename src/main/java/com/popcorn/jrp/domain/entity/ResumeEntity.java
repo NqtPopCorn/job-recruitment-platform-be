@@ -1,17 +1,17 @@
 package com.popcorn.jrp.domain.entity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "resumes")
-@Data
-public class ResumeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter
+@Setter
+public class ResumeEntity extends BaseEntity{
 
     @ManyToOne
-    @JoinColumn(name = "candidateId", nullable = false)
+    @JoinColumn(name = "candidate_id", nullable = false)
     private CandidateEntity candidate;
 
     private String filename;

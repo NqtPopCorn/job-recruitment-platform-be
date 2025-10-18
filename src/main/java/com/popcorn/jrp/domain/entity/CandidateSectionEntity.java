@@ -1,19 +1,18 @@
 package com.popcorn.jrp.domain.entity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "candidate_sections")
-@Data
-public class CandidateSectionEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+@Getter
+@Setter
+public class CandidateSectionEntity extends BaseEntity {
     @ManyToOne
-    @JoinColumn(name = "candidateId", nullable = false)
+    @JoinColumn(name = "candidate_id", nullable = false)
     private CandidateEntity candidate;
 
     private String title;

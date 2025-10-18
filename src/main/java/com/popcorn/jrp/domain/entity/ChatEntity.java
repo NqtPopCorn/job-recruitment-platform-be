@@ -1,16 +1,16 @@
 package com.popcorn.jrp.domain.entity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chats")
-@Data
-public class ChatEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter
+@Setter
+public class ChatEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
