@@ -1,6 +1,5 @@
-package com.popcorn.jrp.domain.request;
+package com.popcorn.jrp.domain.request.candidate;
 
-import com.popcorn.jrp.domain.entity.CandidateEntity;
 import lombok.*;
 
 @Data
@@ -11,7 +10,7 @@ public class CandidateSearchRequest {
     private String search;
     private String location;
     private String industry;
-    private Double experience;
+    private Integer experience;
     private String education;
-    private CandidateEntity.Gender gender;
+    private String gender;
 }

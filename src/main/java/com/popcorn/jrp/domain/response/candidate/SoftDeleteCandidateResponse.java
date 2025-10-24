@@ -1,4 +1,4 @@
-package com.popcorn.jrp.domain.response;
+package com.popcorn.jrp.domain.response.candidate;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class SoftDeleteCandidateResponse {
-    private String id;
+    private Long id;
     private String name;
     private String designation;
     private Boolean status;

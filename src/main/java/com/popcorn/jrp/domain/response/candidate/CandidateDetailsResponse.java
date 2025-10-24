@@ -1,16 +1,18 @@
-package com.popcorn.jrp.domain.response;
+package com.popcorn.jrp.domain.response.candidate;
 
-import com.popcorn.jrp.domain.entity.CandidateEntity;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import java.util.List;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CandidateDetailsResponse {
-    private String id;
-    private String userId;
+@SuperBuilder
+@Setter
+@Getter
+public class CandidateDetailsResponse extends CandidateResponse {
+    private Long id;
+    private Long userId;
     private String email;
     private String avatar;
     private String name;
@@ -20,19 +22,18 @@ public class CandidateDetailsResponse {
     private String city;
     private String location;
     private Double hourlyRate;
-    private List<String> tags;
-    private String category;
-    private CandidateEntity.Gender gender;
+    private List<String> tags; //skills
+    private String category; // industry
+    private String gender;
     private String createdAt;
-    private Object experience;
+    private Integer experience;
     private String qualification;
     private String birthday;
     private String phone;
-    private Object currentSalary;
-    private Object expectedSalary;
-    private String currency;
+    private String currentSalary;
+    private String expectedSalary;
     private String description;
-    private List<String> language;
+    private List<String> languages;
     private List<SocialMediaResponse> socialMedias;
     private Boolean status;
 }
