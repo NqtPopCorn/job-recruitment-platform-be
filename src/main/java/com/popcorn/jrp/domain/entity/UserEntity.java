@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class UserEntity extends BaseEntity implements UserDetails {
         return email;
     }
 
-    // Quan hệ 1-1 hoặc 1-n với Candidate, Employer, SocialMedia, etc.
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<SocialMediaEntity> socialMedias = new ArrayList<>();
 }
 

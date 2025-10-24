@@ -1,4 +1,4 @@
-package com.popcorn.jrp.domain.response;
+package com.popcorn.jrp.domain.response.candidate;
 
 import lombok.*;
 

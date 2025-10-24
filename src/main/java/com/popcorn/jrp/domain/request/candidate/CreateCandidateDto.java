@@ -1,7 +1,6 @@
-package com.popcorn.jrp.domain.request;
+package com.popcorn.jrp.domain.request.candidate;
 
-import com.popcorn.jrp.domain.entity.CandidateEntity;
-import com.popcorn.jrp.domain.response.SocialMediaResponse;
+import com.popcorn.jrp.domain.response.candidate.SocialMediaResponse;
 import lombok.*;
 import java.util.List;
 
@@ -21,12 +20,13 @@ public class CreateCandidateDto {
     private String location;
     private Double hourlyRate;
     private String description;
-    private String experience;
-    private String currentSalary;
-    private String expectedSalary;
-    private CandidateEntity.Gender gender;
-    private List<String> language;
+    private Integer experience;
+    private int currentSalary;
+    private int expectedSalary;
+    private String currency;
+    private String gender;
+    private List<String> languages;
     private String educationLevel;
-    private List<SocialMediaResponse> socialMedias;
+//    private List<SocialMediaResponse> socialMedias;
 }
 

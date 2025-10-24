@@ -1,17 +1,15 @@
 package com.popcorn.jrp.controller;
 
-import com.popcorn.jrp.domain.mapper.PageMapper;
-import com.popcorn.jrp.domain.request.CandidateSearchRequest;
-import com.popcorn.jrp.domain.request.CreateCandidateDto;
-import com.popcorn.jrp.domain.request.UpdateCandidateDto;
+import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
+import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
+import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.*;
+import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
+import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
+import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
 import com.popcorn.jrp.service.CandidateService;
 import jakarta.annotation.Nullable;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Pageable;
@@ -27,36 +25,36 @@ public class CandidateController {
 
     private final CandidateService candidateService;
 
-    // 1️⃣ GET PAGINATED LIST
+    // GET PAGINATED LIST
     @GetMapping
     public @ResponseBody ApiPageResponse<CandidateResponse> getCandidates(
             @Nullable Pageable pageable,
             @Nullable CandidateSearchRequest candidateSearchRequest
     ) {
 
-        var body = new PageMapper<CandidateResponse>().toApiPageResponse(candidateService.getCandidates(candidateSearchRequest, pageable));
+        var body = candidateService.getCandidates(candidateSearchRequest, pageable);
         body.setMessage("Success");
         body.setStatusCode(200);
         return body;
     }
 
-    // 2️⃣ CREATE NEW CANDIDATE
-    @PostMapping
-    public ResponseEntity<ApiDataResponse<CandidateDetailsResponse>> createCandidate(
-            @RequestBody CreateCandidateDto dto
-    ) {
-        var res = candidateService.createCandidate(dto);
-        return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
-                .data(res)
-                .message("Success")
-                .statusCode(200)
-                .build());
-    }
+    //  DELETED: CREATE NEW CANDIDATE
+//    @PostMapping
+//    public ResponseEntity<ApiDataResponse<CandidateDetailsResponse>> createCandidate(
+//            @RequestBody CreateCandidateDto dto
+//    ) {
+//        var res = candidateService.createCandidate(dto);
+//        return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
+//                .data(res)
+//                .message("Success")
+//                .statusCode(200)
+//                .build());
+//    }
 
-    // 3️⃣ GET DETAIL BY CANDIDATE ID
+    // GET DETAIL BY CANDIDATE ID
     @GetMapping("/details/{id}")
     public ResponseEntity<ApiDataResponse<CandidateDetailsResponse>> getCandidateById(
-            @PathVariable String id
+            @PathVariable Long id
     ) {
         var res = candidateService.getCandidateById(id);
         return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
@@ -66,10 +64,10 @@ public class CandidateController {
                 .build());
     }
 
-    // 4️⃣ GET DETAIL BY USER ID
+    //  GET DETAIL BY USER ID
     @GetMapping("/details/user/{userId}")
     public ResponseEntity<ApiDataResponse<CandidateDetailsResponse>> getCandidateByUserId(
-            @PathVariable String userId
+            @PathVariable Long userId
     ) {
         var data = candidateService.getCandidateByUserId(userId);
         return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
@@ -79,7 +77,7 @@ public class CandidateController {
                 .build());
     }
 
-    // 6️⃣ GET INDUSTRY LIST
+    //  GET INDUSTRY LIST
     @GetMapping("/industry-list")
     public @ResponseBody ApiDataResponse<List<String>> getIndustryList() {
         return ApiDataResponse.<List<String>>builder()
@@ -89,7 +87,7 @@ public class CandidateController {
                 .build();
     }
 
-    // 7️⃣ GET SKILL LIST
+    //  GET SKILL LIST
     @GetMapping("/skill-list")
     public @ResponseBody ApiDataResponse<List<String>> getSkillList() {
         return ApiDataResponse.<List<String>>builder()
@@ -99,10 +97,10 @@ public class CandidateController {
                 .build();
     }
 
-    // 8️⃣ UPDATE CANDIDATE (PATCH)
+    //  UPDATE CANDIDATE (PATCH)
     @PatchMapping("/{id}")
     public @ResponseBody ApiDataResponse<CandidateDetailsResponse> updateCandidate(
-            @PathVariable String id,
+            @PathVariable Long id,
             @RequestBody UpdateCandidateDto dto
     ) {
         var data = candidateService.updateCandidate(id, dto);
@@ -113,10 +111,10 @@ public class CandidateController {
                 .build();
     }
 
-    // 9️⃣ SOFT DELETE CANDIDATE
+    //  SOFT DELETE CANDIDATE
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiDataResponse<SoftDeleteCandidateResponse>> softDeleteCandidate(
-            @PathVariable String id
+            @PathVariable Long id
     ) {
         var data = candidateService.softDeleteCandidate(id);
         return ResponseEntity.ok(ApiDataResponse.<SoftDeleteCandidateResponse>builder()

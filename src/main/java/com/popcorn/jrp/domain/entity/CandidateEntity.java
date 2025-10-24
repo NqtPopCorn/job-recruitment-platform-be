@@ -1,10 +1,13 @@
 package com.popcorn.jrp.domain.entity;
+import com.popcorn.jrp.helper.ListStringConverter;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "candidates")
@@ -22,27 +25,33 @@ public class CandidateEntity extends BaseEntity {
     private String industry;
     private String designation;
     private String location;
-
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "DECIMAL(4,2)")
-    private Double experience;
+    private Integer experience;
     private String currentSalary;
     private String expectedSalary;
+    private String gender;
+    private String email;
+    private String phone;
+    private Double hourlyRate;
+    private String city;
+    private String country;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+    @Convert(converter = ListStringConverter.class)
+    private List<String> languages; // "English, Japanese".split
+    @Convert(converter = ListStringConverter.class)
+    private List<String> skills; // "Java, React, Nodejs".split
 
-    public enum Gender {
-        male,
-        female,
-        other
+    private String educationLevel;
+    // For soft delete
+    private boolean status;
+
+    private LocalDateTime createdAt;
+    @PrePersist
+    public void prePersist(){
+        createdAt = LocalDateTime.now();
     }
 
-    private String languages;
-    private String skills;
-    private String educationLevel;
-    private Boolean status;
 }
 
