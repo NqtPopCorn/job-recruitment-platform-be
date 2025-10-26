@@ -1,3 +1,4 @@
+
 package com.popcorn.jrp.security;
 
 import io.jsonwebtoken.Claims;
@@ -15,14 +16,16 @@ public class JwtUtil {
     private final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
     private final long ACCESS_EXPIRATION_TIME = 900000; // 15 phút
 
-    // Tạo Access Token
-    public String generateAccessToken(String id) {
+    // Tạo Access Token với role
+    public String generateAccessToken(String id, String email, String role) {
         try {
             return Jwts.builder()
                     .subject(id)
+                    .claim("email", email)
+                    .claim("role", role)
+                    .claim("type", "access")
                     .issuedAt(new Date())
                     .expiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION_TIME))
-                    .claim("type", "access")
                     .signWith(SECRET_KEY)
                     .compact();
         } catch (Exception e) {
@@ -30,12 +33,30 @@ public class JwtUtil {
         }
     }
 
-    // Lấy email từ token
+    // Lấy ID từ token
     public String extractID(String token) {
         try {
             return getClaims(token).getSubject();
         } catch (Exception e) {
+            throw new RuntimeException("Error extracting ID from token: " + e.getMessage());
+        }
+    }
+
+    // Lấy email từ token
+    public String extractEmail(String token) {
+        try {
+            return getClaims(token).get("email", String.class);
+        } catch (Exception e) {
             throw new RuntimeException("Error extracting email from token: " + e.getMessage());
+        }
+    }
+
+    // Lấy role từ token
+    public String extractRole(String token) {
+        try {
+            return getClaims(token).get("role", String.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Error extracting role from token: " + e.getMessage());
         }
     }
 

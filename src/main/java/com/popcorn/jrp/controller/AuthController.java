@@ -1,6 +1,7 @@
 package com.popcorn.jrp.controller;
 
 import com.popcorn.jrp.domain.request.auth.LoginRequest;
+import com.popcorn.jrp.domain.request.auth.RegisterRequest;
 import com.popcorn.jrp.domain.response.auth.AccountResponse;
 import com.popcorn.jrp.domain.response.ApiResponse;
 import com.popcorn.jrp.service.AuthService;
@@ -20,6 +21,19 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.builder()
+                        .success(true)
+                        .statusCode(HttpStatus.CREATED.value())
+                        .message("User registered successfully")
+                        .build()
+        );
+    }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(

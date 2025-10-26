@@ -7,11 +7,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -45,6 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             String userId = jwtUtil.extractID(token);
+            String role = jwtUtil.extractRole(token);
 
             if (!jwtUtil.isAccessToken(token)) {
                 sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
@@ -53,8 +56,13 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             if (userId != null && jwtUtil.isTokenValid(token, userId)) {
+                // Thêm authorities với role
+                List<SimpleGrantedAuthority> authorities = List.of(
+                        new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
+                );
+
                 UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userId, null, null);
+                        new UsernamePasswordAuthenticationToken(userId, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 chain.doFilter(request, response);
             } else {

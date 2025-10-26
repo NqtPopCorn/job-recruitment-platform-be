@@ -2,10 +2,12 @@ package com.popcorn.jrp.service.impl;
 
 import com.popcorn.jrp.domain.entity.UserEntity;
 import com.popcorn.jrp.domain.request.auth.LoginRequest;
+import com.popcorn.jrp.domain.request.auth.RegisterRequest;
 import com.popcorn.jrp.domain.response.auth.AccountResponse;
 import com.popcorn.jrp.exception.CustomException;
 import com.popcorn.jrp.repository.UserRepository;
 import com.popcorn.jrp.security.JwtUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +23,45 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
 //    private final CandidateService candidateService;
 //    private final CompanyService companyService;
 
+    @Transactional
+    public void register(RegisterRequest request) {
+        try {
+            // Kiểm tra email đã tồn tại
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new CustomException(
+                        HttpStatus.BAD_REQUEST,
+                        "Email already exists"
+                );
+            }
+
+            // Tạo user mới
+            UserEntity user = new UserEntity();
+            user.setEmail(request.getEmail());
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+            // Set role
+            try {
+                user.setRole(UserEntity.Role.valueOf(request.getRole().trim().toLowerCase()));
+            } catch (IllegalArgumentException e) {
+                throw new CustomException(
+                        HttpStatus.BAD_REQUEST,
+                        "Invalid role: " + request.getRole()
+                );
+            }
+
+            userRepository.save(user);
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "AuthService.register: Unexpected error occurred",
+                    e.getMessage()
+            );
+        }
+    }
+
     public String login(LoginRequest request) {
         try {
             // Tìm user theo email
@@ -35,8 +76,12 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
                 throw new CustomException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
             }
 
-            // Tạo access token với ID
-            return jwtUtil.generateAccessToken(String.valueOf(user.getId()));
+            // Tạo access token với ID, email và role
+            return jwtUtil.generateAccessToken(
+                    String.valueOf(user.getId()),
+                    user.getEmail(),
+                    user.getRole().name()
+            );
 
         } catch (CustomException e) {
             throw e;
