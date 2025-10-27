@@ -46,7 +46,7 @@ public final class CandidateSpecification {
 
     public static Specification<CandidateEntity> hasGender(String gender) {
         return (root, query, cb) -> {
-            if (gender == null) {
+            if (gender == null || gender.isEmpty()) {
                 return cb.conjunction();
             }
             return cb.equal(root.get("gender"), gender);
@@ -55,7 +55,7 @@ public final class CandidateSpecification {
 
     public static Specification<CandidateEntity> hasExperienceLessThanOrEqual(Integer experience) {
         return (root, query, cb) -> {
-            if (experience == null) {
+            if (experience == null || experience <= 0) {
                 return cb.conjunction();
             }
             return cb.lessThanOrEqualTo(root.get("experience"), experience);

@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Table(name = "jobs")
 @Getter
 @Setter
-public class JobEntity extends BaseEntity{
+public class    JobEntity extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "employer_id", nullable = false)
     private EmployerEntity employer;

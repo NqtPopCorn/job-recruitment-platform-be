@@ -90,7 +90,7 @@ public class CandidateServiceV1 implements CandidateService {
     }
 
     @Override
-    @Cacheable("industryList")
+    @Cacheable("industryList") // just for demo, cache without TTL
 //    @CacheEvict(cacheNames = "industryList") //delete cache
     public List<String> getIndustryList() {
         return candidateRepository.findAll().stream()
@@ -100,7 +100,7 @@ public class CandidateServiceV1 implements CandidateService {
     }
 
     @Override
-    @Cacheable("skillList")
+    @Cacheable("skillList") // just for demo, cache without TTL
     public List<String> getSkillList() {
         return candidateRepository.findAll().stream()
                 .flatMap(c -> c.getSkills().stream())
