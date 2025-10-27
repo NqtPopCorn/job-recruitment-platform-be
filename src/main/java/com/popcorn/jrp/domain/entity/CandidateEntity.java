@@ -53,5 +53,8 @@ public class CandidateEntity extends BaseEntity {
         createdAt = LocalDateTime.now();
     }
 
+//    @OneToMany(mappedBy = "candidate", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private List<CandidateSectionEntity> candidateSections;
+
 }
 

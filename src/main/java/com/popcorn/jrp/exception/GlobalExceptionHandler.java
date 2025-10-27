@@ -29,5 +29,15 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ApiDataResponse<Object>> handleCustomException(CustomException e) {
+        return ResponseEntity.status(e.getStatus())
+                .body(ApiDataResponse.builder()
+                        .statusCode(e.getStatus().value())
+                        .message(e.getMessage())
+                        .data(e.getDetails())
+                        .build());
+    }
+
     // handle Validate exception
 }
