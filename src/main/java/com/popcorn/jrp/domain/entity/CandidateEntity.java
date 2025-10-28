@@ -1,12 +1,11 @@
 package com.popcorn.jrp.domain.entity;
-import com.popcorn.jrp.helper.ListStringConverter;
+import com.popcorn.jrp.helper.JsonListStringConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,10 +37,12 @@ public class CandidateEntity extends BaseEntity {
     private String city;
     private String country;
 
-    @Convert(converter = ListStringConverter.class)
-    private List<String> languages; // "English, Japanese".split
-    @Convert(converter = ListStringConverter.class)
-    private List<String> skills; // "Java, React, Nodejs".split
+    @Convert(converter = JsonListStringConverter.class)
+    @Column(columnDefinition = "JSON")
+    private List<String> languages; // JSON
+    @Convert(converter = JsonListStringConverter.class)
+    @Column(columnDefinition = "JSON")
+    private List<String> skills; // JSON
 
     private String educationLevel;
     // For soft delete
@@ -52,6 +53,9 @@ public class CandidateEntity extends BaseEntity {
     public void prePersist(){
         createdAt = LocalDateTime.now();
     }
+
+//    @OneToMany(mappedBy = "candidate", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private List<CandidateSectionEntity> candidateSections;
 
 }
 

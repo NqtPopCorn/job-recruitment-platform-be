@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "employers")
 @Getter
@@ -29,5 +31,21 @@ public class EmployerEntity extends BaseEntity {
     private String country;
     private String city;
     private Boolean status;
+
+    @Column(columnDefinition = "JSON")
+    private String socialMedias;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
 

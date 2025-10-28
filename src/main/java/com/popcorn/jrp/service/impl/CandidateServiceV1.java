@@ -16,6 +16,7 @@ import com.popcorn.jrp.repository.spec.CandidateSpecification;
 import com.popcorn.jrp.service.CandidateService;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,17 +33,20 @@ import java.util.List;
 public class CandidateServiceV1 implements CandidateService {
 
     CandidateRepository candidateRepository;
+    @Qualifier("candidateMapper")
     CandidateMapper mapper;
+    CandidateSpecification candidateSpecification;
+
 
     @Override
     public ApiPageResponse<CandidateResponse> getCandidates(CandidateSearchRequest request, Pageable pageable) {
-        Specification<CandidateEntity> spec = CandidateSpecification.getPublicSpecification(request);
+        Specification<CandidateEntity> spec = candidateSpecification.getPublicSpecification(request);
         try {
             var page = candidateRepository
                     .findAll(spec, pageable);
             return mapper.toApiPageResponse(page.map(mapper::toResponse));
         } catch (Exception e) {
-            throw new BadRequestException("Page request error: "+e.getMessage());
+            throw new BadRequestException("Page request error: " + e.getMessage());
         }
     }
 
@@ -54,7 +58,8 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public CandidateDetailsResponse getCandidateByUserId(Long userId) {
-        var found = candidateRepository.getCandidateByUserId(userId).orElseThrow(() -> new NotFoundException("Candidate"));
+        var found = candidateRepository.getCandidateByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         return mapper.toDetailsResponse(found);
     }
 
@@ -67,7 +72,8 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public CandidateDetailsResponse updateCandidate(Long id, UpdateCandidateDto dto) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         mapper.updateEntity(candidateEntity, dto);
         candidateRepository.save(candidateEntity);
         return mapper.toDetailsResponse(candidateEntity);
@@ -75,7 +81,8 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public SoftDeleteCandidateResponse softDeleteCandidate(Long id) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateEntity.setStatus(false);
         candidateRepository.save(candidateEntity);
         var res = mapper.toSoftDeleteResponse(candidateEntity);
@@ -85,13 +92,14 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public void deleteCandidate(Long id) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateRepository.delete(candidateEntity);
     }
 
     @Override
-    @Cacheable("industryList")
-//    @CacheEvict(cacheNames = "industryList") //delete cache
+    @Cacheable("industryList") // just for demo, cache without TTL
+    // @CacheEvict(cacheNames = "industryList") //delete cache
     public List<String> getIndustryList() {
         return candidateRepository.findAll().stream()
                 .map(CandidateEntity::getIndustry)
@@ -100,7 +108,7 @@ public class CandidateServiceV1 implements CandidateService {
     }
 
     @Override
-    @Cacheable("skillList")
+    @Cacheable("skillList") // just for demo, cache without TTL
     public List<String> getSkillList() {
         return candidateRepository.findAll().stream()
                 .flatMap(c -> c.getSkills().stream())

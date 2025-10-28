@@ -50,9 +50,8 @@ public class JwtFilter extends OncePerRequestFilter {
             String role = jwtUtil.extractRole(token);
 
             if (!jwtUtil.isAccessToken(token)) {
-                sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
-                        "This is a Refresh Token, rejecting...");
-                return;
+//                sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
+//                        "This is a Refresh Token, rejecting...");
             }
 
             if (userId != null && jwtUtil.isTokenValid(token, userId)) {
@@ -63,15 +62,20 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                logger.info("Authenticated with userId: "+ userId);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                chain.doFilter(request, response);
-            } else {
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                        "Token has expired");
+            }
+            else {
+                logger.info("Token expired");
+//                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+//                        "Token has expired");
             }
         } catch (Exception e) {
-            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Invalid token");
+            logger.info("Invalid token or error");
+//            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+//                    "Invalid token");
+        } finally {
+            chain.doFilter(request, response);
         }
     }
 
@@ -95,17 +99,17 @@ public class JwtFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private void sendErrorResponse(HttpServletResponse response, int status, String message)
-            throws IOException {
-        response.setStatus(status);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        String error = status == HttpServletResponse.SC_UNAUTHORIZED ? "Unauthorized" : "Forbidden";
-        String jsonResponse = String.format(
-                "{\"statusCode\": %d, \"message\": \"%s\", \"error\": \"%s\"}",
-                status, message, error
-        );
-        response.getWriter().write(jsonResponse);
-    }
+//    private void sendErrorResponse(HttpServletResponse response, int status, String message)
+//            throws IOException {
+//        response.setStatus(status);
+//        response.setContentType("application/json");
+//        response.setCharacterEncoding("UTF-8");
+//
+//        String error = status == HttpServletResponse.SC_UNAUTHORIZED ? "Unauthorized" : "Forbidden";
+//        String jsonResponse = String.format(
+//                "{\"statusCode\": %d, \"message\": \"%s\", \"error\": \"%s\"}",
+//                status, message, error
+//        );
+//        response.getWriter().write(jsonResponse);
+//    }
 }
