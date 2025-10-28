@@ -15,7 +15,7 @@ import java.util.List;
 public class CandidateEntity extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private UserEntity user;
 
     private String name;
