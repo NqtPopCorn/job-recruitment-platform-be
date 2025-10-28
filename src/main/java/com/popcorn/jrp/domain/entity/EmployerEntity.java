@@ -32,6 +32,9 @@ public class EmployerEntity extends BaseEntity {
     private String city;
     private Boolean status;
 
+    @Column(columnDefinition = "JSON")
+    private String socialMedias;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
