@@ -63,20 +63,6 @@ public class CandidateController {
                                 .build());
         }
 
-        // GET DETAIL BY USER ID
-        // @GetMapping("/details/user/{userId}")
-        // public ResponseEntity<ApiDataResponse<CandidateDetailsResponse>>
-        // getCandidateByUserId(
-        // @PathVariable Long userId
-        // ) {
-        // var data = candidateService.getCandidateByUserId(userId);
-        // return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
-        // .data(data)
-        // .message("Success")
-        // .statusCode(200)
-        // .build());
-        // }
-
         // GET INDUSTRY LIST
         @GetMapping("/industry-list")
         public @ResponseBody ApiDataResponse<List<String>> getIndustryList() {
