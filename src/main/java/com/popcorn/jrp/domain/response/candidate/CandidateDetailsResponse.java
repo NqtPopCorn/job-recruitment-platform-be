@@ -5,6 +5,8 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
+import com.popcorn.jrp.domain.response.common.SocialMediaResponse;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
@@ -22,7 +24,7 @@ public class CandidateDetailsResponse extends CandidateResponse {
     private String city;
     private String location;
     private Double hourlyRate;
-    private List<String> tags; //skills
+    private List<String> tags; // skills
     private String category; // industry
     private String gender;
     private String createdAt;

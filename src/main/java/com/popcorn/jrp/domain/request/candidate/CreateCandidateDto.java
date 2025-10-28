@@ -1,8 +1,9 @@
 package com.popcorn.jrp.domain.request.candidate;
 
-import com.popcorn.jrp.domain.response.candidate.SocialMediaResponse;
 import lombok.*;
 import java.util.List;
+
+import com.popcorn.jrp.domain.response.common.SocialMediaResponse;
 
 @Data
 @NoArgsConstructor
@@ -27,6 +28,5 @@ public class CreateCandidateDto {
     private String gender;
     private List<String> languages;
     private String educationLevel;
-//    private List<SocialMediaResponse> socialMedias;
+    // private List<SocialMediaResponse> socialMedias;
 }
-

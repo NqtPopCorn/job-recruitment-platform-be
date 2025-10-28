@@ -1,8 +1,9 @@
 package com.popcorn.jrp.domain.request.candidate;
 
-import com.popcorn.jrp.domain.response.candidate.SocialMediaResponse;
 import lombok.*;
 import java.util.List;
+
+import com.popcorn.jrp.domain.response.common.SocialMediaResponse;
 
 @Data
 @NoArgsConstructor
@@ -30,4 +31,3 @@ public class UpdateCandidateDto {
     private List<SocialMediaResponse> socialMedias;
     private Boolean status;
 }
-
