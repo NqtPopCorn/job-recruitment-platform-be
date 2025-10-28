@@ -78,10 +78,10 @@ public class AuthController {
         );
     }
 
-//    @GetMapping("/account")
-//    public ResponseEntity<AccountResponse> getAccount(Authentication authentication) {
-//        String userId = authentication.getName(); // Lấy ID từ JWT
-//        AccountResponse account = authService.getAccount(userId);
-//        return ResponseEntity.ok(account);
-//    }
+    @GetMapping("/account")
+    public ResponseEntity<AccountResponse> getAccount(Authentication authentication) {
+        String userId = authentication.getName(); // Lấy ID từ JWT
+        AccountResponse account = authService.getAccount(userId);
+        return ResponseEntity.ok(account);
+    }
 }
