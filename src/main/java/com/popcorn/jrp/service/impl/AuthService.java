@@ -1,5 +1,6 @@
 package com.popcorn.jrp.service.impl;
 
+import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.entity.UserEntity;
 import com.popcorn.jrp.domain.request.auth.LoginRequest;
 import com.popcorn.jrp.domain.request.auth.RegisterRequest;
@@ -24,7 +25,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final CandidateService candidateService;
-//    private final CompanyService companyService;
+    // private final CompanyService companyService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -33,8 +34,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             if (userRepository.findByEmail(request.getEmail()).isPresent()) {
                 throw new CustomException(
                         HttpStatus.BAD_REQUEST,
-                        "Email already exists"
-                );
+                        "Email already exists");
             }
 
             // Tạo user mới
@@ -48,8 +48,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             } catch (IllegalArgumentException e) {
                 throw new CustomException(
                         HttpStatus.BAD_REQUEST,
-                        "Invalid role: " + request.getRole()
-                );
+                        "Invalid role: " + request.getRole());
             }
 
             userRepository.save(user);
@@ -60,8 +59,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             throw new CustomException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "AuthService.register: Unexpected error occurred",
-                    e.getMessage()
-            );
+                    e.getMessage());
         }
     }
 
@@ -71,8 +69,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             UserEntity user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new CustomException(
                             HttpStatus.UNAUTHORIZED,
-                            "Invalid credentials"
-                    ));
+                            "Invalid credentials"));
 
             // Kiểm tra password
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -83,8 +80,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             return jwtUtil.generateAccessToken(
                     String.valueOf(user.getId()),
                     user.getEmail(),
-                    user.getRole().name()
-            );
+                    user.getRole().name());
 
         } catch (CustomException e) {
             throw e;
@@ -92,8 +88,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             throw new CustomException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "AuthService.login: Unexpected error occurred",
-                    e.getMessage()
-            );
+                    e.getMessage());
         }
     }
 
@@ -102,36 +97,37 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             UserEntity user = userRepository.findById(Long.parseLong(userId))
                     .orElseThrow(() -> new CustomException(
                             HttpStatus.UNAUTHORIZED,
-                            "Invalid token"
-                    ));
+                            "Invalid token"));
 
             AccountResponse response = new AccountResponse();
-            response.setUserId(String.valueOf(user.getId()));
-            response.setEmail(user.getEmail());
+            response.setUserId(user.getId());
+            response.setEmailLogin(user.getEmail());
             response.setRole(user.getRole().name());
 
             // Lấy data tùy theo role
             switch (user.getRole()) {
                 case candidate:
-                    Object candidateData = candidateService.getCandidateByUserId(user.getId());
-                    response.setData(candidateData);
+                    CandidateEntity candidate = candidateService.getCandidateByUserId(user.getId());
+                    response.setId(candidate.getId());
+                    response.setName(candidate.getName());
+                    response.setImageUrl(candidate.getAvatar());
                     break;
 
-//                case employer:
-//                    Object companyData = companyService.getCompanyByUserId(user.getId());
-//                    response.setData(companyData);
-//                    break;
+                case employer:
+                    CandidateEntity employer = candidateService.getCandidateByUserId(user.getId());
+                    response.setId(employer.getId());
+                    response.setName(employer.getName());
+                    response.setImageUrl(employer.getAvatar());
+                    break;
 
                 case admin:
                     // Admin không có data bổ sung
-                    response.setData(null);
                     break;
 
                 default:
                     throw new CustomException(
                             HttpStatus.BAD_REQUEST,
-                            "Unsupported user role: " + user.getRole().name()
-                    );
+                            "Unsupported user role: " + user.getRole().name());
             }
 
             return response;
@@ -142,8 +138,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             throw new CustomException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "AuthService.getAccount: Unexpected error occurred",
-                    e.getMessage()
-            );
+                    e.getMessage());
         }
     }
 }

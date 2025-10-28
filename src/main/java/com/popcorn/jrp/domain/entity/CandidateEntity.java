@@ -1,4 +1,5 @@
 package com.popcorn.jrp.domain.entity;
+
 import com.popcorn.jrp.helper.ListStringConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -48,10 +49,10 @@ public class CandidateEntity extends BaseEntity {
     private boolean status;
 
     private LocalDateTime createdAt;
+
     @PrePersist
-    public void prePersist(){
+    public void prePersist() {
         createdAt = LocalDateTime.now();
     }
 
 }
-

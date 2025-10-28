@@ -22,4 +22,3 @@ public class CandidateResponse {
     private String createdAt;
     private Boolean status;
 }
-

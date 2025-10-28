@@ -42,7 +42,7 @@ public class CandidateServiceV1 implements CandidateService {
                     .findAll(spec, pageable);
             return mapper.toApiPageResponse(page.map(mapper::toResponse));
         } catch (Exception e) {
-            throw new BadRequestException("Page request error: "+e.getMessage());
+            throw new BadRequestException("Page request error: " + e.getMessage());
         }
     }
 
@@ -52,10 +52,18 @@ public class CandidateServiceV1 implements CandidateService {
         return mapper.toDetailsResponse(found);
     }
 
+    // @Override
+    // public CandidateDetailsResponse getCandidateByUserId(Long userId) {
+    // var found = candidateRepository.getCandidateByUserId(userId)
+    // .orElseThrow(() -> new NotFoundException("Candidate"));
+    // return mapper.toDetailsResponse(found);
+    // }
+
     @Override
-    public CandidateDetailsResponse getCandidateByUserId(Long userId) {
-        var found = candidateRepository.getCandidateByUserId(userId).orElseThrow(() -> new NotFoundException("Candidate"));
-        return mapper.toDetailsResponse(found);
+    public CandidateEntity getCandidateByUserId(Long userId) {
+        CandidateEntity found = candidateRepository.getCandidateByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
+        return found;
     }
 
     @Override
@@ -67,7 +75,8 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public CandidateDetailsResponse updateCandidate(Long id, UpdateCandidateDto dto) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         mapper.updateEntity(candidateEntity, dto);
         candidateRepository.save(candidateEntity);
         return mapper.toDetailsResponse(candidateEntity);
@@ -75,7 +84,8 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public SoftDeleteCandidateResponse softDeleteCandidate(Long id) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateEntity.setStatus(false);
         candidateRepository.save(candidateEntity);
         var res = mapper.toSoftDeleteResponse(candidateEntity);
@@ -85,13 +95,14 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public void deleteCandidate(Long id) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateRepository.delete(candidateEntity);
     }
 
     @Override
     @Cacheable("industryList")
-//    @CacheEvict(cacheNames = "industryList") //delete cache
+    // @CacheEvict(cacheNames = "industryList") //delete cache
     public List<String> getIndustryList() {
         return candidateRepository.findAll().stream()
                 .map(CandidateEntity::getIndustry)
