@@ -1,10 +1,7 @@
 package com.popcorn.jrp.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -12,9 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "jobs")
 @Getter
@@ -22,7 +16,7 @@ import java.util.List;
 public class JobEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employer_id", nullable = false)
+    @JoinColumn(name = "employer_id", nullable = true)
     private EmployerEntity employer;
 
     @Column(columnDefinition = "TEXT")
@@ -47,7 +41,6 @@ public class JobEntity extends BaseEntity {
     @Column(precision = 12, scale = 2)
     private BigDecimal maxSalary;
 
-    @Column(columnDefinition = "month")
     private String unit;
 
     private String currency;

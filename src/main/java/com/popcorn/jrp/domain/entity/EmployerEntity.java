@@ -1,4 +1,5 @@
 package com.popcorn.jrp.domain.entity;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -30,4 +31,3 @@ public class EmployerEntity extends BaseEntity {
     private String city;
     private Boolean status;
 }
-
