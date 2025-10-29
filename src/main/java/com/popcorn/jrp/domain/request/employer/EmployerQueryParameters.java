@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmployerQueryParameters {
 
-    private int page = 1;
+    private int page = 0;
     private int size = 10;
     private String sort;
     private String search;

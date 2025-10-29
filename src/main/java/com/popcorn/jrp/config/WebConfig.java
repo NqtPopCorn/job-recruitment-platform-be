@@ -13,7 +13,6 @@ public class WebConfig {
     @Bean
     public PageableHandlerMethodArgumentResolverCustomizer customizePagination() {
         return resolver -> {
-            resolver.setOneIndexedParameters(true);
             resolver.setMaxPageSize(50);            // Giới hạn kích thước tối đa
             resolver.setFallbackPageable(PageRequest.of(0, 10)); // Mặc định page=1,size=10
             resolver.setPageParameterName("page");  // Tên query param cho page
