@@ -16,6 +16,7 @@ import com.popcorn.jrp.repository.spec.CandidateSpecification;
 import com.popcorn.jrp.service.CandidateService;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,11 +33,13 @@ import java.util.List;
 public class CandidateServiceV1 implements CandidateService {
 
     CandidateRepository candidateRepository;
+    @Qualifier("candidateMapper")
     CandidateMapper mapper;
+    CandidateSpecification candidateSpecification;
 
     @Override
     public ApiPageResponse<CandidateResponse> getCandidates(CandidateSearchRequest request, Pageable pageable) {
-        Specification<CandidateEntity> spec = CandidateSpecification.getPublicSpecification(request);
+        Specification<CandidateEntity> spec = candidateSpecification.getPublicSpecification(request);
         try {
             var page = candidateRepository
                     .findAll(spec, pageable);
@@ -112,7 +115,7 @@ public class CandidateServiceV1 implements CandidateService {
     }
 
     @Override
-    @Cacheable("skillList")
+    @Cacheable("skillList") // just for demo, cache without TTL
     public List<String> getSkillList() {
         return candidateRepository.findAll().stream()
                 .flatMap(c -> c.getSkills().stream())

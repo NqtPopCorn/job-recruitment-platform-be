@@ -1,10 +1,8 @@
 package com.popcorn.jrp.domain.mapper;
 
 import com.popcorn.jrp.domain.response.ApiPageResponse;
-import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 
-// @Mapper(componentModel = "spring")
 public interface PageMapper<T> {
 
     default ApiPageResponse<T> toApiPageResponse(Page<T> page) {

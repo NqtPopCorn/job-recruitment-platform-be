@@ -1,6 +1,6 @@
 package com.popcorn.jrp.domain.entity;
 
-import com.popcorn.jrp.helper.ListStringConverter;
+import com.popcorn.jrp.helper.JsonListStringConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -23,7 +22,7 @@ import java.util.List;
 public class CandidateEntity extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private UserEntity user;
 
     private String name;
@@ -45,10 +44,12 @@ public class CandidateEntity extends BaseEntity {
     private String city;
     private String country;
 
-    @Convert(converter = ListStringConverter.class)
-    private List<String> languages; // "English, Japanese".split
-    @Convert(converter = ListStringConverter.class)
-    private List<String> skills; // "Java, React, Nodejs".split
+    @Convert(converter = JsonListStringConverter.class)
+    @Column(columnDefinition = "JSON")
+    private List<String> languages; // JSON
+    @Convert(converter = JsonListStringConverter.class)
+    @Column(columnDefinition = "JSON")
+    private List<String> skills; // JSON
 
     private String educationLevel;
     // For soft delete
@@ -61,5 +62,9 @@ public class CandidateEntity extends BaseEntity {
         // createdAt = LocalDateTime.now();
         this.status = true;
     }
+
+    // @OneToMany(mappedBy = "candidate", fetch = FetchType.LAZY, cascade =
+    // CascadeType.ALL)
+    // private List<CandidateSectionEntity> candidateSections;
 
 }

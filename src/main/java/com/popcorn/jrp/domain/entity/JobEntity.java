@@ -14,23 +14,29 @@ public class JobEntity extends BaseEntity{
     @JoinColumn(name = "employer_id", nullable = false)
     private EmployerEntity employer;
 
-    @Column(columnDefinition = "TEXT")
-    private String skills; // JSON lưu dưới dạng String
+    private String jobTitle;
+
+    @Column(columnDefinition = "JSON")
+    private String skills; // JSON
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "JSON")
     private String jobType; // JSON
 
     private String level;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "JSON")
     private String responsibilities; // JSON
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "JSON")
     private String skillAndExperiences; // JSON
 
+    @Column(columnDefinition = "JSON")
+    private String workTime; // JSON
+
+    private String salary;
     private Integer experience;
     private String industry;
     private Integer quantity;
