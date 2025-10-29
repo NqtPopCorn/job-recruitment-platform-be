@@ -1,5 +1,7 @@
 package com.popcorn.jrp.domain.response.candidate;
 
+import java.time.LocalDateTime;
+
 import lombok.*;
 
 @Data
@@ -11,6 +13,5 @@ public class SoftDeleteCandidateResponse {
     private String name;
     private String designation;
     private Boolean status;
-    private String updatedAt;
+    private LocalDateTime deletedAt;
 }
-

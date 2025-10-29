@@ -87,9 +87,10 @@ public class CandidateServiceV1 implements CandidateService {
         CandidateEntity candidateEntity = candidateRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateEntity.setStatus(false);
+        candidateEntity.setDeleted(true);
         candidateRepository.save(candidateEntity);
         var res = mapper.toSoftDeleteResponse(candidateEntity);
-        res.setUpdatedAt(LocalDateTime.now().toString());
+        res.setDeletedAt(LocalDateTime.now());
         return res;
     }
 

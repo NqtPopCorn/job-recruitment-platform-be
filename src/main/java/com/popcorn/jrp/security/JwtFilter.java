@@ -23,6 +23,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        System.out.println("🔥 [JwtAuthFilter] Request đi qua filter: " + request.getRequestURI());
+
         String path = request.getRequestURI();
 
         // Bỏ qua JWT filter cho các endpoint public
@@ -46,6 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
+            System.out.println("Access Token: " + token);
             String userId = jwtUtil.extractID(token);
             String role = jwtUtil.extractRole(token);
 
@@ -58,11 +61,10 @@ public class JwtFilter extends OncePerRequestFilter {
             if (userId != null && jwtUtil.isTokenValid(token, userId)) {
                 // Thêm authorities với role
                 List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
-                );
+                        new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
 
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userId, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 chain.doFilter(request, response);
             } else {
@@ -104,8 +106,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String error = status == HttpServletResponse.SC_UNAUTHORIZED ? "Unauthorized" : "Forbidden";
         String jsonResponse = String.format(
                 "{\"statusCode\": %d, \"message\": \"%s\", \"error\": \"%s\"}",
-                status, message, error
-        );
+                status, message, error);
         response.getWriter().write(jsonResponse);
     }
 }

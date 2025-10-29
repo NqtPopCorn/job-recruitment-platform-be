@@ -2,7 +2,10 @@ package com.popcorn.jrp.domain.entity;
 
 import com.popcorn.jrp.helper.ListStringConverter;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -10,6 +13,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "candidates")
 @Getter
@@ -48,11 +54,12 @@ public class CandidateEntity extends BaseEntity {
     // For soft delete
     private boolean status;
 
-    private LocalDateTime createdAt;
+    // private LocalDateTime createdAt;
 
     @PrePersist
     public void prePersist() {
-        createdAt = LocalDateTime.now();
+        // createdAt = LocalDateTime.now();
+        this.status = true;
     }
 
 }

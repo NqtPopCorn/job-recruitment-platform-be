@@ -3,6 +3,7 @@ package com.popcorn.jrp.domain.response.candidate;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -19,6 +20,7 @@ public class CandidateResponse {
     private List<String> tags; // skills
     private String category; // industry
     private String gender;
-    private String createdAt;
+    // private String createdAt;
+    private LocalDateTime createdAt;
     private Boolean status;
 }

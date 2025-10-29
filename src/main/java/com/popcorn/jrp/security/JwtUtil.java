@@ -3,34 +3,78 @@ package com.popcorn.jrp.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    private final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
-    private final long ACCESS_EXPIRATION_TIME = 900000; // 15 phút
+    @Value("${jwt.secret}")
+    private String secretKeyString;
+
+    @Value("${jwt.token-expiration}")
+    private String tokenExpiration; // ví dụ: "1d" hoặc "15m"
+
+    @Value("${jwt.audience}")
+    private String audience;
+
+    @Value("${jwt.issuer}")
+    private String issuer;
+
+    private SecretKey secretKey;
+    private long accessExpirationMs;
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = getSigningKey();
+        this.accessExpirationMs = parseExpirationTime(tokenExpiration);
+    }
+
+    // ✅ Hàm parse "1d", "15m", "900000" -> mili giây
+    private long parseExpirationTime(String value) {
+        value = value.trim().toLowerCase();
+        if (value.endsWith("d")) {
+            return TimeUnit.DAYS.toMillis(Long.parseLong(value.replace("d", "")));
+        } else if (value.endsWith("h")) {
+            return TimeUnit.HOURS.toMillis(Long.parseLong(value.replace("h", "")));
+        } else if (value.endsWith("m")) {
+            return TimeUnit.MINUTES.toMillis(Long.parseLong(value.replace("m", "")));
+        } else {
+            return Long.parseLong(value); // default: milliseconds
+        }
+    }
 
     // Tạo Access Token với role
     public String generateAccessToken(String id, String email, String role) {
-        try {
-            return Jwts.builder()
-                    .subject(id)
-                    .claim("email", email)
-                    .claim("role", role)
-                    .claim("type", "access")
-                    .issuedAt(new Date())
-                    .expiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION_TIME))
-                    .signWith(SECRET_KEY)
-                    .compact();
-        } catch (Exception e) {
-            throw new RuntimeException("Error generating access token: " + e.getMessage());
-        }
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + accessExpirationMs);
+
+        return Jwts.builder()
+                .subject(id)
+                .claim("email", email)
+                .claim("role", role)
+                .claim("type", "access")
+                .issuedAt(now)
+                .expiration(expiry)
+                .issuer(issuer)
+                .audience().add(audience).and()
+                .signWith(secretKey)
+                .compact();
+    }
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
     }
 
     // Lấy ID từ token
@@ -82,7 +126,7 @@ public class JwtUtil {
     private Claims getClaims(String token) {
         try {
             return Jwts.parser()
-                    .verifyWith(SECRET_KEY)
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
