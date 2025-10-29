@@ -1,5 +1,8 @@
 package com.popcorn.jrp.controller;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.popcorn.jrp.domain.request.job.CreateJobDto;
 import com.popcorn.jrp.domain.request.job.JobQueryParameters;
 import com.popcorn.jrp.domain.request.job.RelatedJobQueryParameters;
