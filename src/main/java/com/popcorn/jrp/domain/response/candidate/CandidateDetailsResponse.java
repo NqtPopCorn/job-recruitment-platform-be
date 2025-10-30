@@ -3,6 +3,7 @@ package com.popcorn.jrp.domain.response.candidate;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -11,21 +12,11 @@ import java.util.List;
 @Setter
 @Getter
 public class CandidateDetailsResponse extends CandidateResponse {
-    private Long id;
     private Long userId;
     private String email;
-    private String avatar;
-    private String name;
     private String industry;
-    private String designation;
     private String country;
     private String city;
-    private String location;
-    private Double hourlyRate;
-    private List<String> tags; //skills
-    private String category; // industry
-    private String gender;
-    private String createdAt;
     private Integer experience;
     private String qualification;
     private String birthday;
@@ -35,5 +26,4 @@ public class CandidateDetailsResponse extends CandidateResponse {
     private String description;
     private List<String> languages;
     private List<SocialMediaResponse> socialMedias;
-    private Boolean status;
 }

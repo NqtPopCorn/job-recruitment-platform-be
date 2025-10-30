@@ -1,5 +1,6 @@
 package com.popcorn.jrp.controller;
 
+import com.popcorn.jrp.domain.mapper.CandidateMapper;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
 import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
@@ -27,7 +28,7 @@ import java.util.List;
 public class CandidateController {
 
     private final CandidateService candidateService;
-    private final ResumeService resumeService;
+    private final CandidateMapper candidateMapper;
 
     // GET PAGINATED LIST
     @GetMapping
@@ -75,7 +76,7 @@ public class CandidateController {
     ) {
         var data = candidateService.getCandidateByUserId(userId);
         return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
-                        .data(data)
+                        .data(candidateMapper.toDetailsResponse(data))
                         .message("Success")
                         .statusCode(200)
                 .build());

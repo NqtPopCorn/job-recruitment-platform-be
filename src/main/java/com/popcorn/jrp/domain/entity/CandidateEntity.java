@@ -1,13 +1,20 @@
 package com.popcorn.jrp.domain.entity;
+
 import com.popcorn.jrp.helper.JsonListStringConverter;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "candidates")
 @Getter
@@ -15,7 +22,7 @@ import java.util.List;
 public class CandidateEntity extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private UserEntity user;
 
     private String name;
@@ -54,11 +61,10 @@ public class CandidateEntity extends BaseEntity {
     @OneToMany(mappedBy = "candidate")
     private List<ResumeEntity> resumes;
 
-    private LocalDateTime createdAt;
-    @PrePersist
-    public void prePersist(){
-        createdAt = LocalDateTime.now();
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        this.status = true;
     }
-
 }
 

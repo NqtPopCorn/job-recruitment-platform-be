@@ -33,10 +33,9 @@ import java.util.List;
 public class CandidateServiceV1 implements CandidateService {
 
     CandidateRepository candidateRepository;
-    @Qualifier("candidateMapper")
+//    @Qualifier("candidateMapper")
     CandidateMapper mapper;
     CandidateSpecification candidateSpecification;
-
 
     @Override
     public ApiPageResponse<CandidateResponse> getCandidates(CandidateSearchRequest request, Pageable pageable) {
@@ -56,11 +55,18 @@ public class CandidateServiceV1 implements CandidateService {
         return mapper.toDetailsResponse(found);
     }
 
+    // @Override
+    // public CandidateDetailsResponse getCandidateByUserId(Long userId) {
+    // var found = candidateRepository.getCandidateByUserId(userId)
+    // .orElseThrow(() -> new NotFoundException("Candidate"));
+    // return mapper.toDetailsResponse(found);
+    // }
+
     @Override
-    public CandidateDetailsResponse getCandidateByUserId(Long userId) {
-        var found = candidateRepository.getCandidateByUserId(userId)
+    public CandidateEntity getCandidateByUserId(Long userId) {
+        CandidateEntity found = candidateRepository.getCandidateByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("Candidate"));
-        return mapper.toDetailsResponse(found);
+        return found;
     }
 
     @Override
@@ -84,9 +90,10 @@ public class CandidateServiceV1 implements CandidateService {
         CandidateEntity candidateEntity = candidateRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateEntity.setStatus(false);
+        candidateEntity.setDeleted(true);
         candidateRepository.save(candidateEntity);
         var res = mapper.toSoftDeleteResponse(candidateEntity);
-        res.setUpdatedAt(LocalDateTime.now().toString());
+        res.setDeletedAt(LocalDateTime.now());
         return res;
     }
 
@@ -98,7 +105,7 @@ public class CandidateServiceV1 implements CandidateService {
     }
 
     @Override
-    @Cacheable("industryList") // just for demo, cache without TTL
+    @Cacheable("industryList")
     // @CacheEvict(cacheNames = "industryList") //delete cache
     public List<String> getIndustryList() {
         return candidateRepository.findAll().stream()
