@@ -84,10 +84,4 @@ public class JobEntity extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String deletedBy;
 
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    public void prePersist() {
-        createdAt = LocalDateTime.now();
-    }
 }

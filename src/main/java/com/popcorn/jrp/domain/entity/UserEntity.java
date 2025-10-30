@@ -52,8 +52,9 @@ public class UserEntity extends BaseEntity implements UserDetails {
 
     private boolean status;
 
-    @PrePersist
+    @Override
     protected void onCreate() {
+        super.onCreate();
         this.status = true;
     }
 
