@@ -33,7 +33,7 @@ import java.util.List;
 public class CandidateServiceV1 implements CandidateService {
 
     CandidateRepository candidateRepository;
-//    @Qualifier("candidateMapper")
+    @Qualifier("candidateMapperImpl")
     CandidateMapper mapper;
     CandidateSpecification candidateSpecification;
 

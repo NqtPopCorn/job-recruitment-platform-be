@@ -60,7 +60,7 @@ public class CandidateSubscriptionEntity extends BaseEntity {
         ACTIVE, EXPIRED, SUSPENDED, QUEUED
     }
 
-    @PrePersist
+    @Override
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
