@@ -4,17 +4,17 @@ Tài liệu này định nghĩa các endpoint để quản lý hồ sơ (CV) c�
 
 ## 📌 DTOs (Data Transfer Objects)
 
-Cấu trúc `results` sẽ sử dụng các đối tượng sau.
+Cấu trúc `data` sẽ sử dụng các đối tượng sau.
 
 ### ResumeResponseDto Object
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `id` | `string` | ID của hồ sơ (UUID) |
-| `candidateId` | `string` | ID của ứng viên sở hữu |
-| `fileName` | `string` | Tên file gốc do người dùng đặt (ví dụ: "My\_CV\_2025.pdf") |
+| Field | Type      | Description |
+| --- |-----------| --- |
+| `id` | `number`  | ID của hồ sơ |
+| `candidateId` | `number`  | ID của ứng viên sở hữu |
+| `fileName` | `string`  | Tên file gốc do người dùng đặt (ví dụ: "My\_CV\_2025.pdf") |
 | `status` | `boolean` | Trạng thái (ví dụ: `true` là CV chính/active) |
-| `url` | `string` | Đường dẫn (URL) để tải/xem file |
+| `url` | `string`  | Đường dẫn (URL) để tải/xem file |
 
 ### UpdateResumeDto Object
 
@@ -40,9 +40,9 @@ Content-Type: application/json
 
 ### 📌 Path Params
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `id` | `string` | ID của ứng viên cần lấy hồ sơ |
+| Parameter | Type     | Description |
+| --- |----------| --- |
+| `id` | `number` | ID của ứng viên cần lấy hồ sơ |
 
 ### 📌 Response Schema
 
@@ -50,7 +50,7 @@ Content-Type: application/json
 | --- | --- | --- |
 | `statusCode` | `number` | Mã HTTP trả về (ví dụ 200) |
 | `message` | `string` | Thông báo kết quả |
-| `results` | `ResumeResponseDto[]` | Mảng các đối tượng hồ sơ ứng viên |
+| `data` | `ResumeResponseDto[]` | Mảng các đối tượng hồ sơ ứng viên |
 
 ### 📌 Example Response
 
@@ -58,17 +58,17 @@ Content-Type: application/json
 {
   "statusCode": 200,
   "message": "Lấy danh sách hồ sơ xin việc thành công!",
-  "results": [
+  "data": [
     {
-      "id": "64f1a23b5a8f9d1234567890",
-      "candidateId": "68be91be9bf7f4178721d9fe",
+      "id": 8787878787
+      "candidateId": 988989898,
       "fileName": "CV_Backend_Developer_2025.pdf",
       "status": true,
       "url": "/api/v1/files/resumes/uuid-abc-123.pdf"
     },
     {
-      "id": "64f1a23b5a8f9d1234567891",
-      "candidateId": "68be91be9bf7f4178721d9fe",
+      "id": 4254353,
+      "candidateId": 5345345,
       "fileName": "CV_Data_Analyst.pdf",
       "status": false,
       "url": "/api/v1/files/resumes/uuid-xyz-789.pdf"
@@ -94,9 +94,9 @@ Content-Type: multipart/form-data
 
 ### 📌 Path Params
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `id` | `string` | ID của ứng viên |
+| Parameter | Type     | Description |
+| --- |----------| --- |
+| `id` | `number` | ID của ứng viên |
 
 ### 📌 Form Data
 
@@ -112,7 +112,7 @@ Content-Type: multipart/form-data
 | --- | --- | --- |
 | `statusCode` | `number` | Mã HTTP trả về (ví dụ 201) |
 | `message` | `string` | Thông báo kết quả |
-| `results` | `ResumeResponseDto` | Đối tượng hồ sơ vừa được tạo |
+| `data` | `ResumeResponseDto` | Đối tượng hồ sơ vừa được tạo |
 
 ### 📌 Example Response
 
@@ -120,9 +120,9 @@ Content-Type: multipart/form-data
 {
   "statusCode": 201,
   "message": "Tải lên hồ sơ thành công!",
-  "results": {
-    "id": "64f1a23b5a8f9d1234567892",
-    "candidateId": "68be91be9bf7f4178721d9fe",
+  "data": {
+    "id": 34324,
+    "candidateId": 2342342,
     "fileName": "CV_Moi_Nhat.pdf",
     "status": true,
     "url": "/api/v1/files/resumes/uuid-new-456.pdf"
@@ -147,9 +147,9 @@ Content-Type: application/json
 
 ### 📌 Path Params
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `id` | `string` | ID của hồ sơ (`ResumeEntity`) |
+| Parameter | Type     | Description |
+| --- |----------| --- |
+| `id` | `number` | ID của hồ sơ (`ResumeEntity`) |
 
 ### 📌 Response Schema
 
@@ -157,7 +157,7 @@ Content-Type: application/json
 | --- | --- | --- |
 | `statusCode` | `number` | Mã HTTP trả về (ví dụ 200) |
 | `message` | `string` | Thông báo kết quả |
-| `results` | `ResumeResponseDto` | Đối tượng hồ sơ |
+| `data` | `ResumeResponseDto` | Đối tượng hồ sơ |
 
 ### 📌 Example Response
 
@@ -165,9 +165,9 @@ Content-Type: application/json
 {
   "statusCode": 200,
   "message": "Lấy chi tiết hồ sơ thành công!",
-  "results": {
-    "id": "64f1a23b5a8f9d1234567890",
-    "candidateId": "68be91be9bf7f4178721d9fe",
+  "data": {
+    "id": 1212212,
+    "candidateId": 8787674,
     "fileName": "CV_Backend_Developer_2025.pdf",
     "status": true,
     "url": "/api/v1/files/resumes/uuid-abc-123.pdf"
@@ -192,9 +192,9 @@ Content-Type: application/json
 
 ### 📌 Path Params
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `id` | `string` | ID của hồ sơ (`ResumeEntity`) |
+| Parameter | Type     | Description |
+| --- |----------| --- |
+| `id` | `number` | ID của hồ sơ (`ResumeEntity`) |
 
 ### 📌 Request Body (JSON)
 
@@ -213,7 +213,7 @@ Sử dụng `UpdateResumeDto`.
 | --- | --- | --- |
 | `statusCode` | `number` | Mã HTTP trả về (ví dụ 200) |
 | `message` | `string` | Thông báo kết quả |
-| `results` | `ResumeResponseDto` | Đối tượng hồ sơ đã được cập nhật |
+| `data` | `ResumeResponseDto` | Đối tượng hồ sơ đã được cập nhật |
 
 ### 📌 Example Response
 
@@ -221,9 +221,9 @@ Sử dụng `UpdateResumeDto`.
 {
   "statusCode": 200,
   "message": "Cập nhật hồ sơ thành công!",
-  "results": {
-    "id": "64f1a23b5a8f9d1234567890",
-    "candidateId": "68be91be9bf7f4178721d9fe",
+  "data": {
+    "id": 6499877,
+    "candidateId": 98989797987,
     "fileName": "CV_Backend_Chinh_Thuc.pdf",
     "status": true,
     "url": "/api/v1/files/resumes/uuid-abc-123.pdf"
@@ -247,9 +247,9 @@ Authorization: Bearer {{token}}
 
 ### 📌 Path Params
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `id` | `string` | ID của hồ sơ (`ResumeEntity`) |
+| Parameter | Type     | Description |
+| --- |----------| --- |
+| `id` | `number` | ID của hồ sơ (`ResumeEntity`) |
 
 ### 📌 Response Schema
 
@@ -257,7 +257,7 @@ Authorization: Bearer {{token}}
 | --- | --- | --- |
 | `statusCode` | `number` | Mã HTTP trả về (ví dụ 200) |
 | `message` | `string` | Thông báo kết quả |
-| `results` | `null` | Không có dữ liệu trả về |
+| `data` | `null` | Không có dữ liệu trả về |
 
 ### 📌 Example Response
 
@@ -265,6 +265,6 @@ Authorization: Bearer {{token}}
 {
   "statusCode": 200,
   "message": "Xóa hồ sơ thành công!",
-  "results": null
+  "data": null
 }
 ```

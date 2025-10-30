@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/company-upload")
@@ -20,13 +21,13 @@ public class CompanyUploadController {
     private final CompanyUploadService companyUploadService;
 
     @GetMapping("/{companyId}/logo")
-    public ResponseEntity<ApiDataResponse<String>> getLogoOfCompanyById(@PathVariable("companyId") Long id) {
+    public ResponseEntity<ApiDataResponse<Map<String, String>>> getLogoOfCompanyById(@PathVariable("companyId") Long id) {
         String logo = companyUploadService.getLogoUrl(id);
 
-        ApiDataResponse<String> response = ApiDataResponse.<String>builder()
+        ApiDataResponse<Map<String, String>> response = ApiDataResponse.<Map<String, String>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("Lấy logo công ty thành công!")
-                .data(logo != null ? logo : "")
+                .data(Map.of("url", logo))
                 .build();
 
         return ResponseEntity.ok(response);
@@ -62,16 +63,16 @@ public class CompanyUploadController {
     }
 
     @PostMapping(value = "/{companyId}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiDataResponse<String>> uploadCompanyLogoFile(
+    public ResponseEntity<ApiDataResponse<Map<String, String>>> uploadCompanyLogoFile(
             @PathVariable("companyId") Long companyId,
             @RequestParam("file") MultipartFile file
     ) {
         String result = companyUploadService.uploadLogo(companyId, file);
 
-        ApiDataResponse<String> response = ApiDataResponse.<String>builder()
+        ApiDataResponse<Map<String, String>> response = ApiDataResponse.<Map<String, String>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("Upload logo công ty thành công!")
-                .data(result != null ? result : "")
+                .data(Map.of("url", result))
                 .build();
 
         return ResponseEntity.ok(response);

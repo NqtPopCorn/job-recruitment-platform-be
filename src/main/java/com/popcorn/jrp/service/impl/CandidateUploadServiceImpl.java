@@ -80,13 +80,14 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> getAllImageUrl(Long candidateId) {
+    public List<UploadDataResponse> getAllImageUrl(Long candidateId) {
         CandidateEntity candidate = getCandidateById(candidateId);
 
-        // Trả về List<String> theo yêu cầu của interface mới
         return candidate.getImages().stream()
-                .map(image
-                        -> buildFileUrl("images/candidates", image.getFilename()))
+                .map(image -> UploadDataResponse.builder()
+                        .id(image.getId())
+                        .url(buildFileUrl("images/candidates", image.getFilename()))
+                        .build())
                 .collect(Collectors.toList());
     }
 

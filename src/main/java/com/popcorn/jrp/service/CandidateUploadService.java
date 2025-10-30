@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CandidateUploadService {
     String getAvatarUrl(Long candidateId);
-    List<String> getAllImageUrl(Long candidateId);
+    List<UploadDataResponse> getAllImageUrl(Long candidateId);
 
     String uploadAvatar(Long candidateId, MultipartFile file);
     UploadDataResponse uploadImage(Long candidateId, MultipartFile file);

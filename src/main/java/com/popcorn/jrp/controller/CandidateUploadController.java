@@ -6,7 +6,6 @@ import com.popcorn.jrp.domain.response.upload.UploadDataResponse;
 import com.popcorn.jrp.service.CandidateUploadService;
 import com.popcorn.jrp.service.ResumeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -104,9 +103,9 @@ public class CandidateUploadController {
      * Lấy danh sách URL của tất cả các ảnh trong gallery
      */
     @GetMapping("/{candidateId}/gallery")
-    public ResponseEntity<ApiDataResponse<List<String>>> getAllImageUrls(@PathVariable("candidateId") Long candidateId) {
-        List<String> urls = candidateUploadService.getAllImageUrl(candidateId);
-        return ResponseEntity.ok(ApiDataResponse.<List<String>>builder()
+    public ResponseEntity<ApiDataResponse<List<UploadDataResponse>>> getAllImageUrls(@PathVariable("candidateId") Long candidateId) {
+        List<UploadDataResponse> urls = candidateUploadService.getAllImageUrl(candidateId);
+        return ResponseEntity.ok(ApiDataResponse.<List<UploadDataResponse>>builder()
                 .statusCode(200)
                 .data(urls)
                 .build());
