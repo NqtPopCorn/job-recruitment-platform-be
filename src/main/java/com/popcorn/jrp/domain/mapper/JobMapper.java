@@ -25,27 +25,22 @@ public interface JobMapper extends PageMapper {
 
     // --- Entity to DTO ---
 
+    @Mapping(target = "jobType", ignore = true) // !!!
     @Mapping(source = "id", target = "id", qualifiedByName = "longToString")
     @Mapping(source = "employer.logo", target = "logo") // Lấy logo từ Employer
     @Mapping(source = "employer", target = "company") // Map lồng ghép
-    @Mapping(source = "responsibilities", target = "responsibilities", qualifiedByName = "jsonToListString")
-    @Mapping(source = "skillAndExperiences", target = "skillAndExperience", qualifiedByName = "jsonToListString")
-    @Mapping(source = "jobType", target = "jobTypes")
+    @Mapping(source = "responsibilities", target = "responsibilities")
+    @Mapping(source = "skillAndExperiences", target = "skillAndExperience")
     @Mapping(source = "expirationDate", target = "expireDate", qualifiedByName = "localDateToDateString")
-    // Giả định bạn đã thêm 'salary' và 'workTime' (dạng String JSON) vào JobEntity
-    @Mapping(source = "salary", target = "salary", qualifiedByName = "jsonToSalaryDto")
-    @Mapping(source = "workTime", target = "workTime", qualifiedByName = "jsonToWorkTimeDto")
+    @Mapping(target = "salary", source = ".")
+    @Mapping(target = "salary.min", source = "minSalary")
+    @Mapping(target = "salary.max", source = "maxSalary")
+    @Mapping(target = "workTime.from", source = "workTimeFrom")
+    @Mapping(target = "workTime.to", source = "workTimeTo")
     JobDetailDto toDetailDto(JobEntity entity);
 
-    @Mapping(source = "id", target = "id", qualifiedByName = "longToString")
-    @Mapping(source = "employer.logo", target = "logo")
-    @Mapping(source = "employer", target = "company")
-    @Mapping(source = "responsibilities", target = "responsibilities", qualifiedByName = "jsonToListString")
-    @Mapping(source = "skillAndExperiences", target = "skillAndExperience", qualifiedByName = "jsonToListString")
-    @Mapping(source = "jobType", target = "jobTypes")
-    @Mapping(source = "expirationDate", target = "expireDate", qualifiedByName = "localDateToDateString")
-    @Mapping(source = "salary", target = "salary", qualifiedByName = "jsonToSalaryDto")
-    @Mapping(source = "workTime", target = "workTime", qualifiedByName = "jsonToWorkTimeDto")
+
+    @InheritConfiguration(name = "toDetailDto")
     @Mapping(target = "applications", expression = "java(0)") // Service sẽ tính toán
     JobDashboardDto toDashboardDto(JobEntity entity);
 
@@ -61,25 +56,26 @@ public interface JobMapper extends PageMapper {
     CompanyInJobDto employerToCompanyInJobDto(EmployerEntity employer);
 
     // --- DTO to Entity ---
-
-    @Mapping(target = "skills", source = "skills", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "responsibilities", source = "responsibilities", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "skillAndExperiences", source = "skillAndExperience", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "jobType", source = "jobType", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "salary", source = "salary", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "workTime", source = "workTime", qualifiedByName = "objectToJsonString")
+    /**
+     * NEED UPDATE !!!!!!!!!!!!
+     */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "skills", source = "skills", ignore = true)
+    @Mapping(target = "responsibilities", source = "responsibilities", ignore = true)
+    @Mapping(target = "skillAndExperiences", source = "skillAndExperience", ignore = true)
+    @Mapping(target = "jobTypes", source = "jobType", ignore = true)
     JobEntity toEntity(CreateJobDto dto);
 
+    /**
+     * NEED UPDATE !!!!!!!!!!!!
+     */
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "employer", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)
-    @Mapping(target = "skills", source = "skills", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "responsibilities", source = "responsibilities", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "skillAndExperiences", source = "skillAndExperience", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "jobType", source = "jobType", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "salary", source = "salary", qualifiedByName = "objectToJsonString")
-    @Mapping(target = "workTime", source = "workTime", qualifiedByName = "objectToJsonString")
+    @Mapping(target = "skills", source = "skills", ignore = true)
+    @Mapping(target = "responsibilities", source = "responsibilities", ignore = true)
+    @Mapping(target = "skillAndExperiences", source = "skillAndExperience", ignore = true)
     void updateEntityFromDto(UpdateJobDto dto, @MappingTarget JobEntity entity);
 
     // --- Helper Methods (Qualified By Name) ---

@@ -3,6 +3,7 @@ package com.popcorn.jrp.helper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.entity.JobTypeEntity;
 import com.popcorn.jrp.domain.response.job.JobTypeDto;
 import com.popcorn.jrp.domain.response.job.SalaryDto;
@@ -75,15 +76,11 @@ public class JsonMapperHelper {
         }
     }
 
-    @Named("jsonToSalaryDto")
-    public SalaryDto jsonToSalaryDto(String json) {
-        if (json == null || json.isEmpty()) return null;
-        try {
-            return objectMapper.readValue(json, SalaryDto.class);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-    }
+//    @Named("parseSalary")
+//    public SalaryDto parseSalary(CandidateEntity candidate) {
+//        if (candidate == null ) return null;
+//        return
+//    }
 
     @Named("jsonToWorkTimeDto")
     public WorkTimeDto jsonToWorkTimeDto(String json) {

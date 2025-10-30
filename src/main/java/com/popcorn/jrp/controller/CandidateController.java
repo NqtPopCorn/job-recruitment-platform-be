@@ -6,8 +6,10 @@ import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.*;
 import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
+import com.popcorn.jrp.domain.response.candidate.ResumeResponseDto;
 import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
 import com.popcorn.jrp.service.CandidateService;
+import com.popcorn.jrp.service.ResumeService;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,6 +27,7 @@ import java.util.List;
 public class CandidateController {
 
     private final CandidateService candidateService;
+    private final ResumeService resumeService;
 
     // GET PAGINATED LIST
     @GetMapping

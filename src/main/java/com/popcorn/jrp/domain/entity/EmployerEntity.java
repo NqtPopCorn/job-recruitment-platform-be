@@ -1,10 +1,10 @@
 package com.popcorn.jrp.domain.entity;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "employers")
@@ -34,6 +34,9 @@ public class EmployerEntity extends BaseEntity {
 
     @Column(columnDefinition = "JSON")
     private String socialMedias;
+
+    @OneToMany(mappedBy = "employer")
+    private List<EmployerImageEntity> images;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
