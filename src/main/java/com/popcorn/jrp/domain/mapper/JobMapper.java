@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {JsonMapperHelper.class})
-public interface JobMapper extends PageMapper<JobDetailDto> {
+public interface JobMapper extends PageMapper {
 
     // Định dạng ngày theo "d/M/yyyy" (ví dụ: 6/8/2025)
     DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("d/M/yyyy");
@@ -30,7 +30,7 @@ public interface JobMapper extends PageMapper<JobDetailDto> {
     @Mapping(source = "employer", target = "company") // Map lồng ghép
     @Mapping(source = "responsibilities", target = "responsibilities", qualifiedByName = "jsonToListString")
     @Mapping(source = "skillAndExperiences", target = "skillAndExperience", qualifiedByName = "jsonToListString")
-    @Mapping(source = "jobType", target = "jobType", qualifiedByName = "jsonToJobTypeList")
+    @Mapping(source = "jobType", target = "jobTypes")
     @Mapping(source = "expirationDate", target = "expireDate", qualifiedByName = "localDateToDateString")
     // Giả định bạn đã thêm 'salary' và 'workTime' (dạng String JSON) vào JobEntity
     @Mapping(source = "salary", target = "salary", qualifiedByName = "jsonToSalaryDto")
@@ -42,7 +42,7 @@ public interface JobMapper extends PageMapper<JobDetailDto> {
     @Mapping(source = "employer", target = "company")
     @Mapping(source = "responsibilities", target = "responsibilities", qualifiedByName = "jsonToListString")
     @Mapping(source = "skillAndExperiences", target = "skillAndExperience", qualifiedByName = "jsonToListString")
-    @Mapping(source = "jobType", target = "jobType", qualifiedByName = "jsonToJobTypeList")
+    @Mapping(source = "jobType", target = "jobTypes")
     @Mapping(source = "expirationDate", target = "expireDate", qualifiedByName = "localDateToDateString")
     @Mapping(source = "salary", target = "salary", qualifiedByName = "jsonToSalaryDto")
     @Mapping(source = "workTime", target = "workTime", qualifiedByName = "jsonToWorkTimeDto")

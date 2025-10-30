@@ -1,5 +1,6 @@
 package com.popcorn.jrp.domain.entity;
 
+import com.popcorn.jrp.helper.JsonListStringConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -26,43 +28,33 @@ public class JobEntity extends BaseEntity {
 
     private String jobTitle;
 
-    @Column(columnDefinition = "JSON")
-    private String skills; // JSON
-
     @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Column(columnDefinition = "JSON")
-    private String jobType; // JSON
 
     private String level;
 
     @Column(columnDefinition = "JSON")
-    private String responsibilities; // JSON
+    @Convert(converter = JsonListStringConverter.class)
+    private List<String> responsibilities; // JSON
 
     @Column(columnDefinition = "JSON")
-    private String skillAndExperiences; // JSON
+    @Convert(converter = JsonListStringConverter.class)
+    private List<String> skillAndExperiences; // JSON
 
-    private String salary;
     private Integer experience;
 
     @Column(precision = 12, scale = 2)
     private BigDecimal minSalary;
-
     @Column(precision = 12, scale = 2)
     private BigDecimal maxSalary;
-
     private String currency;
-
     private Boolean negotiable;
 
     private LocalDate workTimeFrom;
     private LocalDate workTimeTo;
 
     private String industry;
-
     private Integer quantity;
-
     private String country;
     private String city;
     private String location;
@@ -72,11 +64,15 @@ public class JobEntity extends BaseEntity {
     private Boolean isDeleted;
 
     @ManyToMany
-    @JoinTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    @JoinTable(name = "job_skills",
+            joinColumns = @JoinColumn(name = "job_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id"))
     private List<SkillEntity> skills;
 
     @ManyToMany
-    @JoinTable(name = "job_job_type", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "job_type_id"))
+    @JoinTable(name = "job_job_type",
+            joinColumns = @JoinColumn(name = "job_id"),
+            inverseJoinColumns = @JoinColumn(name = "job_type_id"))
     private List<JobTypeEntity> jobTypes;
 
     @Column(columnDefinition = "TEXT")
@@ -87,4 +83,11 @@ public class JobEntity extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String deletedBy;
+
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+    }
 }

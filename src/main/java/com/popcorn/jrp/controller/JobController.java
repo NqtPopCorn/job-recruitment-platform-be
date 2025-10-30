@@ -1,12 +1,9 @@
 package com.popcorn.jrp.controller;
 
+import com.popcorn.jrp.domain.request.job.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.popcorn.jrp.domain.request.job.CreateJobDto;
-import com.popcorn.jrp.domain.request.job.JobQueryParameters;
-import com.popcorn.jrp.domain.request.job.RelatedJobQueryParameters;
-import com.popcorn.jrp.domain.request.job.UpdateJobDto;
 import com.popcorn.jrp.domain.response.ApiDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.job.JobDashboardDto;
@@ -20,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -36,7 +34,7 @@ public class JobController {
     @GetMapping
     public @ResponseBody ApiPageResponse<JobDetailDto> getJobsPaginated(
             @Nullable Pageable pageable,
-            @Valid @Nullable JobQueryParameters queryParams
+            @Nullable JobQueryParameters queryParams
     ) {
         ApiPageResponse<JobDetailDto> body = jobService.getJobsPaginated(queryParams, pageable);
 
@@ -139,9 +137,9 @@ public class JobController {
      * GET /api/v1/job/max-salary
      */
     @GetMapping("/max-salary")
-    public ResponseEntity<ApiDataResponse<Double>> getMaxSalary() {
-        Double data = jobService.getMaxSalary();
-        return ResponseEntity.ok(ApiDataResponse.<Double>builder()
+    public ResponseEntity<ApiDataResponse<BigDecimal>> getMaxSalary(@RequestParam("currency") String currency) {
+        var data = jobService.getMaxSalaryWithCurrency(currency);
+        return ResponseEntity.ok(ApiDataResponse.<BigDecimal>builder()
                 .data(data)
                 .message("Lấy mức lương cao nhất thành công!")
                 .statusCode(200)
@@ -166,19 +164,18 @@ public class JobController {
     }
 
     /**
-     * 10. GET List Job Dashboard of Company by ID
+     * 10. GET List Job Dashboard of Company by ID Pageable
      * GET /api/v1/job/get-list/dashboard/company/:id
      */
     @GetMapping("/get-list/dashboard/company/{id}")
-    public ResponseEntity<ApiDataResponse<List<JobDashboardDto>>> getJobsForDashboard(
-            @PathVariable Long id
+    public ResponseEntity<ApiPageResponse<JobDashboardDto>> getJobsForDashboard(
+            @PathVariable Long id,
+            @RequestBody EmployerJobQueryDto params
     ) {
-        List<JobDashboardDto> data = jobService.getJobsForDashboard(id);
-        return ResponseEntity.ok(ApiDataResponse.<List<JobDashboardDto>>builder()
-                .data(data)
-                .message("Lấy danh sách công việc dashboard thành công!")
-                .statusCode(200)
-                .build());
+        var res = jobService.getJobsForDashboard(id, params);
+        res.setStatusCode(200);
+        res.setMessage("Get paginated list of dashboard successfully!");
+        return ResponseEntity.ok(res);
     }
 
     /**

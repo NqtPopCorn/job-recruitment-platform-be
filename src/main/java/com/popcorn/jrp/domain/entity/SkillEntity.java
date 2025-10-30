@@ -18,4 +18,8 @@ public class SkillEntity extends BaseEntity {
     // Quan hệ ngược (không bắt buộc, có thể bỏ nếu không cần)
     // @ManyToMany(mappedBy = "skills")
     // private List<JobEntity> jobs;
+    @Override
+    public String toString() {
+        return name;
+    }
 }

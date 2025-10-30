@@ -12,7 +12,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface EmployerMapper extends PageMapper<EmployerPaginationDto> {
+public interface EmployerMapper extends PageMapper {
 
     // Dùng cho 1. GET PAGINATION
     @Mapping(target = "jobNumber", expression = "java(0)") // TODO: Cần logic riêng để đếm jobs
