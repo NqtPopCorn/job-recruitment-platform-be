@@ -40,6 +40,7 @@ public class SecurityConfig {
                         // Protected endpoints
                         .requestMatchers("/api/v1/auth/logout").authenticated()
                         .requestMatchers("/api/v1/auth/account").authenticated()
+                        .requestMatchers("/api/v1/conversations/**").authenticated()
                         // Các endpoint khác yêu cầu xác thực
                         // .anyRequest().authenticated()
                         // Cho phép bất kì endpoint khác (test only)
