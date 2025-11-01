@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class ReadReceiptDTO  {
+    private Long conversationId;
     private Long userId;
-    private LocalDateTime lastRead;
+    private LocalDateTime readAt;
 }

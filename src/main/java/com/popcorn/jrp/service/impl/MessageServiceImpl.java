@@ -112,7 +112,7 @@ public class MessageServiceImpl implements MessageService {
 
         member.setLastSeenAt(LocalDateTime.now());
         conversationMemberRepository.save(member);
-        return new ReadReceiptDTO(currentUserId, member.getLastSeenAt());
+        return new ReadReceiptDTO(conversationId, currentUserId, member.getLastSeenAt());
     }
 
 
