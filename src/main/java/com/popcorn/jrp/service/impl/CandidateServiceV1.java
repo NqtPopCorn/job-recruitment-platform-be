@@ -33,7 +33,7 @@ import java.util.List;
 public class CandidateServiceV1 implements CandidateService {
 
     CandidateRepository candidateRepository;
-    @Qualifier("candidateMapper")
+    @Qualifier("candidateMapperImpl")
     CandidateMapper mapper;
     CandidateSpecification candidateSpecification;
 
@@ -52,6 +52,13 @@ public class CandidateServiceV1 implements CandidateService {
     @Override
     public CandidateDetailsResponse getCandidateById(Long id) {
         var found = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        return mapper.toDetailsResponse(found);
+    }
+
+    @Override
+    public CandidateDetailsResponse getCandidateByUserId(Long userId) {
+        var found = candidateRepository.getCandidateByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         return mapper.toDetailsResponse(found);
     }
 

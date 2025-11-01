@@ -30,10 +30,6 @@ public interface CandidateSectionMapper {
     @Mapping(source = "category", target = "industry")
     @Mapping(target = "startTime", source = "startTime", qualifiedByName = "instantToLocalDate")
     @Mapping(target = "endTime", source = "endTime", qualifiedByName = "instantToLocalDate")
-    @Mapping(target = "candidate", ignore = true) // Service sẽ thiết lập quan hệ này
-    @Mapping(target = "id", ignore = true)        // Sẽ được tạo bởi DB
-    @Mapping(target = "createdAt", ignore = true) // Sẽ được xử lý bởi @PrePersist
-    @Mapping(target = "updatedAt", ignore = true) // Sẽ được xử lý bởi @PreUpdate
     CandidateSectionEntity toEntity(CreateCandidateAboutDto dto);
 
     // =================================================================

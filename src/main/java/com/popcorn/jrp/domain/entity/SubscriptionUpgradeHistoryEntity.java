@@ -41,7 +41,7 @@ public class SubscriptionUpgradeHistoryEntity extends BaseEntity {
         EMPLOYER, CANDIDATE
     }
 
-    @PrePersist
+    @Override
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }

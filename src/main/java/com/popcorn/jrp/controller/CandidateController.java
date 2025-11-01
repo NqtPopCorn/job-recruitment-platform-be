@@ -1,13 +1,16 @@
 package com.popcorn.jrp.controller;
 
+import com.popcorn.jrp.domain.mapper.CandidateMapper;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
 import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.*;
 import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
+import com.popcorn.jrp.domain.response.candidate.ResumeResponseDto;
 import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
 import com.popcorn.jrp.service.CandidateService;
+import com.popcorn.jrp.service.ResumeService;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,6 +28,7 @@ import java.util.List;
 public class CandidateController {
 
         private final CandidateService candidateService;
+        private final CandidateMapper candidateMapper;
 
         // GET PAGINATED LIST
         @GetMapping
@@ -58,6 +63,18 @@ public class CandidateController {
                 var res = candidateService.getCandidateById(id);
                 return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
                                 .data(res)
+                                .message("Success")
+                                .statusCode(200)
+                                .build());
+        }
+
+        // GET DETAIL BY USER ID
+        @GetMapping("/details/user/{userId}")
+        public ResponseEntity<ApiDataResponse<CandidateDetailsResponse>> getCandidateByUserId(
+                        @PathVariable Long userId) {
+                var data = candidateService.getCandidateByUserId(userId);
+                return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
+                                .data(data)
                                 .message("Success")
                                 .statusCode(200)
                                 .build());

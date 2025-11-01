@@ -39,8 +39,9 @@ public class EmployerServicePackageEntity extends BaseEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @PrePersist
+    @Override
     protected void onCreate() {
+        super.onCreate();
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (isLifetime) {

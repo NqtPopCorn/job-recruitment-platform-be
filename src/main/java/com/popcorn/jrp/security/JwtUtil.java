@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +22,7 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKeyString;
 
-    @Value("${jwt.token-expiration}")
+    @Value("${jwt.token.expiration}")
     private String tokenExpiration; // ví dụ: "1d" hoặc "15m"
 
     @Value("${jwt.audience}")

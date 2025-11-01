@@ -12,8 +12,8 @@ public class JobQueryParameters {
     private String location;
     private String category;
     private String type;
-    private String datePosted;
-    private String experience;
-    private Double min; // Hoặc BigDecimal nếu cần độ chính xác cao
-    private Double max;
+    private Integer datePosted;
+    private Integer experience;
+    private BigDecimal min;
+    private BigDecimal max;
 }

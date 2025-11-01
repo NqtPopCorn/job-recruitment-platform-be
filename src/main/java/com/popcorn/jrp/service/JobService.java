@@ -1,14 +1,13 @@
 package com.popcorn.jrp.service;
 
-import com.popcorn.jrp.domain.request.job.JobQueryParameters;
-import com.popcorn.jrp.domain.request.job.RelatedJobQueryParameters;
-import com.popcorn.jrp.domain.request.job.CreateJobDto;
-import com.popcorn.jrp.domain.request.job.UpdateJobDto;
+import com.popcorn.jrp.domain.request.job.*;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.job.JobDashboardDto;
 import com.popcorn.jrp.domain.response.job.JobDetailDto;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -77,12 +76,12 @@ public interface JobService {
     List<String> getCityList();
 
     /**
-     * 8. Lấy mức lương tối đa (VND) từ tất cả công việc.
-     * Tương ứng với: GET /api/v1/job/max-salary
+     * 8. Lấy mức lương tối đa theo currency.
+     * Tương ứng với: GET /api/v1/job/max-salary&currency=
      *
      * @return Mức lương cao nhất.
      */
-    Double getMaxSalary();
+    BigDecimal getMaxSalaryWithCurrency(String currency);
 
     /**
      * 9. Lấy danh sách công việc liên quan.
@@ -101,7 +100,7 @@ public interface JobService {
      * @param companyId ID của công ty (Kiểu Long).
      * @return Danh sách JobDashboardDto (bao gồm status và số lượng applications).
      */
-    List<JobDashboardDto> getJobsForDashboard(Long companyId);
+    ApiPageResponse<JobDashboardDto> getJobsForDashboard(Long companyId, EmployerJobQueryDto params);
 
     /**
      * (Implied) Tạo một công việc mới.

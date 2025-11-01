@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "resumes")
 @Getter
@@ -14,7 +16,9 @@ public class ResumeEntity extends BaseEntity{
     @JoinColumn(name = "candidate_id", nullable = false)
     private CandidateEntity candidate;
 
-    private String filename;
+    @Column(name = "file_name")
+    private String fileName;
     private Boolean status;
+
 }
 

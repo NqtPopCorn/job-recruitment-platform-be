@@ -3,14 +3,18 @@ package com.popcorn.jrp.helper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.popcorn.jrp.domain.entity.CandidateEntity;
+import com.popcorn.jrp.domain.entity.JobTypeEntity;
 import com.popcorn.jrp.domain.response.job.JobTypeDto;
 import com.popcorn.jrp.domain.response.job.SalaryDto;
 import com.popcorn.jrp.domain.response.job.SocialMediaDto;
 import com.popcorn.jrp.domain.response.job.WorkTimeDto;
+import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Lớp helper để giúp MapStruct xử lý chuyển đổi JSON String.
@@ -20,9 +24,16 @@ public class JsonMapperHelper {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    public String toString(JobTypeEntity entity) {
+        return entity.toString();
+    }
+    public List<String> toString(List<JobTypeEntity> entity) {
+        return entity.stream().map(JobTypeEntity::getName).collect(Collectors.toList());
+    }
+
     // --- Object to JSON String ---
 
-    @org.mapstruct.Named("objectToJsonString")
+    @Named("objectToJsonString")
     public String objectToJsonString(Object obj) {
         if (obj == null) return null;
         try {
@@ -35,7 +46,7 @@ public class JsonMapperHelper {
 
     // --- JSON String to Object ---
 
-    @org.mapstruct.Named("jsonToListString")
+    @Named("jsonToListString")
     public List<String> jsonToListString(String json) {
         if (json == null || json.isEmpty()) return Collections.emptyList();
         try {
@@ -45,7 +56,7 @@ public class JsonMapperHelper {
         }
     }
 
-    @org.mapstruct.Named("jsonToJobTypeList")
+    @Named("jsonToJobTypeList")
     public List<JobTypeDto> jsonToJobTypeList(String json) {
         if (json == null || json.isEmpty()) return Collections.emptyList();
         try {
@@ -55,7 +66,7 @@ public class JsonMapperHelper {
         }
     }
 
-    @org.mapstruct.Named("jsonToSocialMediaList")
+    @Named("jsonToSocialMediaList")
     public List<SocialMediaDto> jsonToSocialMediaList(String json) {
         if (json == null || json.isEmpty()) return Collections.emptyList();
         try {
@@ -65,17 +76,13 @@ public class JsonMapperHelper {
         }
     }
 
-    @org.mapstruct.Named("jsonToSalaryDto")
-    public SalaryDto jsonToSalaryDto(String json) {
-        if (json == null || json.isEmpty()) return null;
-        try {
-            return objectMapper.readValue(json, SalaryDto.class);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-    }
+//    @Named("parseSalary")
+//    public SalaryDto parseSalary(CandidateEntity candidate) {
+//        if (candidate == null ) return null;
+//        return
+//    }
 
-    @org.mapstruct.Named("jsonToWorkTimeDto")
+    @Named("jsonToWorkTimeDto")
     public WorkTimeDto jsonToWorkTimeDto(String json) {
         if (json == null || json.isEmpty()) return null;
         try {

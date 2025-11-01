@@ -44,7 +44,7 @@ public class EmployerAddOnPackageEntity extends BaseEntity {
         JOB_POST, HIGHLIGHT, CV_VIEW
     }
 
-    @PrePersist
+    @Override
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();

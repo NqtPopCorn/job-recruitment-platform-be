@@ -14,5 +14,6 @@ public class CandidateImageEntity extends BaseEntity {
     @JoinColumn(name = "candidate_id", nullable = false)
     private CandidateEntity candidate;
 
+    @Column(name = "file_name")
     private String filename;
 }

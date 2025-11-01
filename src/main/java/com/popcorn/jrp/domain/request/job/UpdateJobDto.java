@@ -1,37 +1,65 @@
 package com.popcorn.jrp.domain.request.job;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.popcorn.jrp.domain.response.employer.JobSalaryDto;
 import com.popcorn.jrp.domain.response.job.JobTypeDto;
-import com.popcorn.jrp.domain.response.job.SalaryDto;
-import com.popcorn.jrp.domain.response.job.WorkTimeDto;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO để cập nhật thông tin công việc (PATCH /api/v1/job).
+ * Tất cả các trường đều là tùy chọn.
+ */
 @Data
 @NoArgsConstructor
 public class UpdateJobDto {
-    // Các trường này là tùy chọn khi cập nhật (PATCH)
-    private String jobTitle;
+
+    @Size(max = 100, message = "Tên công việc không được vượt quá 100 ký tự")
+    private String name;
+
     private String description;
-    private List<String> skills;
+
+    @Valid
     private List<JobTypeDto> jobType;
+
+    @Valid
+    private JobSalaryDto salary;
+
     private String level;
+
     private List<String> responsibilities;
+
     private List<String> skillAndExperience;
+
+    @Min(value = 0, message = "Số năm kinh nghiệm phải lớn hơn hoặc bằng 0")
     private Integer experience;
+
+    @Valid
+    private JobWorkTimeDto workTime;
+
     private String industry;
+
+    @Min(value = 1, message = "Số lượng tuyển phải ít nhất là 1")
     private Integer quantity;
+
     private String country;
+
     private String city;
+
     private String location;
+
+    @Future(message = "Ngày hết hạn phải ở trong tương lai")
     private LocalDate expirationDate;
-    private Boolean status; // Dùng cho dashboard (active/inactive)
 
-    @Valid
-    private SalaryDto salary;
+    private List<String> skills;
 
-    @Valid
-    private WorkTimeDto workTime;
+    private Boolean isActive; // Tên trong tài liệu
+
+    private Boolean status; // Tên trong tài liệu
 }

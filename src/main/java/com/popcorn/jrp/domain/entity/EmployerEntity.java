@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "employers")
@@ -41,6 +42,12 @@ public class EmployerEntity extends BaseEntity {
 
     @Column(columnDefinition = "JSON")
     private String socialMedias;
+
+    @OneToMany(mappedBy = "employer")
+    private List<EmployerImageEntity> images;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @PrePersist
     public void prePersist() {

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popcorn.jrp.domain.entity.EmployerEntity;
-import com.popcorn.jrp.domain.request.employer.CreateEmployerDto;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
-import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.common.SocialMediaDto;
 import com.popcorn.jrp.domain.response.employer.*;
@@ -14,7 +12,6 @@ import org.mapstruct.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,7 +39,8 @@ public interface EmployerMapper extends PageMapper {
 
     // Dùng cho 8. PATCH
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "socialMedias", expression = "java(mapSocialMediasToString(dto.getSocialMedias()))")
+    // @Mapping(target = "socialMedias", expression =
+    // "java(mapSocialMediasToString(dto.getSocialMedias()))")
     void updateEntityFromDto(UpdateEmployerDto dto, @MappingTarget EmployerEntity entity);
 
     // Dùng cho 9. SOFT DELETE

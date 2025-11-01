@@ -55,16 +55,16 @@ public class CandidateEntity extends BaseEntity {
     // For soft delete
     private boolean status;
 
-    // private LocalDateTime createdAt;
+    @OneToMany(mappedBy = "candidate")
+    private List<CandidateImageEntity> images;
 
-    @PrePersist
-    public void prePersist() {
-        // createdAt = LocalDateTime.now();
+    @OneToMany(mappedBy = "candidate")
+    private List<ResumeEntity> resumes;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
         this.status = true;
     }
-
-    // @OneToMany(mappedBy = "candidate", fetch = FetchType.LAZY, cascade =
-    // CascadeType.ALL)
-    // private List<CandidateSectionEntity> candidateSections;
-
 }
+

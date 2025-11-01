@@ -18,6 +18,8 @@ public interface CandidateService {
 
     CandidateDetailsResponse getCandidateById(Long id);
 
+    CandidateDetailsResponse getCandidateByUserId(Long userId);
+
     CandidateDetailsResponse createCandidate(CreateCandidateDto dto);
 
     CandidateDetailsResponse updateCandidate(Long id, UpdateCandidateDto dto);
