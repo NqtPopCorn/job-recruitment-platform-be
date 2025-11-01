@@ -6,6 +6,7 @@ import com.popcorn.jrp.domain.request.employer.CreateEmployerDto;
 import com.popcorn.jrp.domain.request.employer.EmployerQueryParameters;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
 import com.popcorn.jrp.exception.NotFoundException;
 import com.popcorn.jrp.repository.EmployerRepository;
@@ -36,7 +37,8 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApiPageResponse<EmployerPaginationDto> getEmployersPaginated(EmployerQueryParameters queryParams, Pageable pageable) {
+    public ApiPageResponse<EmployerPaginationDto> getEmployersPaginated(EmployerQueryParameters queryParams,
+            Pageable pageable) {
 
         // 1. Tạo Specification từ query params
         Specification<EmployerEntity> spec = employerSpecification.filterBy(queryParams);
@@ -47,14 +49,6 @@ public class EmployerServiceImpl implements EmployerService {
         // 3. Map sang DTO
         // TODO: Cần logic tính 'jobNumber' cho mỗi DTO
         return employerMapper.toApiPageResponse(entityPage.map(employerMapper::toPaginationDto));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<EmployerSimpleDto> getAllEmployers() {
-        return employerRepository.findAll().stream()
-                .map(employerMapper::toSimpleDto)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -96,26 +90,6 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Override
     @Transactional
-    public EmployerDetailDto createEmployer(CreateEmployerDto createDto) {
-        // TODO: Kiểm tra xem User ID có tồn tại không
-        // if (!userRepository.existsById(createDto.getUserId())) {
-        //     throw new ResourceNotFoundException("Cser ID: " + createDto.getUserId());
-        // }
-
-        // Kiểm tra email trùng lặp
-        if (employerRepository.existsByEmail(createDto.getEmail())) {
-            throw new IllegalArgumentException("Email đã tồn tại"); // Hoặc dùng @ResponseStatus(HttpStatus.CONFLICT)
-        }
-
-        EmployerEntity entity = employerMapper.toEntity(createDto);
-        entity.setStatus(true); // Mặc định khi tạo
-
-        EmployerEntity savedEntity = employerRepository.save(entity);
-        return employerMapper.toDetailDto(savedEntity);
-    }
-
-    @Override
-    @Transactional
     public EmployerDetailDto updateEmployer(Long id, UpdateEmployerDto updateDto) {
         EmployerEntity existingEntity = employerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Công ty với ID: " + id));
@@ -134,7 +108,8 @@ public class EmployerServiceImpl implements EmployerService {
                 .orElseThrow(() -> new NotFoundException("Công ty với ID: " + id));
 
         entity.setStatus(false);
-        entity.setUpdatedAt(LocalDateTime.now()); // Cập nhật thủ công vì @PreUpdate có thể không chạy
+        entity.setDeleted(true);
+        entity.setDeletedAt(LocalDateTime.now()); // Cập nhật thủ công vì @PreUpdate có thể không chạy
 
         EmployerEntity savedEntity = employerRepository.save(entity);
 

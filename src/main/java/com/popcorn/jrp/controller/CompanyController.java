@@ -5,6 +5,7 @@ import com.popcorn.jrp.domain.request.employer.EmployerQueryParameters;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
 import com.popcorn.jrp.domain.response.ApiDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
 import com.popcorn.jrp.service.EmployerService;
 import jakarta.validation.Valid;
@@ -26,168 +27,150 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyController {
 
-    private final EmployerService employerService;
+        private final EmployerService employerService;
 
-    /**
-     * 1. GET LIST PAGINATION COMPANY
-     * GET /api/v1/company
-     */
-    @GetMapping
-    public ResponseEntity<ApiPageResponse<EmployerPaginationDto>> getCompaniesPaginated(
-            @Valid EmployerQueryParameters queryParams,
-            Pageable pageable) {
+        /**
+         * 1. GET LIST PAGINATION COMPANY
+         * GET /api/v1/company
+         */
+        @GetMapping
+        @ResponseStatus(HttpStatus.OK)
+        public ApiPageResponse<EmployerPaginationDto> getCompaniesPaginated(
+                        @Valid EmployerQueryParameters queryParams,
+                        Pageable pageable) {
 
-        var employerPage = employerService.getEmployersPaginated(queryParams, pageable);
+                ApiPageResponse<EmployerPaginationDto> employerPage = employerService.getEmployersPaginated(queryParams,
+                                pageable);
 
-        return ResponseEntity.ok(employerPage);
-    }
+                return employerPage;
+        }
 
-    /**
-     * 2. GET LIST COMPANY
-     * GET /api/v1/company/get-list
-     */
-    @GetMapping("/get-list")
-    public ResponseEntity<ApiDataResponse<List<EmployerSimpleDto>>> getAllCompanies() {
+        /**
+         * 2. GET LIST COMPANY
+         * GET /api/v1/company/get-list
+         */
+        // @GetMapping("/get-list")
+        // public ResponseEntity<ApiDataResponse<List<EmployerSimpleDto>>>
+        // getAllCompanies() {
 
-        List<EmployerSimpleDto> employers = employerService.getAllEmployers();
+        // List<EmployerSimpleDto> employers = employerService.getAllEmployers();
 
-        var response = ApiDataResponse.<List<EmployerSimpleDto>>builder()
-                .message(employers.size() + " employers found")
-                .statusCode(HttpStatus.OK.value())
-                .data(employers)
-                .build();
+        // var response = ApiDataResponse.<List<EmployerSimpleDto>>builder()
+        // .message(employers.size() + " employers found")
+        // .statusCode(HttpStatus.OK.value())
+        // .data(employers)
+        // .build();
 
-        return ResponseEntity.ok(response);
-    }
+        // return ResponseEntity.ok(response);
+        // }
 
-    /**
-     * 3. GET DETAIL COMPANY BY ID
-     * GET /api/v1/company/details/:id
-     */
-    @GetMapping("/details/{id}")
-    public ResponseEntity<ApiDataResponse<EmployerDetailDto>> getCompanyById(@PathVariable("id") Long id) {
+        /**
+         * 3. GET DETAIL COMPANY BY ID
+         * GET /api/v1/company/details/:id
+         */
+        @GetMapping("/details/{id}")
+        @ResponseStatus(HttpStatus.OK)
+        public ApiDataResponse<EmployerDetailDto> getCompanyById(@PathVariable("id") Long id) {
 
-        EmployerDetailDto employer = employerService.getEmployerDetailsById(id);
+                EmployerDetailDto employer = employerService.getEmployerDetailsById(id);
 
-        ApiDataResponse<EmployerDetailDto> response = new ApiDataResponse<>(
-                HttpStatus.OK.value(),
-                "Lấy thông tin công ty thành công!",
-                employer
-        );
+                ApiDataResponse<EmployerDetailDto> response = ApiDataResponse.<EmployerDetailDto>builder()
+                                .statusCode(HttpStatus.OK.value())
+                                .message("Lấy thông tin công ty thành công!")
+                                .data(employer)
+                                .build();
+                return response;
+        }
 
-        return ResponseEntity.ok(response);
-    }
+        /**
+         * 4. GET DETAIL COMPANY BY USER ID
+         * GET /api/v1/company/details/user/:id
+         */
+        @GetMapping("/details/user/{id}")
+        @ResponseStatus(HttpStatus.OK)
+        public ApiDataResponse<EmployerDetailDto> getCompanyByUserId(@PathVariable("id") Long userId) {
 
-    /**
-     * 4. GET DETAIL COMPANY BY USER ID
-     * GET /api/v1/company/details/user/:id
-     */
-    @GetMapping("/details/user/{id}")
-    public ResponseEntity<ApiDataResponse<EmployerDetailDto>> getCompanyByUserId(@PathVariable("id") Long userId) {
+                EmployerDetailDto employer = employerService.getEmployerDetailsByUserId(userId);
 
-        EmployerDetailDto employer = employerService.getEmployerDetailsByUserId(userId);
+                ApiDataResponse<EmployerDetailDto> response = new ApiDataResponse<>(
+                                HttpStatus.OK.value(),
+                                "Lấy thông tin công ty thành công!",
+                                employer);
 
-        ApiDataResponse<EmployerDetailDto> response = new ApiDataResponse<>(
-                HttpStatus.OK.value(),
-                "Lấy thông tin công ty thành công!",
-                employer
-        );
+                return response;
+        }
 
-        return ResponseEntity.ok(response);
-    }
+        /**
+         * 5. GET RELATED JOBS BY COMPANY ID
+         * GET /api/v1/company/related-jobs/:companyId
+         */
+        @GetMapping("/related-jobs/{companyId}")
+        public ResponseEntity<ApiDataResponse<List<RelatedJobDto>>> getRelatedJobs(
+                        @PathVariable("companyId") Long employerId) {
 
-    /**
-     * 5. GET RELATED JOBS BY COMPANY ID
-     * GET /api/v1/company/related-jobs/:companyId
-     */
-    @GetMapping("/related-jobs/{companyId}")
-    public ResponseEntity<ApiDataResponse<List<RelatedJobDto>>> getRelatedJobs(
-            @PathVariable("companyId") Long employerId) {
+                List<RelatedJobDto> jobs = employerService.getRelatedJobsByEmployerId(employerId);
 
-        List<RelatedJobDto> jobs = employerService.getRelatedJobsByEmployerId(employerId);
+                var response = ApiDataResponse.<List<RelatedJobDto>>builder()
+                                .message(jobs.size() + " jobs found")
+                                .statusCode(HttpStatus.OK.value())
+                                .data(jobs)
+                                .build();
 
-        var response = ApiDataResponse.<List<RelatedJobDto>>builder()
-                .message(jobs.size() + " jobs found")
-                .statusCode(HttpStatus.OK.value())
-                .data(jobs)
-                .build();
+                return ResponseEntity.ok(response);
+        }
 
-        return ResponseEntity.ok(response);
-    }
+        /**
+         * 6. GET INDUSTRY LIST OF COMPANY
+         * GET /api/v1/company/industry-list
+         */
+        @GetMapping("/industry-list")
+        @ResponseStatus(HttpStatus.OK)
+        public ApiDataResponse<List<IndustryLabelValueDto>> getIndustryList() {
 
-    /**
-     * 6. GET INDUSTRY LIST OF COMPANY
-     * GET /api/v1/company/industry-list
-     */
-    @GetMapping("/industry-list")
-    public ResponseEntity<ApiDataResponse<List<IndustryLabelValueDto>>> getIndustryList() {
+                List<IndustryLabelValueDto> industries = employerService.getIndustryList();
 
-        List<IndustryLabelValueDto> industries = employerService.getIndustryList();
+                ApiDataResponse<List<IndustryLabelValueDto>> response = new ApiDataResponse<>(
+                                HttpStatus.OK.value(),
+                                "Lấy danh sách danh mục công ty thành công!",
+                                industries);
 
-        var response = new ApiDataResponse<>(
-                HttpStatus.OK.value(),
-                "Lấy danh sách danh mục công ty thành công!",
-                industries
-        );
+                return response;
+        }
 
-        return ResponseEntity.ok(response);
-    }
+        /**
+         * 8. PATCH COMPANY
+         * PATCH /api/v1/company/:id
+         */
+        @PatchMapping("/{id}")
+        public ResponseEntity<ApiDataResponse<EmployerDetailDto>> updateCompany(
+                        @PathVariable("id") Long id,
+                        @Valid @RequestBody UpdateEmployerDto updateDto) {
 
-    /**
-     * 7. POST NEW COMPANY
-     * POST /api/v1/company
-     */
-    @PostMapping
-    public ResponseEntity<ApiDataResponse<EmployerDetailDto>> createCompany(
-            @Valid @RequestBody CreateEmployerDto createDto) {
+                EmployerDetailDto updatedEmployer = employerService.updateEmployer(id, updateDto);
 
-        EmployerDetailDto newEmployer = employerService.createEmployer(createDto);
+                ApiDataResponse<EmployerDetailDto> response = new ApiDataResponse<>(
+                                HttpStatus.OK.value(),
+                                "Cập nhật công ty thành công!",
+                                updatedEmployer);
 
-        ApiDataResponse<EmployerDetailDto> response = new ApiDataResponse<>(
-                HttpStatus.CREATED.value(),
-                "Tạo công ty thành công!",
-                newEmployer
-        );
+                return ResponseEntity.ok(response);
+        }
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
+        /**
+         * 9. SOFT DELETE COMPANY
+         * DELETE /api/v1/company/:id
+         */
+        @DeleteMapping("/{id}")
+        public ResponseEntity<ApiDataResponse<EmployerSoftDeleteDto>> softDeleteCompany(
+                        @PathVariable("id") Long id) {
 
-    /**
-     * 8. PATCH COMPANY
-     * PATCH /api/v1/company/:id
-     */
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiDataResponse<EmployerDetailDto>> updateCompany(
-            @PathVariable("id") Long id,
-            @Valid @RequestBody UpdateEmployerDto updateDto) {
+                EmployerSoftDeleteDto deletedInfo = employerService.softDeleteEmployer(id);
 
-        EmployerDetailDto updatedEmployer = employerService.updateEmployer(id, updateDto);
+                ApiDataResponse<EmployerSoftDeleteDto> response = new ApiDataResponse<>(
+                                HttpStatus.OK.value(),
+                                "Xóa mềm công ty thành công!",
+                                deletedInfo);
 
-        ApiDataResponse<EmployerDetailDto> response = new ApiDataResponse<>(
-                HttpStatus.OK.value(),
-                "Cập nhật công ty thành công!",
-                updatedEmployer
-        );
-
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 9. SOFT DELETE COMPANY
-     * DELETE /api/v1/company/:id
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiDataResponse<EmployerSoftDeleteDto>> softDeleteCompany(
-            @PathVariable("id") Long id) {
-
-        EmployerSoftDeleteDto deletedInfo = employerService.softDeleteEmployer(id);
-
-        ApiDataResponse<EmployerSoftDeleteDto> response = new ApiDataResponse<>(
-                HttpStatus.OK.value(),
-                "Xóa mềm công ty thành công!",
-                deletedInfo
-        );
-
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 }

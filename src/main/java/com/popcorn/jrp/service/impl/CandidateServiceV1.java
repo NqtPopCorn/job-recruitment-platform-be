@@ -55,18 +55,11 @@ public class CandidateServiceV1 implements CandidateService {
         return mapper.toDetailsResponse(found);
     }
 
-    // @Override
-    // public CandidateDetailsResponse getCandidateByUserId(Long userId) {
-    // var found = candidateRepository.getCandidateByUserId(userId)
-    // .orElseThrow(() -> new NotFoundException("Candidate"));
-    // return mapper.toDetailsResponse(found);
-    // }
-
     @Override
-    public CandidateEntity getCandidateByUserId(Long userId) {
-        CandidateEntity found = candidateRepository.getCandidateByUserId(userId)
+    public CandidateDetailsResponse getCandidateByUserId(Long userId) {
+        var found = candidateRepository.getCandidateByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("Candidate"));
-        return found;
+        return mapper.toDetailsResponse(found);
     }
 
     @Override

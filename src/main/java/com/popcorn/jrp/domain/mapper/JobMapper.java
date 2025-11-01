@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {JsonMapperHelper.class})
+@Mapper(componentModel = "spring", uses = { JsonMapperHelper.class })
 public interface JobMapper extends PageMapper {
 
     // Định dạng ngày theo "d/M/yyyy" (ví dụ: 6/8/2025)
@@ -39,12 +39,12 @@ public interface JobMapper extends PageMapper {
     @Mapping(target = "workTime.to", source = "workTimeTo")
     JobDetailDto toDetailDto(JobEntity entity);
 
-
     @InheritConfiguration(name = "toDetailDto")
     @Mapping(target = "applications", expression = "java(0)") // Service sẽ tính toán
     JobDashboardDto toDashboardDto(JobEntity entity);
 
     List<JobDetailDto> toDetailDtoList(List<JobEntity> entities);
+
     List<JobDashboardDto> toDashboardDtoList(List<JobEntity> entities);
 
     // Helper: Mapping EmployerEntity -> CompanyInJobDto (lồng nhau)
@@ -87,19 +87,22 @@ public interface JobMapper extends PageMapper {
 
     @Named("localDateTimeToDateString")
     default String localDateTimeToDateString(LocalDateTime dateTime) {
-        if (dateTime == null) return null;
+        if (dateTime == null)
+            return null;
         return dateTime.format(DATE_FORMATTER);
     }
 
     @Named("localDateToDateString")
     default String localDateToDateString(LocalDate date) {
-        if (date == null) return null;
+        if (date == null)
+            return null;
         return date.format(DATE_FORMATTER);
     }
 
     @Named("localDateTimeToInstant")
     default Instant localDateTimeToInstant(LocalDateTime localDateTime) {
-        if (localDateTime == null) return null;
+        if (localDateTime == null)
+            return null;
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
     }
 }

@@ -1,6 +1,11 @@
 package com.popcorn.jrp.domain.entity;
+
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -10,6 +15,9 @@ import java.util.List;
 @Table(name = "employers")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EmployerEntity extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -18,8 +26,8 @@ public class EmployerEntity extends BaseEntity {
     private String email;
     private String name;
     private String primaryIndustry;
-    private String size;
-    private Integer foundedIn;
+    private int size;
+    private int foundedIn;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -30,7 +38,7 @@ public class EmployerEntity extends BaseEntity {
     private String website;
     private String country;
     private String city;
-    private Boolean status;
+    private boolean status;
 
     @Column(columnDefinition = "JSON")
     private String socialMedias;
@@ -43,12 +51,6 @@ public class EmployerEntity extends BaseEntity {
 
     @PrePersist
     public void prePersist() {
-        createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
+        status = true;
     }
 }
-

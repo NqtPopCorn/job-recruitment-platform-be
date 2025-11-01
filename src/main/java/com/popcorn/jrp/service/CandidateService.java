@@ -18,8 +18,7 @@ public interface CandidateService {
 
     CandidateDetailsResponse getCandidateById(Long id);
 
-//     CandidateDetailsResponse getCandidateResponseByUserId(Long userId);
-    CandidateEntity getCandidateByUserId(Long userId);
+    CandidateDetailsResponse getCandidateByUserId(Long userId);
 
     CandidateDetailsResponse createCandidate(CreateCandidateDto dto);
 

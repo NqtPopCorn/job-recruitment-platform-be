@@ -50,4 +50,3 @@ public class CandidateSectionEntity extends BaseEntity {
         this.updatedAt = LocalDateTime.now();
     }
 }
-

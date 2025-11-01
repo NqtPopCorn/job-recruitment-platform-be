@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class    EmployerPaginationDto {
+public class EmployerPaginationDto {
     private String id;
     private String email;
     private String name;

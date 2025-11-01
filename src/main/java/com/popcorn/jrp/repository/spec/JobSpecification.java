@@ -71,8 +71,7 @@ public class JobSpecification {
             String searchPattern = "%" + search.toLowerCase() + "%";
             return cb.or(
                     cb.like(cb.lower(root.get("jobTitle")), searchPattern),
-                    cb.like(cb.lower(root.get("employer").get("name")), searchPattern)
-            );
+                    cb.like(cb.lower(root.get("employer").get("name")), searchPattern));
         };
     }
 
@@ -87,8 +86,7 @@ public class JobSpecification {
             String locationPattern = "%" + location.toLowerCase() + "%";
             return cb.or(
                     cb.like(cb.lower(root.get("location")), locationPattern),
-                    cb.like(cb.lower(root.get("city")), locationPattern)
-            );
+                    cb.like(cb.lower(root.get("city")), locationPattern));
         };
     }
 
@@ -171,8 +169,7 @@ public class JobSpecification {
                 // Logic overlap: (Job.minSalary <= User.max) AND (Job.maxSalary >= User.min)
                 salaryMatches = cb.and(
                         cb.lessThanOrEqualTo(root.get("minSalary"), max),
-                        cb.greaterThanOrEqualTo(root.get("maxSalary"), min)
-                );
+                        cb.greaterThanOrEqualTo(root.get("maxSalary"), min));
             } else if (min != null) {
                 // Chỉ có min: Job.maxSalary >= User.min
                 salaryMatches = cb.greaterThanOrEqualTo(root.get("maxSalary"), min);
