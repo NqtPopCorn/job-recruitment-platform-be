@@ -12,17 +12,16 @@ public interface ConversationMapper extends PageMapper {
     /**
      * Mapper cho ConversationDetailsDTO (chứa danh sách thành viên).
      */
-    @Mapping(target = "displayName", expression = "java(null)") // Sẽ được xử lý ở Service
-    @Mapping(target = "displayImageUrl", expression = "java(null)") // Sẽ được xử lý ở Service
+    @Mapping(target = "displayName", ignore = true)
+    @Mapping(target = "displayImageUrl", ignore = true)
     @Mapping(source = "members", target = "members")
     ConversationDetailsDTO toDetailsDto(ConversationEntity entity);
 
     /**
      * Mapper cho ConversationSummaryDTO (không chứa danh sách thành viên).
-     * Các trường như lastMessage, unreadCount sẽ được set thủ công trong Service.
      */
-    @Mapping(target = "displayName", expression = "java(null)")
-    @Mapping(target = "displayImageUrl", expression = "java(null)")
+    @Mapping(target = "displayName", ignore = true)
+    @Mapping(target = "displayImageUrl", ignore = true)
     @Mapping(target = "lastMessageContent", ignore = true)
     @Mapping(target = "lastMessageAt", ignore = true)
     @Mapping(target = "unreadCount", ignore = true)

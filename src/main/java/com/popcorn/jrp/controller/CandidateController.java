@@ -43,18 +43,17 @@ public class CandidateController {
         return body;
     }
 
-    //  DELETED: CREATE NEW CANDIDATE
-//    @PostMapping
-//    public ResponseEntity<ApiDataResponse<CandidateDetailsResponse>> createCandidate(
-//            @RequestBody CreateCandidateDto dto
-//    ) {
-//        var res = candidateService.createCandidate(dto);
-//        return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
-//                .data(res)
-//                .message("Success")
-//                .statusCode(200)
-//                .build());
-//    }
+    @GetMapping("/user/{id}")
+    public ResponseEntity<ApiDataResponse<CandidateDetailsResponse>> getCandidateByUserId(
+            @PathVariable Long id
+    ) {
+        var res = candidateService.getCandidateByUserId(id);
+        return ResponseEntity.ok(ApiDataResponse.<CandidateDetailsResponse>builder()
+                .data(candidateMapper.toDetailsResponse(res))
+                .message("Success")
+                .statusCode(200)
+                .build());
+    }
 
     // GET DETAIL BY CANDIDATE ID
     @GetMapping("/details/{id}")

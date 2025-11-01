@@ -2,35 +2,34 @@
 
 package com.popcorn.jrp.service.impl;
 
-import com.popcorn.jrp.domain.entity.ConversationEntity;
-import com.popcorn.jrp.domain.entity.ConversationMemberEntity;
-import com.popcorn.jrp.domain.entity.MessageEntity;
-import com.popcorn.jrp.domain.entity.UserEntity;
+import com.popcorn.jrp.domain.entity.*;
 import com.popcorn.jrp.domain.mapper.ConversationMapper;
 import com.popcorn.jrp.domain.request.chat.CreateConversationRequestDTO;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.chat.ConversationDetailsDTO;
 import com.popcorn.jrp.domain.response.chat.ConversationSummaryDTO;
+import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.CustomException;
 import com.popcorn.jrp.exception.NotFoundException;
 import com.popcorn.jrp.repository.ConversationMemberRepository;
 import com.popcorn.jrp.repository.ConversationRepository;
 import com.popcorn.jrp.repository.MessageRepository;
 import com.popcorn.jrp.repository.UserRepository;
+import com.popcorn.jrp.service.CandidateUploadService;
+import com.popcorn.jrp.service.CompanyUploadService;
 import com.popcorn.jrp.service.ConversationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -41,14 +40,11 @@ public class ConversationServiceImpl implements ConversationService {
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final ConversationMapper conversationMapper;
+    private final CandidateUploadService candidateUploadService;
+    private final CompanyUploadService companyUploadService;
 
-    @Override
     @Transactional
-    public ConversationSummaryDTO createConversation(CreateConversationRequestDTO request, Long creatorUserId) {
-        // Đảm bảo người tạo luôn có trong danh sách
-        if (!request.getUserIds().contains(creatorUserId)) {
-            request.getUserIds().add(creatorUserId);
-        }
+    public ConversationSummaryDTO createPrivateConversation(Long creatorUserId, Long otherUserId) {
 
         // 1. Tạo ConversationEntity
         ConversationEntity newConversation = new ConversationEntity();
@@ -56,7 +52,10 @@ public class ConversationServiceImpl implements ConversationService {
         ConversationEntity savedConversation = conversationRepository.save(newConversation);
 
         // 2. Thêm thành viên
-        List<UserEntity> users = userRepository.findAllById(request.getUserIds());
+        List<UserEntity> users = userRepository.findAllById(List.of(creatorUserId, otherUserId));
+        if (users.size() != 2) {
+            throw new NotFoundException("A user data");
+        }
         List<ConversationMemberEntity> members = new ArrayList<>();
 
         for (UserEntity user : users) {
@@ -64,7 +63,6 @@ public class ConversationServiceImpl implements ConversationService {
                     .user(user)
                     .conversation(savedConversation)
                     .build();
-            // @PrePersist trong ConversationMemberEntity sẽ set lastSeenAt
             members.add(member);
         }
         conversationMemberRepository.saveAll(members);
@@ -72,12 +70,17 @@ public class ConversationServiceImpl implements ConversationService {
         savedConversation.setMembers(members);
 
         // 3. Map sang DTO và trả về (sẽ không có tin nhắn cuối)
-        return convertToSummaryDTO(savedConversation, creatorUserId);
+        var dto = convertToSummaryDTO(savedConversation, creatorUserId);
+        dto.setOtherUserId(otherUserId);
+        return dto;
     }
 
     @Override
     @Transactional
     public ConversationSummaryDTO findOrCreatePrivateConversation(Long userId1, Long userId2) {
+        if(Objects.equals(userId1, userId2)) {
+            throw new BadRequestException("2 userIds is equals, please check again");
+        }
         // 1. Thử tìm cuộc hội thoại 1-1 đã tồn tại
         Optional<ConversationEntity> existing = conversationRepository.findPrivateConversationByUsers(userId1, userId2);
 
@@ -87,11 +90,7 @@ public class ConversationServiceImpl implements ConversationService {
         }
 
         // 2. Nếu không tìm thấy, tạo mới
-        CreateConversationRequestDTO request = new CreateConversationRequestDTO();
-        request.setUserIds(List.of(userId1, userId2));
-
-        // Gọi lại hàm createConversation
-        return createConversation(request, userId1);
+        return createPrivateConversation(userId1, userId2);
     }
 
     @Override
@@ -122,15 +121,16 @@ public class ConversationServiceImpl implements ConversationService {
         ConversationDetailsDTO dto = conversationMapper.toDetailsDto(conversation);
 
         // 4. Set tên hiển thị (logic cho chat 1-1)
-        dto.setDisplayName(getConversationDisplayName(conversation, currentUserId));
-        // dto.setDisplayImageUrl(...);
+        var statsMap = getConversationStatsMap(conversation, currentUserId);
+        dto.setDisplayName(statsMap.get("displayName"));
+         dto.setDisplayImageUrl(statsMap.get("displayImageUrl"));
 
         return dto;
     }
 
     @Override
     @Transactional
-    public void deleteConversation(Long conversationId, Long currentUserId) {
+    public void leaveConversation(Long conversationId, Long currentUserId) {
         // 1. Tìm thành viên
         ConversationMemberEntity member = conversationMemberRepository.findByConversationIdAndUserId(conversationId, currentUserId)
                 .orElseThrow(() -> new CustomException(HttpStatus.FORBIDDEN, "You are not a member of this conversation."));
@@ -138,7 +138,7 @@ public class ConversationServiceImpl implements ConversationService {
         // 2. Xóa thành viên này (rời khỏi nhóm)
         conversationMemberRepository.delete(member);
 
-        // 3. (Tùy chọn) Nếu đây là thành viên cuối cùng, xóa luôn cuộc hội thoại
+        // 3. Nếu đây là thành viên cuối cùng, xóa luôn cuộc hội thoại
         long remainingMembers = conversationMemberRepository.countByConversationId(conversationId);
         if (remainingMembers == 0) {
             conversationRepository.deleteById(conversationId);
@@ -153,9 +153,14 @@ public class ConversationServiceImpl implements ConversationService {
     private ConversationSummaryDTO convertToSummaryDTO(ConversationEntity conversation, Long currentUserId) {
         ConversationSummaryDTO dto = conversationMapper.toSummaryDto(conversation);
 
-        // 1. Lấy tên hiển thị
-        dto.setDisplayName(getConversationDisplayName(conversation, currentUserId));
-        // dto.setDisplayImageUrl(...);
+        // 1. Lấy tên hiển thị, other user id
+        Map<String, String> stats = getConversationStatsMap(conversation, currentUserId);
+        dto.setDisplayName(stats.get("displayName"));
+        dto.setDisplayImageUrl(stats.get("displayImageUrl"));
+        if(stats.containsKey("otherUserId")) {
+            dto.setOtherUserId(Long.valueOf(stats.get("otherUserId")));
+        }
+
 
         // 2. Lấy tin nhắn cuối cùng
         Optional<MessageEntity> lastMessageOpt = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId());
@@ -178,25 +183,42 @@ public class ConversationServiceImpl implements ConversationService {
         return dto;
     }
 
-    /**
-     * Lấy tên hiển thị cho cuộc hội thoại.
-     * Nếu là chat 1-1, trả về tên người kia.
-     * Nếu là chat nhóm, trả về tên nhóm (nếu có) hoặc "Group chat".
-     */
-    private String getConversationDisplayName(ConversationEntity conversation, Long currentUserId) {
-        if (conversation.getMembers().size() == 2) {
-            // Chat 1-1
+    private Map<String,String> getConversationStatsMap(ConversationEntity conversation, Long currentUserId) {
+        try {
+            Map<String, String> result = new HashMap<>();
+            // Chat 1-1 ~~ conversation.getMembers().size() == 2
             Optional<ConversationMemberEntity> otherMember = conversation.getMembers().stream()
                     .filter(m -> !m.getUser().getId().equals(currentUserId))
                     .findFirst();
 
             if (otherMember.isPresent()) {
-                // TODO: Trả về tên thật của user khi UserEntity có
-                return "User " + otherMember.get().getUser().getId();
+                UserEntity user = otherMember.get().getUser();
+                switch (user.getRole()) {
+                    case candidate -> {
+                        var candidate = user.getCandidate();
+                        String displayImageUrl = candidateUploadService.generateFileUrl(candidate.getAvatar(), "avatar");
+                        String displayName = candidate.getName();
+                        result.put("displayImageUrl", displayImageUrl);
+                        result.put("displayName", displayName);
+                        result.put("otherUserId", user.getId().toString());
+                    }
+                    case employer -> {
+                        String displayImageUrl = companyUploadService.generateFileUrl(user.getEmployer().getLogo());
+                        String displayName = user.getEmployer().getName();
+                        result.put("displayImageUrl", displayImageUrl);
+                        result.put("displayName", displayName);
+                        result.put("otherUserId", user.getId().toString());
+                    }
+                    default -> {}
+                }
             }
+            return result;
+        } catch (Exception e) {
+            if(e instanceof NullPointerException) {
+                log.error("Failed to get conversation stats for current user");
+                throw new NotFoundException("Please check again, Candidate, or Employer");
+            }
+            return new HashMap<>();
         }
-
-        // TODO: Trả về tên nhóm nếu ConversationEntity có trường 'name'
-        return "Group Chat (" + conversation.getMembers().size() + ")";
     }
 }

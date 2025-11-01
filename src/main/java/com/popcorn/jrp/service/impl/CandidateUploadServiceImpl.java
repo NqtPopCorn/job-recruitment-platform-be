@@ -72,10 +72,33 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
     // --- CÁC HÀM GET URL ---
 
     @Override
+    public String generateFileUrl(String fileName, String type) {
+        if (fileName == null || fileName.isEmpty()) {
+            return "";
+        }
+        return switch (type) {
+            case "image", "avatar" -> "/images/candidates/" + fileName;
+            case "resume" -> "/resumes/" + fileName;
+            default -> "";
+        };
+    }
+
+    /**
+     * Xây dựng URL để client có thể truy cập file.
+     */
+//    private String buildFileUrl(String pathPrefix, String filename) {
+//        if (filename == null || filename.isEmpty()) {
+//            return "";
+//        }
+//        // Ví dụ: /avatars/abc-123.jpg
+//        return "/" + pathPrefix + "/" + filename;
+//    }
+
+    @Override
     @Transactional(readOnly = true)
     public String getAvatarUrl(Long candidateId) {
         CandidateEntity candidate = getCandidateById(candidateId);
-        return buildFileUrl("images/candidates", candidate.getAvatar());
+        return generateFileUrl(candidate.getAvatar(), "avatar");
     }
 
     @Override
@@ -86,7 +109,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
         return candidate.getImages().stream()
                 .map(image -> UploadDataResponse.builder()
                         .id(image.getId())
-                        .url(buildFileUrl("images/candidates", image.getFilename()))
+                        .url(generateFileUrl(image.getFilename(), "image"))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -117,7 +140,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
         candidate.setAvatar(newFilename);
         candidateRepository.save(candidate);
 
-        return buildFileUrl("images/candidates", newFilename);
+        return generateFileUrl(candidate.getAvatar(), "avatar");
     }
 
     @Override
@@ -133,7 +156,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
 
         return UploadDataResponse.builder()
                 .id(imageEntity.getId())
-                .url(buildFileUrl("images/candidates", filename))
+                .url(generateFileUrl(filename, "image"))
                 .build();
     }
 
@@ -150,7 +173,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
         resumeRepository.save(resumeEntity);
 
         var res = resumeMapper.toResponse(resumeEntity);
-        res.setUrl(buildFileUrl("resumes", filename));
+        res.setUrl(generateFileUrl(filename, "resume"));
         return res;
     }
 
@@ -245,14 +268,5 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
         }
     }
 
-    /**
-     * Xây dựng URL để client có thể truy cập file.
-     */
-    private String buildFileUrl(String pathPrefix, String filename) {
-        if (filename == null || filename.isEmpty()) {
-            return "";
-        }
-        // Ví dụ: /avatars/abc-123.jpg
-        return "/" + pathPrefix + "/" + filename;
-    }
+
 }

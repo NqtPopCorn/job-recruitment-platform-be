@@ -9,8 +9,7 @@ import org.mapstruct.Mapping;
 public interface ConversationMemberMapper {
 
     @Mapping(source = "user.id", target = "userId")
-    // TODO: Map tên và avatar thật khi UserEntity có các trường đó
-    @Mapping(target = "userName", expression = "java(\"User \" + entity.getUser().getId())")
-    @Mapping(target = "userAvatarUrl", expression = "java(null)")
+//    @Mapping(target = "userName", expression = "java(\"User \" + entity.getUser().getId())")
+//    @Mapping(target = "userAvatarUrl", expression = "java(null)")
     ConversationMemberDTO toDto(ConversationMemberEntity entity);
 }

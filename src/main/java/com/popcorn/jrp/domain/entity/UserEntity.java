@@ -53,6 +53,9 @@ public class UserEntity extends BaseEntity implements UserDetails {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private CandidateEntity candidate;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private EmployerEntity employer;
+
     private boolean status;
 
     @Override

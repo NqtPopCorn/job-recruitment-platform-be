@@ -1,28 +1,14 @@
 package com.popcorn.jrp.service;
 
-import com.popcorn.jrp.domain.request.chat.CreateConversationRequestDTO;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.chat.ConversationDetailsDTO;
 import com.popcorn.jrp.domain.response.chat.ConversationSummaryDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 /**
  * Service interface for managing conversations.
  */
 public interface ConversationService {
-
-    /**
-     * Creates a new conversation with the given members.
-     * This method will also create the corresponding ConversationMemberEntity entries.
-     *
-     * @param request DTO containing the list of user IDs to include.
-     * @param creatorUserId The ID of the user creating the conversation.
-     * @return A summary DTO of the newly created conversation.
-     */
-    ConversationSummaryDTO createConversation(CreateConversationRequestDTO request, Long creatorUserId);
 
     /**
      * Finds or creates a private (1-on-1) conversation between two users.
@@ -55,11 +41,10 @@ public interface ConversationService {
     ConversationDetailsDTO getConversationDetails(Long conversationId, Long currentUserId);
 
     /**
-     * Deletes a conversation for a specific user.
-     * (This might be a soft delete or removing the user from the conversation members).
+     * Removing the user from the conversation members.
      *
      * @param conversationId The ID of the conversation.
      * @param currentUserId The ID of the user performing the action.
      */
-    void deleteConversation(Long conversationId, Long currentUserId);
+    void leaveConversation(Long conversationId, Long currentUserId);
 }

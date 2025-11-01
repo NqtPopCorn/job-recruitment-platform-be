@@ -1,13 +1,14 @@
 package com.popcorn.jrp.domain.request.chat;
 
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 public class CreateConversationRequestDTO {
-    // Dùng cho cả chat nhóm (nhiều hơn 2) hoặc chat 1-1
-    private List<Long> userIds;
-    // Có thể thêm tên nhóm, v.v. nếu là chat nhóm
-    // private String groupName;
+
+//    @Size(min = 2, max = 2, message = "This app only support private chat, please request 2 userId")
+//    private List<Long> userIds;
+    Long userId;
 }

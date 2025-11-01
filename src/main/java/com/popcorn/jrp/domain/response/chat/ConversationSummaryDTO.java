@@ -7,8 +7,9 @@ import java.time.LocalDateTime;
 @Data
 public class ConversationSummaryDTO {
     private Long id;
-    private String displayName; // Tên của người kia (nếu chat 1-1) hoặc tên nhóm
-    private String displayImageUrl; // Avatar của người kia hoặc nhóm
+    private Long otherUserId;
+    private String displayName;
+    private String displayImageUrl;
     private String lastMessageContent;
     private LocalDateTime lastMessageAt;
     private Long unreadCount; // Số tin nhắn chưa đọc

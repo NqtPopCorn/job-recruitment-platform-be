@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface CandidateUploadService {
+    String generateFileUrl(String fileName, String type);
     String getAvatarUrl(Long candidateId);
     List<UploadDataResponse> getAllImageUrl(Long candidateId);
 

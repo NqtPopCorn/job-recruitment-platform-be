@@ -24,10 +24,9 @@ public interface MessageMapper extends PageMapper {
     @AfterMapping
     default void setCustomFields(@MappingTarget MessageDTO dto, MessageEntity entity) {
 
-        if (entity.getSenderUser() != null) {
-            dto.setSenderName("User " + entity.getSenderUser().getId());
-            // TODO: Thay thế bằng logic thực tế (vd: entity.getSenderUser().getFullName())
-        }
+//        if (entity.getSenderUser() != null) {
+//            dto.setSenderName("User " + entity.getSenderUser().getId());
+//        }
 
         if (entity.isDeleted()) {
             dto.setContent("This message has been deleted.");

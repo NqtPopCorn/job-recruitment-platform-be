@@ -59,10 +59,19 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
     // --- CÁC HÀM GET URL (Triển khai Interface mới) ---
 
     @Override
+    public String generateFileUrl(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return "";
+        }
+        // Ví dụ: /images/companies/abc-123.jpg
+        return "/" + PUBLIC_URL_PREFIX + "/" + fileName;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public String getLogoUrl(Long companyId) {
         EmployerEntity employer = getEmployerById(companyId);
-        return buildFileUrl(PUBLIC_URL_PREFIX, employer.getLogo());
+        return generateFileUrl(employer.getLogo());
     }
 
     @Override
@@ -73,7 +82,7 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
         return employer.getImages().stream()
                 .map(image -> UploadDataResponse.builder()
                         .id(image.getId())
-                        .url(buildFileUrl(PUBLIC_URL_PREFIX, image.getFilename()))
+                        .url(generateFileUrl(image.getFilename()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -97,7 +106,7 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
         employer.setLogo(newFilename);
         employerRepository.save(employer);
 
-        return buildFileUrl(PUBLIC_URL_PREFIX, newFilename);
+        return generateFileUrl(newFilename);
     }
 
     @Override
@@ -113,7 +122,7 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
 
         return UploadDataResponse.builder()
                 .id(imageEntity.getId())
-                .url(buildFileUrl(PUBLIC_URL_PREFIX, filename))
+                .url(generateFileUrl(filename))
                 .build();
     }
 
@@ -201,14 +210,5 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
         }
     }
 
-    /**
-     * Xây dựng URL để client có thể truy cập file.
-     */
-    private String buildFileUrl(String pathPrefix, String filename) {
-        if (filename == null || filename.isEmpty()) {
-            return "";
-        }
-        // Ví dụ: /images/companies/abc-123.jpg
-        return "/" + pathPrefix + "/" + filename;
-    }
+
 }

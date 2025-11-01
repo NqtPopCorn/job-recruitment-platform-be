@@ -2,9 +2,7 @@
 
 package com.popcorn.jrp.controller;
 
-import com.popcorn.jrp.domain.entity.UserEntity;
 import com.popcorn.jrp.domain.mapper.ConversationMapper;
-import com.popcorn.jrp.domain.request.chat.CreateConversationRequestDTO;
 import com.popcorn.jrp.domain.request.chat.PrivateConversationRequestDTO;
 import com.popcorn.jrp.domain.response.ApiDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
@@ -15,18 +13,11 @@ import com.popcorn.jrp.service.ConversationService;
 import com.popcorn.jrp.service.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/v1/conversations")
@@ -47,11 +38,13 @@ public class ConversationController {
             @PageableDefault(size = 20, sort = "updatedAt") Pageable pageable) {
         Long userId = Long.parseLong(auth.getName());
 
-        ApiPageResponse<ConversationSummaryDTO> conversations = conversationService.getConversationsForUser(
+        ApiPageResponse<ConversationSummaryDTO> res = conversationService.getConversationsForUser(
                 userId,
                 pageable
         );
-        return ResponseEntity.ok(conversations);
+        res.setStatusCode(200);
+        res.setMessage("Success");
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/{conversationId}/messages")
@@ -61,32 +54,10 @@ public class ConversationController {
             @PageableDefault(size = 20, sort = "createAt") Pageable pageable) {
 
         Long userId = Long.parseLong(auth.getName());
-        ApiPageResponse<MessageDTO> messages = messageService.getMessagesForConversation(conversationId, userId, pageable);
-        return ResponseEntity.ok(messages);
-    }
-
-    /**
-     * Tạo một cuộc hội thoại nhóm mới.
-     */
-    @PostMapping
-    public ResponseEntity<ApiDataResponse<ConversationSummaryDTO>> createConversation(
-            @Valid @RequestBody CreateConversationRequestDTO request,
-            Authentication auth) {
-        Long userId = Long.parseLong(auth.getName());
-
-        ConversationSummaryDTO conversation = conversationService.createConversation(
-                request,
-                userId
-        );
-
-        // Trả về 201 Created cùng với location của resource mới
-        URI location = URI.create(String.format("/api/v1/conversations/%d", conversation.getId()));
-        return ResponseEntity.created(location)
-                .body(ApiDataResponse.<ConversationSummaryDTO>builder()
-                        .statusCode(201)
-                        .message("Conversation created")
-                        .data(conversation)
-                        .build());
+        ApiPageResponse<MessageDTO> res = messageService.getMessagesForConversation(conversationId, userId, pageable);
+        res.setStatusCode(200);
+        res.setMessage("Success");
+        return ResponseEntity.ok(res);
     }
 
     /**
@@ -134,13 +105,13 @@ public class ConversationController {
      * Xóa/rời khỏi một cuộc hội thoại.
      * @return 204 No Content.
      */
-    @DeleteMapping("/{conversationId}")
+    @DeleteMapping("/{conversationId}/leave")
     public ResponseEntity<ApiDataResponse<Void>> deleteConversation(
             @PathVariable Long conversationId,
             Authentication auth) {
         Long userId = Long.parseLong(auth.getName());
 
-        conversationService.deleteConversation(conversationId, userId);
+        conversationService.leaveConversation(conversationId, userId);
         return ResponseEntity.ok(ApiDataResponse.<Void>builder()
                     .statusCode(204)
                     .message("Conversation deleted")

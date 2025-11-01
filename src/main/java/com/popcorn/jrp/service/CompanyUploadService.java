@@ -10,6 +10,8 @@ import java.util.List;
  */
 public interface CompanyUploadService {
 
+    String generateFileUrl(String fileName);
+
     /**
      * Lấy URL logo của công ty.
      * Tương ứng với: getAvatarUrl(Long candidateId)
