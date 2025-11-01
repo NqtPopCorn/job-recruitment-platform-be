@@ -1,4 +1,5 @@
 package com.popcorn.jrp.domain.entity;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -41,4 +42,3 @@ public class CandidateSectionEntity extends BaseEntity {
         this.updatedAt = LocalDateTime.now();
     }
 }
-

@@ -28,8 +28,7 @@ public class JobSpecification {
                 String searchPattern = "%" + params.getSearch().toLowerCase() + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("jobTitle")), searchPattern),
-                        cb.like(cb.lower(root.get("employer").get("name")), searchPattern)
-                ));
+                        cb.like(cb.lower(root.get("employer").get("name")), searchPattern)));
             }
 
             // 2. Lọc theo 'location' (location hoặc city)
@@ -37,8 +36,7 @@ public class JobSpecification {
                 String locationPattern = "%" + params.getLocation().toLowerCase() + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("location")), locationPattern),
-                        cb.like(cb.lower(root.get("city")), locationPattern)
-                ));
+                        cb.like(cb.lower(root.get("city")), locationPattern)));
             }
 
             // 3. Lọc theo 'category' (industry)
@@ -60,6 +58,9 @@ public class JobSpecification {
                     // Bỏ qua nếu không phải là số
                 }
             }
+
+            // Mặc định luôn lọc status = true (mặc dù đã có @Where)
+            predicates.add(cb.isFalse(root.get("isDeleted")));
 
             // 6. Lọc lương (Yêu cầu xử lý JSON trong DB, phức tạp)
             // Tạm thời bỏ qua lọc min/max salary vì nó nằm trong JSON.

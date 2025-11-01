@@ -9,7 +9,7 @@ import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
-public interface CandidateMapper extends PageMapper<CandidateResponse> {
+public interface CandidateMapper extends PageMapper {
 
     @Mapping(target = "tags", source = "skills")
     @Mapping(target = "category", source = "industry")

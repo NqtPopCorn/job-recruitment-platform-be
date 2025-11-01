@@ -20,8 +20,7 @@ public class EmployerSpecification {
                 String searchPattern = "%" + params.getSearch().toLowerCase() + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("name")), searchPattern),
-                        cb.like(cb.lower(root.get("email")), searchPattern)
-                ));
+                        cb.like(cb.lower(root.get("email")), searchPattern)));
             }
 
             // Lọc theo 'location' (address hoặc city)
@@ -29,8 +28,7 @@ public class EmployerSpecification {
                 String locationPattern = "%" + params.getLocation().toLowerCase() + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("address")), locationPattern),
-                        cb.like(cb.lower(root.get("city")), locationPattern)
-                ));
+                        cb.like(cb.lower(root.get("city")), locationPattern)));
             }
 
             // Lọc theo 'primaryIndustry'
@@ -45,6 +43,9 @@ public class EmployerSpecification {
 
             // Mặc định luôn lọc status = true (mặc dù đã có @Where)
             predicates.add(cb.isTrue(root.get("status")));
+
+            // Mặc định luôn lọc status = true (mặc dù đã có @Where)
+            predicates.add(cb.isFalse(root.get("isDeleted")));
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
