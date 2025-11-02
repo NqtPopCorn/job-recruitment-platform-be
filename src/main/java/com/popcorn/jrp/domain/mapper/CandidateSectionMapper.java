@@ -75,14 +75,16 @@ public interface CandidateSectionMapper {
 
     @Named("instantToLocalDate")
     default LocalDate instantToLocalDate(Instant instant) {
-        if (instant == null) return null;
+        if (instant == null)
+            return null;
         // Chuyển Instant (UTC) về múi giờ hệ thống để lấy ngày
         return instant.atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     @Named("localDateToInstant")
     default Instant localDateToInstant(LocalDate localDate) {
-        if (localDate == null) return null;
+        if (localDate == null)
+            return null;
         // Chuyển ngày (không có múi giờ) thành Instant (UTC) tại thời điểm 00:00
         // theo múi giờ hệ thống
         return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
@@ -90,7 +92,8 @@ public interface CandidateSectionMapper {
 
     @Named("localDateTimeToInstant")
     default Instant localDateTimeToInstant(LocalDateTime localDateTime) {
-        if (localDateTime == null) return null;
+        if (localDateTime == null)
+            return null;
         // Chuyển LDT (theo múi giờ hệ thống) sang Instant (UTC)
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
     }

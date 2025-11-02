@@ -3,6 +3,7 @@ package com.popcorn.jrp.service;
 import com.popcorn.jrp.domain.request.candidate.CreateCandidateAboutDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateAboutDto;
 import com.popcorn.jrp.domain.response.candidate.CandidateAboutDto;
+import com.popcorn.jrp.domain.response.candidate.CandidateSectionBlockDto;
 import com.popcorn.jrp.domain.response.candidate.CandidateSectionCategoryDto;
 
 import java.util.List;
@@ -19,17 +20,17 @@ public interface CandidateAboutService {
      * @param createDto DTO chứa thông tin để tạo mới.
      * @return DTO của mục thông tin vừa được tạo.
      */
-    CandidateAboutDto createCandidateAbout(CreateCandidateAboutDto createDto);
+    CandidateSectionBlockDto createCandidateAbout(CreateCandidateAboutDto createDto);
 
     /**
      * Cập nhật một mục thông tin đã có của ứng viên.
      * Tương ứng với: PATCH /api/v1/candidate-about/:id
      *
-     * @param id ID của mục thông tin cần cập nhật.
+     * @param id        ID của mục thông tin cần cập nhật.
      * @param updateDto DTO chứa thông tin cập nhật.
      * @return DTO của mục thông tin sau khi đã cập nhật.
      */
-    CandidateAboutDto updateCandidateAbout(Long id, UpdateCandidateAboutDto updateDto);
+    CandidateSectionBlockDto updateCandidateAbout(Long id, UpdateCandidateAboutDto updateDto);
 
     /**
      * Xóa một mục thông tin của ứng viên.
