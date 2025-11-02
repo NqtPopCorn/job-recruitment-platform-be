@@ -3,6 +3,7 @@ package com.popcorn.jrp.controller;
 import com.popcorn.jrp.domain.request.candidate.CreateCandidateAboutDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateAboutDto;
 import com.popcorn.jrp.domain.response.ApiDataResponse;
+import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiResultsResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateAboutDto;
 import com.popcorn.jrp.domain.response.candidate.CandidateSectionBlockDto;
@@ -56,7 +57,7 @@ public class CandidateAboutController {
 
                 CandidateSectionBlockDto updatedSection = candidateAboutService.updateCandidateAbout(id, updateDto);
 
-                var response = ApiDataResponse.<CandidateSectionBlockDto>builder()
+                ApiDataResponse<CandidateSectionBlockDto> response = ApiDataResponse.<CandidateSectionBlockDto>builder()
                                 .statusCode(HttpStatus.OK.value())
                                 .message("Successfully updated candidate about.")
                                 .data(updatedSection)
@@ -70,11 +71,11 @@ public class CandidateAboutController {
          * DELETE /api/v1/candidate-about/:id
          */
         @DeleteMapping("/{id}")
-        public ResponseEntity<ApiDataResponse> deleteCandidateAbout(@PathVariable("id") Long id) {
+        public ResponseEntity<ApiNoDataResponse> deleteCandidateAbout(@PathVariable("id") Long id) {
 
                 candidateAboutService.deleteCandidateAbout(id);
 
-                var response = ApiDataResponse.builder()
+                ApiNoDataResponse response = ApiNoDataResponse.builder()
                                 .statusCode(200)
                                 .message("Successfully deleted candidate about.")
                                 .build();
