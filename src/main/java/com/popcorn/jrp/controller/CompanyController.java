@@ -5,6 +5,7 @@ import com.popcorn.jrp.domain.request.employer.EmployerQueryParameters;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
 import com.popcorn.jrp.domain.response.ApiDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.ApiResultsResponse;
 import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
 import com.popcorn.jrp.service.EmployerService;
@@ -34,43 +35,22 @@ public class CompanyController {
          * GET /api/v1/company
          */
         @GetMapping
-        @ResponseStatus(HttpStatus.OK)
-        public ApiPageResponse<EmployerPaginationDto> getCompaniesPaginated(
+        public ResponseEntity<ApiPageResponse<EmployerPaginationDto>> getCompaniesPaginated(
                         @Valid EmployerQueryParameters queryParams,
                         Pageable pageable) {
 
                 ApiPageResponse<EmployerPaginationDto> employerPage = employerService.getEmployersPaginated(queryParams,
                                 pageable);
 
-                return employerPage;
+                return ResponseEntity.ok(employerPage);
         }
-
-        /**
-         * 2. GET LIST COMPANY
-         * GET /api/v1/company/get-list
-         */
-        // @GetMapping("/get-list")
-        // public ResponseEntity<ApiDataResponse<List<EmployerSimpleDto>>>
-        // getAllCompanies() {
-
-        // List<EmployerSimpleDto> employers = employerService.getAllEmployers();
-
-        // var response = ApiDataResponse.<List<EmployerSimpleDto>>builder()
-        // .message(employers.size() + " employers found")
-        // .statusCode(HttpStatus.OK.value())
-        // .data(employers)
-        // .build();
-
-        // return ResponseEntity.ok(response);
-        // }
 
         /**
          * 3. GET DETAIL COMPANY BY ID
          * GET /api/v1/company/details/:id
          */
         @GetMapping("/details/{id}")
-        @ResponseStatus(HttpStatus.OK)
-        public ApiDataResponse<EmployerDetailDto> getCompanyById(@PathVariable("id") Long id) {
+        public ResponseEntity<ApiDataResponse<EmployerDetailDto>> getCompanyById(@PathVariable("id") Long id) {
 
                 EmployerDetailDto employer = employerService.getEmployerDetailsById(id);
 
@@ -79,7 +59,7 @@ public class CompanyController {
                                 .message("Lấy thông tin công ty thành công!")
                                 .data(employer)
                                 .build();
-                return response;
+                return ResponseEntity.ok(response);
         }
 
         /**
@@ -87,17 +67,16 @@ public class CompanyController {
          * GET /api/v1/company/details/user/:id
          */
         @GetMapping("/details/user/{id}")
-        @ResponseStatus(HttpStatus.OK)
-        public ApiDataResponse<EmployerDetailDto> getCompanyByUserId(@PathVariable("id") Long userId) {
+        public ResponseEntity<ApiDataResponse<EmployerDetailDto>> getCompanyByUserId(@PathVariable("id") Long userId) {
 
                 EmployerDetailDto employer = employerService.getEmployerDetailsByUserId(userId);
 
-                ApiDataResponse<EmployerDetailDto> response = new ApiDataResponse<>(
-                                HttpStatus.OK.value(),
-                                "Lấy thông tin công ty thành công!",
-                                employer);
-
-                return response;
+                ApiDataResponse<EmployerDetailDto> response = ApiDataResponse.<EmployerDetailDto>builder()
+                                .statusCode(HttpStatus.OK.value())
+                                .message("Lấy thông tin công ty thành công!")
+                                .data(employer)
+                                .build();
+                return ResponseEntity.ok(response);
         }
 
         /**
@@ -105,15 +84,15 @@ public class CompanyController {
          * GET /api/v1/company/related-jobs/:companyId
          */
         @GetMapping("/related-jobs/{companyId}")
-        public ResponseEntity<ApiDataResponse<List<RelatedJobDto>>> getRelatedJobs(
+        public ResponseEntity<ApiResultsResponse<RelatedJobDto>> getRelatedJobs(
                         @PathVariable("companyId") Long employerId) {
 
                 List<RelatedJobDto> jobs = employerService.getRelatedJobsByEmployerId(employerId);
 
-                var response = ApiDataResponse.<List<RelatedJobDto>>builder()
+                ApiResultsResponse<RelatedJobDto> response = ApiResultsResponse.<RelatedJobDto>builder()
                                 .message(jobs.size() + " jobs found")
                                 .statusCode(HttpStatus.OK.value())
-                                .data(jobs)
+                                .results(jobs)
                                 .build();
 
                 return ResponseEntity.ok(response);
@@ -124,17 +103,16 @@ public class CompanyController {
          * GET /api/v1/company/industry-list
          */
         @GetMapping("/industry-list")
-        @ResponseStatus(HttpStatus.OK)
-        public ApiDataResponse<List<IndustryLabelValueDto>> getIndustryList() {
+        public ResponseEntity<ApiResultsResponse<IndustryLabelValueDto>> getIndustryList() {
 
                 List<IndustryLabelValueDto> industries = employerService.getIndustryList();
 
-                ApiDataResponse<List<IndustryLabelValueDto>> response = new ApiDataResponse<>(
-                                HttpStatus.OK.value(),
-                                "Lấy danh sách danh mục công ty thành công!",
-                                industries);
-
-                return response;
+                ApiResultsResponse<IndustryLabelValueDto> response = ApiResultsResponse.<IndustryLabelValueDto>builder()
+                                .statusCode(HttpStatus.OK.value())
+                                .message("Lấy danh sách danh mục của các ứng viên thành công!")
+                                .results(industries)
+                                .build();
+                return ResponseEntity.ok(response);
         }
 
         /**

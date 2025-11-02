@@ -44,8 +44,8 @@ public class UserEntity extends BaseEntity implements UserDetails {
         return email;
     }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<SocialMediaEntity> socialMedias = new ArrayList<>();
+    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    // private List<SocialMediaEntity> socialMedias = new ArrayList<>();
 
     // @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     // private CandidateEntity candidate;

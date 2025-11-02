@@ -1,4 +1,5 @@
 package com.popcorn.jrp.domain.entity;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -31,4 +32,3 @@ public class ApplicationEntity extends BaseEntity {
         PENDING, REVIEWED, ACCEPTED, REJECTED
     }
 }
-

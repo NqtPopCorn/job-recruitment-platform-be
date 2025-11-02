@@ -44,7 +44,7 @@ public class EmployerSpecification {
             // Mặc định luôn lọc status = true (mặc dù đã có @Where)
             predicates.add(cb.isTrue(root.get("status")));
 
-            // Mặc định luôn lọc status = true (mặc dù đã có @Where)
+            // Mặc định luôn lọc isDeleted = false (mặc dù đã có @Where)
             predicates.add(cb.isFalse(root.get("isDeleted")));
 
             return cb.and(predicates.toArray(new Predicate[0]));

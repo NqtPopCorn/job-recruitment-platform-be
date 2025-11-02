@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -41,8 +43,7 @@ public class CandidateServiceV1 implements CandidateService {
     public ApiPageResponse<CandidateResponse> getCandidates(CandidateSearchRequest request, Pageable pageable) {
         Specification<CandidateEntity> spec = candidateSpecification.getPublicSpecification(request);
         try {
-            var page = candidateRepository
-                    .findAll(spec, pageable);
+            var page = candidateRepository.findAll(spec, pageable);
             return mapper.toApiPageResponse(page.map(mapper::toResponse));
         } catch (Exception e) {
             throw new BadRequestException("Page request error: " + e.getMessage());
@@ -51,22 +52,16 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public CandidateDetailsResponse getCandidateById(Long id) {
-        var found = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
-        return mapper.toDetailsResponse(found);
-    }
-
-    @Override
-    public CandidateDetailsResponse getCandidateByUserId(Long userId) {
-        var found = candidateRepository.getCandidateByUserId(userId)
+        CandidateEntity found = candidateRepository.findByIdAndStatusTrueAndIsDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Candidate"));
         return mapper.toDetailsResponse(found);
     }
 
     @Override
-    public CandidateDetailsResponse createCandidate(CreateCandidateDto dto) {
-        CandidateEntity candidateEntity = mapper.createEntity(dto);
-        candidateRepository.save(candidateEntity);
-        return mapper.toDetailsResponse(candidateEntity);
+    public CandidateDetailsResponse getCandidateByUserId(Long userId) {
+        CandidateEntity found = candidateRepository.findByUserIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
+        return mapper.toDetailsResponse(found);
     }
 
     @Override

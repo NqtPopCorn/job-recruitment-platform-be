@@ -20,8 +20,6 @@ public interface CandidateService {
 
     CandidateDetailsResponse getCandidateByUserId(Long userId);
 
-    CandidateDetailsResponse createCandidate(CreateCandidateDto dto);
-
     CandidateDetailsResponse updateCandidate(Long id, UpdateCandidateDto dto);
 
     SoftDeleteCandidateResponse softDeleteCandidate(Long id);

@@ -41,7 +41,7 @@ public class EmployerEntity extends BaseEntity {
     private boolean status;
 
     @Column(columnDefinition = "JSON")
-    private String socialMedias;
+    private String socialMedias = "[]";
 
     @OneToMany(mappedBy = "employer")
     private List<EmployerImageEntity> images;

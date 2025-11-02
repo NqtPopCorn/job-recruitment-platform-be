@@ -1,6 +1,7 @@
 package com.popcorn.jrp.domain.request.candidate;
 
-import com.popcorn.jrp.domain.response.candidate.SocialMediaResponse;
+import com.popcorn.jrp.domain.response.common.SocialMediaDto;
+
 import lombok.*;
 import java.util.List;
 
@@ -27,7 +28,6 @@ public class UpdateCandidateDto {
     private String gender;
     private List<String> languages;
     private String educationLevel;
-    private List<SocialMediaResponse> socialMedias;
+    private List<SocialMediaDto> socialMedias;
     private Boolean status;
 }
-

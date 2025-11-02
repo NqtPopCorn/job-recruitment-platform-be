@@ -16,7 +16,8 @@ public class CandidateSpecification {
                 .and(hasGender(request.getGender()))
                 .and(hasExperienceLessThanOrEqual(request.getExperience()))
                 .and(withEducationLevel(request.getEducation()))
-                .and(hasStatus(true));
+                .and(hasStatus(true))
+                .and(hasIsDeleted());
     }
 
     public Specification<CandidateEntity> hasNameLike(String name) {
@@ -67,20 +68,9 @@ public class CandidateSpecification {
     public Specification<CandidateEntity> withEducationLevel(String education) {
         return (root, query, cb) -> {
             if (education == null || education.isEmpty()) {
-                return cb.conjunction();
+                return cb.conjunction(); // không lọc nếu không có giá trị
             }
-
-            String eduLower = education.toLowerCase();
-            if ("university".equals(eduLower)) {
-                return cb.like(cb.lower(root.get("educationLevel")), "%đại học%");
-            } else if ("college".equals(eduLower)) {
-                return cb.like(cb.lower(root.get("educationLevel")), "%cao đẳng%");
-            } else if ("other".equals(eduLower)) {
-                Predicate notUniversity = cb.notLike(cb.lower(root.get("educationLevel")), "%đại học%");
-                Predicate notCollege = cb.notLike(cb.lower(root.get("educationLevel")), "%cao đẳng%");
-                return cb.and(notUniversity, notCollege);
-            }
-            return cb.conjunction(); // Nếu không khớp case nào thì không lọc gì
+            return cb.like(cb.lower(root.get("educationLevel")), "%" + education.toLowerCase() + "%");
         };
     }
 
@@ -93,4 +83,9 @@ public class CandidateSpecification {
         };
     }
 
+    public Specification<CandidateEntity> hasIsDeleted() {
+        return (root, query, cb) -> {
+            return cb.isFalse(root.get("isDeleted"));
+        };
+    }
 }

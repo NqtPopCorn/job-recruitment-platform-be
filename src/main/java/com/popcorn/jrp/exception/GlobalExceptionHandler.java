@@ -15,9 +15,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiDataResponse> handleNotFoundException(NotFoundException e) {
         return ResponseEntity.status(404)
                 .body(ApiDataResponse.builder()
-                    .statusCode(404)
-                    .message(e.getMessage())
-                    .build());
+                        .statusCode(404)
+                        .message(e.getMessage())
+                        .build());
     }
 
     @ExceptionHandler(BadRequestException.class)

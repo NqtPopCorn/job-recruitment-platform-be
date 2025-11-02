@@ -27,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Pattern;
+import java.math.BigDecimal;
 import java.sql.SQLOutput;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -84,8 +85,8 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
                             .location("")
                             .description("")
                             .experience(null)
-                            .currentSalary("")
-                            .expectedSalary("")
+                            .currentSalary(BigDecimal.valueOf(0))
+                            .expectedSalary(BigDecimal.valueOf(0))
                             .gender("")
                             .email(newUser.getEmail())
                             .phone("")
@@ -109,7 +110,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
                             .country("")
                             .description("")
                             .email(request.getEmail())
-                            .foundedIn(0)
+                            .foundedIn(1900)
                             .logo("")
                             .name("")
                             .phone("")
@@ -183,7 +184,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             // Lấy data tùy theo role
             switch (user.getRole()) {
                 case candidate:
-                    CandidateEntity candidate = candidateRepository.getCandidateByUserId(Long.valueOf(userId))
+                    CandidateEntity candidate = candidateRepository.findByUserId(Long.valueOf(userId))
                             .orElseThrow(() -> new NotFoundException("Candidate"));
                     response.setId(candidate.getId());
                     response.setName(candidate.getName());
