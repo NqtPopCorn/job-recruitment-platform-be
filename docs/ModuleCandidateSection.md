@@ -11,24 +11,28 @@ Ví dụ: Work & Experience, Education, Projects…
 
 ### 📌Endpoint
 
+- **Endpoint:**
+  POST /api/v1/candidate-about
+
+- **Headers:**
+
 ```http
-POST {{baseUrl}}/api/v1/candidate-about
 Authorization: Bearer {{token}}
 Content-Type: application/json
 ```
 
 ### 📌 Request Body
 
-| Field        | Type   | Description                                 |
-| ------------ | ------ | ------------------------------------------- |
-| candidateId  | string | ID của ứng viên                             |
-| category     | string | Loại mục (ví dụ: "Work & Experience")       |
-| title        | string | Tiêu đề của mục                             |
-| organization | string | Tổ chức/công ty liên quan                   |
-| startTime    | string | Thời gian bắt đầu (ISODate)                 |
-| endTime      | string | Thời gian kết thúc (ISODate)                |
-| text         | string | Mô tả chi tiết                              |
-| type         | string | DTO type (ví dụ: "CreateCandidateAboutDto") |
+| Field        | Type            | Description                                 |
+| ------------ | --------------- | ------------------------------------------- |
+| candidateId  | string / number | ID của ứng viên                             |
+| category     | string          | Loại mục (ví dụ: "Work & Experience")       |
+| title        | string          | Tiêu đề của mục                             |
+| organization | string          | Tổ chức/công ty liên quan                   |
+| startTime    | string          | Thời gian bắt đầu (ISODate)                 |
+| endTime      | string          | Thời gian kết thúc (ISODate)                |
+| text         | string          | Mô tả chi tiết                              |
+| type         | string          | DTO type (ví dụ: "CreateCandidateAboutDto") |
 
 ### 📌 Example Request Body
 
@@ -83,8 +87,12 @@ Ví dụ: Work & Experience, Education, Projects…
 
 ### 📌 Endpoint
 
+- **Endpoint:**
+  PATCH /api/v1/candidate-about/:id
+
+- **Headers:**
+
 ```http
-PATCH {{baseUrl}}/api/v1/candidate-about/:id
 Authorization: Bearer {{token}}
 Content-Type: application/json
 ```
@@ -103,15 +111,16 @@ Content-Type: application/json
 
 ### 📌 Example Request Body
 
+```json
 {
-"category": "Work & Experience",
-"title": "Backend Developer",
-"organization": "Công ty TNHH Công Nghệ VNP",
-"startTime": "2022-01-01T00:00:00.000Z",
-"endTime": "2024-06-01T00:00:00.000Z",
-"text": "Tham gia phát triển hệ thống quản lý người dùng bằng NestJS và PostgreSQL.",
-"type": "CreateCandidateAboutDto"
+  "category": "Work & Experience",
+  "title": "Backend Developer",
+  "organization": "Công ty TNHH Công Nghệ VNP",
+  "startTime": "2022-01-01T00:00:00.000Z",
+  "endTime": "2024-06-01T00:00:00.000Z",
+  "text": "Tham gia phát triển hệ thống quản lý người dùng bằng NestJS và PostgreSQL."
 }
+```
 
 ### 📌 Response Schema
 
@@ -146,13 +155,16 @@ Content-Type: application/json
 
 ### 🧾 Description
 
-Xóa một mục (section) của ứng viên đã tồn tại.
-Ví dụ: Work & Experience, Education, Projects…
+Xóa trực tiếp một mục (section) của ứng viên đã tồn tại.
 
 ### Endpoint
 
-```json
-DELETE {{baseUrl}}/api/v1/candidate-about/:id
+- **Endpoint:**
+  DELETE /api/v1/candidate-about/:id
+
+- **Headers:**
+
+```http
 Authorization: Bearer {{token}}
 Content-Type: application/json
 ```
@@ -160,11 +172,6 @@ Content-Type: application/json
 ### 📌 Request Body
 
 Không cần body. Chỉ cần cung cấp id của mục trong URL.
-
-### 📌 Example Request
-
-DELETE {{baseUrl}}/api/v1/candidate-about/68b456efc98b2cd3f1a0567b
-Authorization: Bearer {{token}}
 
 ### 📌 Response Schema
 
@@ -175,10 +182,12 @@ Authorization: Bearer {{token}}
 
 ### 📌 Example Response
 
+```json
 {
-"statusCode": 200,
-"message": "Xóa candidate section thành công!"
+  "statusCode": 200,
+  "message": "Xóa candidate section thành công!"
 }
+```
 
 ## 4. GET SECTIONS OF CANDIDATE BY ID
 
@@ -188,14 +197,12 @@ Lấy danh mục các section (Educations, Works, Certificates, v.v.) của mộ
 
 ### 📌 Endpoint
 
-```http
-GET {{baseUrl}}/api/v1/candidate-about/details/candidate/:candidateId
-```
+- **Endpoint:**
+  DELETE /api/v1/candidate-about/details/candidate/:candidateId
 
-### 📌 Example Request
+- **Headers:**
 
 ```http
-GET {{baseUrl}}/api/v1/candidate-about/details/candidate/68be91be9bf7f4178721d9fe
 Authorization: Bearer {{token}}
 Content-Type: application/json
 ```
@@ -209,7 +216,7 @@ Content-Type: application/json
 | `results`                            | `array`  | Danh sách các section của ứng viên                            |
 | `results[].category`                 | `string` | Tên loại section (ví dụ: `Educations`, `Works & Experiences`) |
 | `results[].themeColor`               | `string` | Màu chủ đề của section                                        |
-| `results[].blockList`                | `array`  | Danh sách các khối nội dung trong section                     |
+| `results[].blockList`                | `array`  | Danh sách các khối nội dung trong section (đã gom nhóm)       |
 | `results[].blockList[].id`           | `string` | ID của block                                                  |
 | `results[].blockList[].meta`         | `string` | Mã meta của block                                             |
 | `results[].blockList[].title`        | `string` | Tiêu đề nội dung (ví dụ: tên ngành học, công việc, v.v.)      |
