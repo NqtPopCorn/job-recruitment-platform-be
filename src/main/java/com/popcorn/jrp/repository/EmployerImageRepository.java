@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface EmployerImageRepository extends JpaRepository<EmployerImageEntity, Long> {
     Optional<EmployerImageEntity> findByFilename(String name);
+
+    Optional<EmployerImageEntity> findByEmployerId(Long employerId);
 }

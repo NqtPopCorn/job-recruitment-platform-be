@@ -4,10 +4,13 @@ import com.popcorn.jrp.domain.entity.EmployerEntity;
 import com.popcorn.jrp.domain.entity.EmployerImageEntity;
 import com.popcorn.jrp.domain.response.upload.UploadDataResponse;
 import com.popcorn.jrp.exception.NotFoundException; // Dùng exception nhất quán
+import com.popcorn.jrp.helper.FileHelper;
 import com.popcorn.jrp.repository.EmployerImageRepository;
 import com.popcorn.jrp.repository.EmployerRepository;
 import com.popcorn.jrp.service.CompanyUploadService;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CompanyUploadServiceImpl implements CompanyUploadService {
 
     private final EmployerRepository employerRepository;
@@ -35,8 +39,8 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
 
     @Autowired
     public CompanyUploadServiceImpl(EmployerRepository employerRepository,
-                                    EmployerImageRepository employerImageRepository,
-                                    @Value("${upload.path.company-images}") String companyPath) {
+            EmployerImageRepository employerImageRepository,
+            @Value("${upload.path.companies}") String companyPath) {
         this.employerRepository = employerRepository;
         this.employerImageRepository = employerImageRepository;
 
@@ -62,7 +66,7 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
     @Transactional(readOnly = true)
     public String getLogoUrl(Long companyId) {
         EmployerEntity employer = getEmployerById(companyId);
-        return buildFileUrl(PUBLIC_URL_PREFIX, employer.getLogo());
+        return employer.getLogo();
     }
 
     @Override
@@ -73,7 +77,7 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
         return employer.getImages().stream()
                 .map(image -> UploadDataResponse.builder()
                         .id(image.getId())
-                        .url(buildFileUrl(PUBLIC_URL_PREFIX, image.getFilename()))
+                        .filename(image.getFilename())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -91,20 +95,21 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
         }
 
         // Lưu file mới
-        String newFilename = storeFile(file, logoRootLocation);
+        String newFilename = FileHelper.storeFile(file, logoRootLocation);
 
         // Cập nhật entity
         employer.setLogo(newFilename);
         employerRepository.save(employer);
 
-        return buildFileUrl(PUBLIC_URL_PREFIX, newFilename);
+        // return buildFileUrl(PUBLIC_URL_PREFIX, newFilename);
+        return newFilename;
     }
 
     @Override
     @Transactional
     public UploadDataResponse uploadImage(Long companyId, MultipartFile file) {
         EmployerEntity employer = getEmployerById(companyId);
-        String filename = storeFile(file, imageRootLocation);
+        String filename = FileHelper.storeFile(file, imageRootLocation);
 
         EmployerImageEntity imageEntity = new EmployerImageEntity();
         imageEntity.setEmployer(employer);
@@ -113,7 +118,7 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
 
         return UploadDataResponse.builder()
                 .id(imageEntity.getId())
-                .url(buildFileUrl(PUBLIC_URL_PREFIX, filename))
+                .filename(filename)
                 .build();
     }
 
@@ -123,11 +128,11 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
     @Transactional
     public void deleteLogo(Long companyId) {
         EmployerEntity employer = getEmployerById(companyId);
-        String filename = employer.getLogo();
+        String logo = employer.getLogo();
 
-        if (filename != null && !filename.isEmpty()) {
-            deleteFile(filename, logoRootLocation);
-            employer.setLogo(null);
+        if (logo != null && !logo.isEmpty()) {
+            deleteFile(logo, logoRootLocation);
+            employer.setLogo("");
             employerRepository.save(employer);
         }
     }
@@ -135,8 +140,8 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
     @Override
     @Transactional
     public void deleteImageById(Long imageId) {
-        EmployerImageEntity imageEntity = getEmployerImageById(imageId);
-        deleteFile(imageEntity.getFilename(), imageRootLocation);
+        EmployerImageEntity imageEntity = this.getEmployerImageById(imageId);
+        FileHelper.deleteFile(imageEntity.getFilename(), imageRootLocation);
         employerImageRepository.delete(imageEntity);
     }
 
@@ -163,7 +168,7 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
      */
     private EmployerImageEntity getEmployerImageById(Long imageId) {
         return employerImageRepository.findById(imageId)
-                .orElseThrow(() -> new NotFoundException("EmployerImage with id " + imageId));
+                .orElseThrow(() -> new NotFoundException("EmployerImage with imageId " + imageId));
     }
 
     /**

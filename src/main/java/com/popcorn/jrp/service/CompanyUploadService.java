@@ -27,13 +27,14 @@ public interface CompanyUploadService {
      * @return Danh sách đường dẫn (URL) ảnh.
      */
     List<UploadDataResponse> getAllUploadedImage(Long companyId);
+    // List<String> getAllUploadedImage(Long companyId);
 
     /**
      * Upload logo mới cho công ty (thường là ghi đè hoặc cập nhật).
      * Tương ứng với: uploadAvatar(Long candidateId, MultipartFile file)
      *
      * @param companyId ID của công ty.
-     * @param file File logo tải lên.
+     * @param file      File logo tải lên.
      * @return Đường dẫn (URL) logo sau khi lưu.
      */
     String uploadLogo(Long companyId, MultipartFile file);
@@ -43,7 +44,7 @@ public interface CompanyUploadService {
      * Tương ứng với: uploadImage(Long candidateId, MultipartFile file)
      *
      * @param companyId ID của công ty.
-     * @param file File ảnh tải lên.
+     * @param file      File ảnh tải lên.
      * @return Đường dẫn (URL) ảnh sau khi lưu.
      */
     UploadDataResponse uploadImage(Long companyId, MultipartFile file);

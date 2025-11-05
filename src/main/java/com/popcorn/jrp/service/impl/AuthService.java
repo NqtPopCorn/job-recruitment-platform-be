@@ -36,7 +36,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequiredArgsConstructor
 public class AuthService implements com.popcorn.jrp.service.AuthService {
 
-    @Value("${jwt.token-expiration:1h}") // đọc từ application.properties, mặc định 1h
+    @Value("${jwt.token.expiration:1h}") // đọc từ application.properties, mặc định 1h
     private String jwtTokenExpiration;
 
     @Value("${role.candidate}")
