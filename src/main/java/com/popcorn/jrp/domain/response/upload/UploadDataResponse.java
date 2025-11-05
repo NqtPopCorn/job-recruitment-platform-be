@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UploadDataResponse {
     Long id;
-    String url;
+    String filename;
 }

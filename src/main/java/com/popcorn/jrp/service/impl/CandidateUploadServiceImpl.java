@@ -7,6 +7,7 @@ import com.popcorn.jrp.domain.mapper.ResumeMapper;
 import com.popcorn.jrp.domain.response.candidate.ResumeResponseDto;
 import com.popcorn.jrp.domain.response.upload.UploadDataResponse;
 import com.popcorn.jrp.exception.NotFoundException; // Import exception tùy chỉnh
+import com.popcorn.jrp.helper.FileHelper;
 import com.popcorn.jrp.repository.CandidateImageRepository;
 import com.popcorn.jrp.repository.CandidateRepository;
 import com.popcorn.jrp.repository.ResumeRepository;
@@ -43,12 +44,12 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
 
     @Autowired
     public CandidateUploadServiceImpl(CandidateRepository candidateRepository,
-                                      CandidateImageRepository candidateImageRepository,
-                                      ResumeRepository resumeRepository,
-                                      @Value("${upload.path.candidate-images}") String avatarPath,
-                                      @Value("${upload.path.candidate-images}") String imagePath,
-                                      @Value("${upload.path.resumes}") String resumePath,
-                                      ResumeMapper resumeMapper) {
+            CandidateImageRepository candidateImageRepository,
+            ResumeRepository resumeRepository,
+            @Value("${upload.path.candidates}") String avatarPath,
+            @Value("${upload.path.candidates}") String imagePath,
+            @Value("${upload.path.resumes}") String resumePath,
+            ResumeMapper resumeMapper) {
         this.candidateRepository = candidateRepository;
         this.candidateImageRepository = candidateImageRepository;
         this.resumeRepository = resumeRepository;
@@ -75,7 +76,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
     @Transactional(readOnly = true)
     public String getAvatarUrl(Long candidateId) {
         CandidateEntity candidate = getCandidateById(candidateId);
-        return buildFileUrl("images/candidates", candidate.getAvatar());
+        return candidate.getAvatar();
     }
 
     @Override
@@ -86,17 +87,9 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
         return candidate.getImages().stream()
                 .map(image -> UploadDataResponse.builder()
                         .id(image.getId())
-                        .url(buildFileUrl("images/candidates", image.getFilename()))
-                        .build())
+                        .filename(image.getFilename()).build())
                 .collect(Collectors.toList());
     }
-
-//    @Override
-//    @Transactional(readOnly = true)
-//    public String getResumeUrl(Long resumeId) {
-//        ResumeEntity resume = getResumeById(resumeId);
-//        return buildFileUrl("resumes", resume.getFilename());
-//    }
 
     // --- CÁC HÀM UPLOAD ---
 
@@ -107,24 +100,24 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
 
         // Xóa avatar cũ
         if (candidate.getAvatar() != null && !candidate.getAvatar().isEmpty()) {
-            deleteFile(candidate.getAvatar(), avatarRootLocation);
+            FileHelper.deleteFile(candidate.getAvatar(), avatarRootLocation);
         }
 
         // Lưu file mới
-        String newFilename = storeFile(file, avatarRootLocation);
+        String newFilename = FileHelper.storeFile(file, avatarRootLocation);
 
         // Cập nhật entity
         candidate.setAvatar(newFilename);
         candidateRepository.save(candidate);
 
-        return buildFileUrl("images/candidates", newFilename);
+        return newFilename;
     }
 
     @Override
     @Transactional
     public UploadDataResponse uploadImage(Long candidateId, MultipartFile file) {
         CandidateEntity candidate = getCandidateById(candidateId);
-        String filename = storeFile(file, imageRootLocation);
+        String filename = FileHelper.storeFile(file, imageRootLocation);
 
         CandidateImageEntity imageEntity = new CandidateImageEntity();
         imageEntity.setCandidate(candidate);
@@ -133,7 +126,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
 
         return UploadDataResponse.builder()
                 .id(imageEntity.getId())
-                .url(buildFileUrl("images/candidates", filename))
+                .filename(imageEntity.getFilename())
                 .build();
     }
 
@@ -141,7 +134,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
     @Transactional
     public ResumeResponseDto uploadResume(Long candidateId, MultipartFile file, Boolean status) {
         CandidateEntity candidate = getCandidateById(candidateId);
-        String filename = storeFile(file, resumeRootLocation);
+        String filename = FileHelper.storeFile(file, resumeRootLocation);
 
         ResumeEntity resumeEntity = new ResumeEntity();
         resumeEntity.setCandidate(candidate);
@@ -149,8 +142,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
         resumeEntity.setStatus(status);
         resumeRepository.save(resumeEntity);
 
-        var res = resumeMapper.toResponse(resumeEntity);
-        res.setUrl(buildFileUrl("resumes", filename));
+        ResumeResponseDto res = resumeMapper.toResponse(resumeEntity);
         return res;
     }
 
@@ -163,7 +155,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
         String filename = candidate.getAvatar();
 
         if (filename != null && !filename.isEmpty()) {
-            deleteFile(filename, avatarRootLocation);
+            FileHelper.deleteFile(filename, avatarRootLocation);
             candidate.setAvatar(null);
             candidateRepository.save(candidate);
         }
@@ -171,9 +163,9 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
 
     @Override
     @Transactional
-    public void deleteImage(Long imageId) {
+    public void deleteImageById(Long imageId) {
         CandidateImageEntity imageEntity = getCandidateImageById(imageId);
-        deleteFile(imageEntity.getFilename(), imageRootLocation);
+        FileHelper.deleteFile(imageEntity.getFilename(), imageRootLocation);
         candidateImageRepository.delete(imageEntity);
     }
 
@@ -181,10 +173,9 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
     @Transactional
     public void deleteResume(Long resumeId) {
         ResumeEntity resumeEntity = getResumeById(resumeId);
-        deleteFile(resumeEntity.getFileName(), resumeRootLocation);
+        FileHelper.deleteFile(resumeEntity.getFileName(), resumeRootLocation);
         resumeRepository.delete(resumeEntity);
     }
-
 
     // --- CÁC HÀM HELPER PRIVATE ---
 
@@ -209,40 +200,7 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
      */
     private CandidateImageEntity getCandidateImageById(Long imageId) {
         return candidateImageRepository.findById(imageId)
-                .orElseThrow(() -> new NotFoundException("CandidateImage with id " + imageId));
-    }
-
-    /**
-     * Lưu file vào một thư mục (location) với tên file duy nhất (UUID).
-     */
-    private String storeFile(MultipartFile file, Path location) {
-        if (file == null || file.isEmpty()) {
-            throw new RuntimeException("Failed to store empty file.");
-        }
-
-        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
-        String extension = StringUtils.getFilenameExtension(originalFilename);
-        String uniqueFilename = UUID.randomUUID() + "." + extension;
-
-        try (InputStream inputStream = file.getInputStream()) {
-            Path targetLocation = location.resolve(uniqueFilename);
-            Files.copy(inputStream, targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            return uniqueFilename;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file " + uniqueFilename, e);
-        }
-    }
-
-    /**
-     * Xóa file vật lý khỏi hệ thống.
-     */
-    private void deleteFile(String filename, Path location) {
-        try {
-            Path file = location.resolve(filename);
-            Files.deleteIfExists(file);
-        } catch (IOException e) {
-            System.err.println("Failed to delete file: " + filename + " from " + location);
-        }
+                .orElseThrow(() -> new NotFoundException("CandidateImage with imageId " + imageId));
     }
 
     /**
