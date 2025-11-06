@@ -3,7 +3,10 @@ package com.popcorn.jrp.domain.response.candidate;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import com.popcorn.jrp.domain.response.common.SocialMediaDto;
 
 @Data
 @NoArgsConstructor
@@ -19,7 +22,8 @@ public class CandidateResponse {
     private List<String> tags; // skills
     private String category; // industry
     private String gender;
-    private String createdAt;
-    private Boolean status;
+    private String country;
+    private String city;
+    private LocalDateTime createdAt;
+    private boolean status;
 }
-

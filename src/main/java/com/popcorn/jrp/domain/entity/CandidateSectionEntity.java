@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+/**
+ * Candidate Experiences and Achievement
+ */
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,10 +30,10 @@ public class CandidateSectionEntity extends BaseEntity {
 
     private String title;
     private String organization;
+    private String industry;
     private LocalDate startTime;
     private LocalDate endTime;
 
     @Column(columnDefinition = "TEXT")
     private String text;
-
 }

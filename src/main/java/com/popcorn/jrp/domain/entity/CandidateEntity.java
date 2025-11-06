@@ -1,22 +1,30 @@
 package com.popcorn.jrp.domain.entity;
-import com.popcorn.jrp.helper.ListStringConverter;
+
+import com.popcorn.jrp.helper.JsonListStringConverter;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "candidates")
 @Getter
 @Setter
 public class CandidateEntity extends BaseEntity {
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
     private UserEntity user;
 
     private String name;
@@ -29,8 +37,9 @@ public class CandidateEntity extends BaseEntity {
     private String description;
 
     private Integer experience;
-    private String currentSalary;
-    private String expectedSalary;
+    private BigDecimal currentSalary;
+    private BigDecimal expectedSalary;
+    private String currency;
     private String gender;
     private String email;
     private String phone;
@@ -38,20 +47,30 @@ public class CandidateEntity extends BaseEntity {
     private String city;
     private String country;
 
-    @Convert(converter = ListStringConverter.class)
-    private List<String> languages; // "English, Japanese".split
-    @Convert(converter = ListStringConverter.class)
-    private List<String> skills; // "Java, React, Nodejs".split
+    @Convert(converter = JsonListStringConverter.class)
+    @Column(columnDefinition = "JSON")
+    private List<String> languages = new ArrayList<>(); // JSON
+
+    @Convert(converter = JsonListStringConverter.class)
+    @Column(columnDefinition = "JSON")
+    private List<String> skills = new ArrayList<>(); // JSON
 
     private String educationLevel;
-    // For soft delete
+
     private boolean status;
 
-    private LocalDateTime createdAt;
-    @PrePersist
-    public void prePersist(){
-        createdAt = LocalDateTime.now();
+    @Column(columnDefinition = "JSON")
+    private String socialMedias = "[]";
+
+    @OneToMany(mappedBy = "candidate")
+    private List<CandidateImageEntity> images;
+
+    @OneToMany(mappedBy = "candidate")
+    private List<ResumeEntity> resumes;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        this.status = true;
     }
-
 }
-

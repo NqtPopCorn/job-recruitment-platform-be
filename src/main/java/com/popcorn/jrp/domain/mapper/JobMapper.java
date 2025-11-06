@@ -1,100 +1,107 @@
 package com.popcorn.jrp.domain.mapper;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.popcorn.jrp.domain.entity.EmployerEntity;
 import com.popcorn.jrp.domain.entity.JobEntity;
-import com.popcorn.jrp.domain.entity.JobTypeEntity;
-import com.popcorn.jrp.domain.entity.SkillEntity;
-import com.popcorn.jrp.domain.response.job.JobResponse;
-import com.popcorn.jrp.domain.response.job.SalaryResponse;
-import com.popcorn.jrp.domain.response.job.WorkTimeResponse;
+import com.popcorn.jrp.helper.JsonMapperHelper;
+import com.popcorn.jrp.domain.request.job.CreateJobDto;
+import com.popcorn.jrp.domain.request.job.UpdateJobDto;
+import com.popcorn.jrp.domain.response.job.CompanyInJobDto;
+import com.popcorn.jrp.domain.response.job.JobDashboardDto;
+import com.popcorn.jrp.domain.response.job.JobDetailDto;
+import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
-public interface JobMapper extends PageMapper<JobResponse> {
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-    @Mapping(target = "jobTitle", source = "name")
-    @Mapping(target = "responsibilities", expression = "java(convertJsonToList(jobEntity.getResponsibilities()))")
-    @Mapping(target = "skillAndExperience", expression = "java(convertJsonToList(jobEntity.getSkillAndExperiences()))")
-    @Mapping(target = "salary", expression = "java(toSalaryResponse(jobEntity))")
-    @Mapping(target = "workTime", expression = "java(toWorkTimeResponse(jobEntity))")
-    @Mapping(target = "jobType", expression = "java(toJobTypeList(jobEntity.getJobTypes()))")
-    @Mapping(target = "skills", expression = "java(toSkillList(jobEntity.getSkills()))")
-    @Mapping(target = "datePosted", expression = "java(toLocalDate(jobEntity.getCreatedAt()))")
-    @Mapping(target = "expireDate", source = "expirationDate")
-    JobResponse toResponse(JobEntity jobEntity);
+@Mapper(componentModel = "spring", uses = { JsonMapperHelper.class })
+public interface JobMapper extends PageMapper {
 
-    // ✅ Thêm default method để hỗ trợ Page mapping
-    default Page<JobResponse> toPageResponse(Page<JobEntity> entities) {
-        return entities.map(entity -> toResponse(entity));
+    // Định dạng ngày theo "d/M/yyyy" (ví dụ: 6/8/2025)
+    DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("d/M/yyyy");
+
+    // --- Entity to DTO ---
+
+    @Mapping(target = "jobType", ignore = true) // !!!
+    @Mapping(source = "id", target = "id", qualifiedByName = "longToString")
+    @Mapping(source = "employer.logo", target = "logo") // Lấy logo từ Employer
+    @Mapping(source = "employer", target = "company") // Map lồng ghép
+    @Mapping(source = "responsibilities", target = "responsibilities")
+    @Mapping(source = "skillAndExperiences", target = "skillAndExperience")
+    @Mapping(source = "expirationDate", target = "expireDate", qualifiedByName = "localDateToDateString")
+    @Mapping(target = "salary", source = ".")
+    @Mapping(target = "salary.min", source = "minSalary")
+    @Mapping(target = "salary.max", source = "maxSalary")
+    @Mapping(target = "workTime.from", source = "workTimeFrom")
+    @Mapping(target = "workTime.to", source = "workTimeTo")
+    JobDetailDto toDetailDto(JobEntity entity);
+
+    @InheritConfiguration(name = "toDetailDto")
+    @Mapping(target = "applications", expression = "java(0)") // Service sẽ tính toán
+    JobDashboardDto toDashboardDto(JobEntity entity);
+
+    List<JobDetailDto> toDetailDtoList(List<JobEntity> entities);
+
+    List<JobDashboardDto> toDashboardDtoList(List<JobEntity> entities);
+
+    // Helper: Mapping EmployerEntity -> CompanyInJobDto (lồng nhau)
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "socialMedias", target = "socialMedias", qualifiedByName = "jsonToSocialMediaList")
+    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "localDateTimeToInstant")
+    @Mapping(source = "updatedAt", target = "updatedAt", qualifiedByName = "localDateTimeToInstant")
+    CompanyInJobDto employerToCompanyInJobDto(EmployerEntity employer);
+
+    // --- DTO to Entity ---
+    /**
+     * NEED UPDATE !!!!!!!!!!!!
+     */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "skills", source = "skills", ignore = true)
+    @Mapping(target = "responsibilities", source = "responsibilities", ignore = true)
+    @Mapping(target = "skillAndExperiences", source = "skillAndExperience", ignore = true)
+    @Mapping(target = "jobTypes", source = "jobType", ignore = true)
+    JobEntity toEntity(CreateJobDto dto);
+
+    /**
+     * NEED UPDATE !!!!!!!!!!!!
+     */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "employer", ignore = true)
+    @Mapping(target = "skills", source = "skills", ignore = true)
+    @Mapping(target = "responsibilities", source = "responsibilities", ignore = true)
+    @Mapping(target = "skillAndExperiences", source = "skillAndExperience", ignore = true)
+    void updateEntityFromDto(UpdateJobDto dto, @MappingTarget JobEntity entity);
+
+    // --- Helper Methods (Qualified By Name) ---
+
+    @Named("longToString")
+    default String longToString(Long id) {
+        return id != null ? String.valueOf(id) : null;
     }
 
-    // ✅ Hàm hỗ trợ
-    default List<String> convertJsonToList(String json) {
-        if (json == null || json.isEmpty())
-            return Collections.emptyList();
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(json, new TypeReference<List<String>>() {
-            });
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
-    }
-
-    // 🔹 Map JobTypeEntity → List<String>
-    default List<String> toJobTypeList(List<JobTypeEntity> jobTypes) {
-        if (jobTypes == null)
-            return Collections.emptyList();
-        return jobTypes.stream()
-                .map(JobTypeEntity::getName)
-                .collect(Collectors.toList());
-    }
-
-    // 🔹 Map SkillEntity → List<String>
-    default List<String> toSkillList(List<SkillEntity> skills) {
-        if (skills == null)
-            return Collections.emptyList();
-        return skills.stream()
-                .map(SkillEntity::getName)
-                .collect(Collectors.toList());
-    }
-
-    // 🔹 Combine salary fields
-    default SalaryResponse toSalaryResponse(JobEntity entity) {
-        if (entity.getMinSalary() == null && entity.getMaxSalary() == null)
+    @Named("localDateTimeToDateString")
+    default String localDateTimeToDateString(LocalDateTime dateTime) {
+        if (dateTime == null)
             return null;
-        return SalaryResponse.builder()
-                .min(entity.getMinSalary())
-                .max(entity.getMaxSalary())
-                .currency(entity.getCurrency())
-                .unit(entity.getUnit())
-                .negotiable(entity.getNegotiable())
-                .build();
+        return dateTime.format(DATE_FORMATTER);
     }
 
-    // 🔹 Combine workTimeFrom / workTimeTo
-    default WorkTimeResponse toWorkTimeResponse(JobEntity entity) {
-        if (entity.getWorkTimeFrom() == null && entity.getWorkTimeTo() == null)
+    @Named("localDateToDateString")
+    default String localDateToDateString(LocalDate date) {
+        if (date == null)
             return null;
-        return WorkTimeResponse.builder()
-                .from(entity.getWorkTimeFrom())
-                .to(entity.getWorkTimeTo())
-                .build();
+        return date.format(DATE_FORMATTER);
     }
 
-    // 🔹 Convert LocalDateTime → LocalDate
-    default LocalDate toLocalDate(java.time.LocalDateTime dateTime) {
-        return dateTime != null ? dateTime.toLocalDate() : null;
+    @Named("localDateTimeToInstant")
+    default Instant localDateTimeToInstant(LocalDateTime localDateTime) {
+        if (localDateTime == null)
+            return null;
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
     }
 }

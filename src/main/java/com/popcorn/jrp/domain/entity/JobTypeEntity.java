@@ -21,7 +21,8 @@ public class JobTypeEntity extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    // Quan hệ ngược (tùy chọn)
-    // @ManyToMany(mappedBy = "jobTypes")
-    // private List<JobEntity> jobs;
+    @Override
+    public String toString() {
+        return name;
+    }
 }

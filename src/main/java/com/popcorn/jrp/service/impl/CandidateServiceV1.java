@@ -16,6 +16,7 @@ import com.popcorn.jrp.repository.spec.CandidateSpecification;
 import com.popcorn.jrp.service.CandidateService;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -32,42 +35,39 @@ import java.util.List;
 public class CandidateServiceV1 implements CandidateService {
 
     CandidateRepository candidateRepository;
+    @Qualifier("candidateMapperImpl")
     CandidateMapper mapper;
+    CandidateSpecification candidateSpecification;
 
     @Override
     public ApiPageResponse<CandidateResponse> getCandidates(CandidateSearchRequest request, Pageable pageable) {
-        Specification<CandidateEntity> spec = CandidateSpecification.getPublicSpecification(request);
+        Specification<CandidateEntity> spec = candidateSpecification.getPublicSpecification(request);
         try {
-            var page = candidateRepository
-                    .findAll(spec, pageable);
+            var page = candidateRepository.findAll(spec, pageable);
             return mapper.toApiPageResponse(page.map(mapper::toResponse));
         } catch (Exception e) {
-            throw new BadRequestException("Page request error: "+e.getMessage());
+            throw new BadRequestException("Page request error: " + e.getMessage());
         }
     }
 
     @Override
     public CandidateDetailsResponse getCandidateById(Long id) {
-        var found = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity found = candidateRepository.findByIdAndStatusTrueAndIsDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         return mapper.toDetailsResponse(found);
     }
 
     @Override
     public CandidateDetailsResponse getCandidateByUserId(Long userId) {
-        var found = candidateRepository.getCandidateByUserId(userId).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity found = candidateRepository.findByUserIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         return mapper.toDetailsResponse(found);
     }
 
     @Override
-    public CandidateDetailsResponse createCandidate(CreateCandidateDto dto) {
-        CandidateEntity candidateEntity = mapper.createEntity(dto);
-        candidateRepository.save(candidateEntity);
-        return mapper.toDetailsResponse(candidateEntity);
-    }
-
-    @Override
     public CandidateDetailsResponse updateCandidate(Long id, UpdateCandidateDto dto) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         mapper.updateEntity(candidateEntity, dto);
         candidateRepository.save(candidateEntity);
         return mapper.toDetailsResponse(candidateEntity);
@@ -75,23 +75,26 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public SoftDeleteCandidateResponse softDeleteCandidate(Long id) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateEntity.setStatus(false);
+        candidateEntity.setDeleted(true);
         candidateRepository.save(candidateEntity);
         var res = mapper.toSoftDeleteResponse(candidateEntity);
-        res.setUpdatedAt(LocalDateTime.now().toString());
+        res.setDeletedAt(LocalDateTime.now());
         return res;
     }
 
     @Override
     public void deleteCandidate(Long id) {
-        CandidateEntity candidateEntity = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
+        CandidateEntity candidateEntity = candidateRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateRepository.delete(candidateEntity);
     }
 
     @Override
     @Cacheable("industryList")
-//    @CacheEvict(cacheNames = "industryList") //delete cache
+    // @CacheEvict(cacheNames = "industryList") //delete cache
     public List<String> getIndustryList() {
         return candidateRepository.findAll().stream()
                 .map(CandidateEntity::getIndustry)
@@ -100,7 +103,7 @@ public class CandidateServiceV1 implements CandidateService {
     }
 
     @Override
-    @Cacheable("skillList")
+    @Cacheable("skillList") // just for demo, cache without TTL
     public List<String> getSkillList() {
         return candidateRepository.findAll().stream()
                 .flatMap(c -> c.getSkills().stream())
