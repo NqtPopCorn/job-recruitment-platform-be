@@ -15,88 +15,88 @@ import java.util.List;
 @Setter
 public class JobEntity extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employer_id", nullable = true)
-    private EmployerEntity employer;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "employer_id", nullable = true)
+        private EmployerEntity employer;
 
-    @Column(columnDefinition = "TEXT")
-    private String name;
+        @Column(columnDefinition = "TEXT")
+        private String name;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+        @Column(columnDefinition = "TEXT")
+        private String description;
 
-    private String level;
+        private String level;
 
-    @Column(columnDefinition = "JSON")
-    private String responsibilities; // mảng string JSON
+        @Column(columnDefinition = "JSON")
+        private String responsibilities; // mảng string JSON
 
-    @Column(name = "skill_and_experiences", columnDefinition = "JSON")
-    private String skillAndExperiences; // mảng string JSON
+        @Column(name = "skill_and_experiences", columnDefinition = "JSON")
+        private String skillAndExperiences; // mảng string JSON
 
-    private Integer experience;
+        private Integer experience;
 
-    @Column(precision = 12, scale = 2)
-    private BigDecimal minSalary;
+        @Column(precision = 12, scale = 2)
+        private BigDecimal minSalary;
 
-    @Column(precision = 12, scale = 2)
-    private BigDecimal maxSalary;
+        @Column(precision = 12, scale = 2)
+        private BigDecimal maxSalary;
 
-    private String unit;
+        private String unit;
 
-    private String currency;
+        private String currency;
 
-    private Boolean negotiable;
+        private Boolean negotiable;
 
-    private String workTimeFrom;
-    private String workTimeTo;
+        private String workTimeFrom;
+        private String workTimeTo;
 
-    private String industry;
+        private String industry;
 
-    private Integer quantity;
+        private Integer quantity;
 
-    private String country;
-    private String city;
-    private String location;
-    private LocalDate expirationDate;
+        private String country;
+        private String city;
+        private String location;
+        private LocalDate expirationDate;
 
-    @Column(nullable = false)
-    private boolean status;
+        @Column(nullable = false)
+        private boolean status;
 
-    @Column(nullable = false)
-    private boolean isDeleted;
+        @Column(nullable = false)
+        private boolean isDeleted;
 
-    @ManyToMany
-    @JoinTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<SkillEntity> skills;
+        @ManyToMany
+        @JoinTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
+        private List<SkillEntity> skills;
 
-    @ManyToMany
-    @JoinTable(name = "job_job_type", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "job_type_id"))
-    private List<JobTypeEntity> jobTypes;
+        @ManyToMany
+        @JoinTable(name = "job_job_type", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "job_type_id"))
+        private List<JobTypeEntity> jobTypes;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private LocalDateTime deletedAt;
 
-    @Column(columnDefinition = "TEXT")
-    private String createdBy; // JSON {userId, email}
+        @Column(columnDefinition = "TEXT")
+        private String createdBy; // JSON {userId, email}
 
-    @Column(columnDefinition = "TEXT")
-    private String updatedBy;
+        @Column(columnDefinition = "TEXT")
+        private String updatedBy;
 
-    @Column(columnDefinition = "TEXT")
-    private String deletedBy;
+        @Column(columnDefinition = "TEXT")
+        private String deletedBy;
 
-    @PrePersist
-    public void prePersist() {
-        if (!this.status)
-            this.status = true;
-        if (this.isDeleted)
-            this.isDeleted = false;
-        this.createdAt = LocalDateTime.now();
-    }
+        @PrePersist
+        public void prePersist() {
+                if (!this.status)
+                        this.status = true;
+                if (this.isDeleted)
+                        this.isDeleted = false;
+                this.createdAt = LocalDateTime.now();
+        }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+        @PreUpdate
+        protected void onUpdate() {
+                this.updatedAt = LocalDateTime.now();
+        }
 }
