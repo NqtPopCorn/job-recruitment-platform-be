@@ -26,7 +26,6 @@ public class ApplicationEntity extends BaseEntity {
     private Status status = Status.PENDING;
 
     private LocalDateTime appliedAt;
-    private LocalDateTime updatedAt;
 
     public enum Status {
         PENDING, REVIEWED, ACCEPTED, REJECTED

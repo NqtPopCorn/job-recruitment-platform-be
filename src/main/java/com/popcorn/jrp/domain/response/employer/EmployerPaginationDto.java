@@ -18,5 +18,4 @@ public class EmployerPaginationDto {
     private int jobNumber;
     private String logo;
     private boolean status;
-    // private List<String> socialMedias;
 }

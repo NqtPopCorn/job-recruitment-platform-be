@@ -1,22 +1,23 @@
 package com.popcorn.jrp.controller;
 
 import com.popcorn.jrp.domain.request.job.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.popcorn.jrp.domain.response.ApiDataResponse;
+import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.ApiResultsResponse;
 import com.popcorn.jrp.domain.response.job.JobDashboardDto;
 import com.popcorn.jrp.domain.response.job.JobDetailDto;
+import com.popcorn.jrp.domain.response.job.JobResponseDto;
 import com.popcorn.jrp.service.JobService;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,29 +34,11 @@ public class JobController {
          * GET /api/v1/job
          */
         @GetMapping
-        public @ResponseBody ApiPageResponse<JobDetailDto> getJobsPaginated(
-                        @Nullable Pageable pageable,
-                        @Nullable JobQueryParameters queryParams) {
-                ApiPageResponse<JobDetailDto> body = jobService.getJobsPaginated(queryParams, pageable);
-
-                // Gán message và status code theo chuẩn
-                body.setMessage("Lấy danh sách công việc phân trang thành công!");
-                body.setStatusCode(200);
-                return body;
-        }
-
-        /**
-         * 2. GET LIST JOB FOR CLIENT (Non-paginated)
-         * GET /api/v1/job/get-list
-         */
-        @GetMapping("/get-list")
-        public ResponseEntity<ApiDataResponse<List<JobDetailDto>>> getAllJobs() {
-                List<JobDetailDto> data = jobService.getAllJobs();
-                return ResponseEntity.ok(ApiDataResponse.<List<JobDetailDto>>builder()
-                                .data(data)
-                                .message("Lấy danh sách công việc thành công!")
-                                .statusCode(200)
-                                .build());
+        public ResponseEntity<ApiPageResponse<JobResponseDto>> getJobsPaginated(
+                        @PageableDefault(size = 10, page = 1, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                        @ModelAttribute JobQueryParameters queryParams) {
+                ApiPageResponse<JobResponseDto> body = jobService.getJobsPaginated(queryParams, pageable);
+                return ResponseEntity.ok(body);
         }
 
         /**
@@ -67,9 +50,9 @@ public class JobController {
                         @PathVariable Long id) {
                 JobDetailDto data = jobService.getJobById(id);
                 return ResponseEntity.ok(ApiDataResponse.<JobDetailDto>builder()
-                                .data(data)
+                                .statusCode(HttpStatus.OK.value())
                                 .message("Lấy thông tin chi tiết công việc thành công!")
-                                .statusCode(200)
+                                .data(data)
                                 .build());
         }
 
@@ -78,12 +61,12 @@ public class JobController {
          * GET /api/v1/job/category-list
          */
         @GetMapping("/category-list")
-        public ResponseEntity<ApiDataResponse<List<String>>> getJobIndustryList() {
+        public ResponseEntity<ApiResultsResponse<String>> getJobIndustryList() {
                 List<String> data = jobService.getJobIndustryList();
-                return ResponseEntity.ok(ApiDataResponse.<List<String>>builder()
-                                .data(data)
+                return ResponseEntity.ok(ApiResultsResponse.<String>builder()
+                                .statusCode(HttpStatus.OK.value())
                                 .message("Lấy danh sách danh mục thành công!")
-                                .statusCode(200)
+                                .results(data)
                                 .build());
         }
 
@@ -92,13 +75,13 @@ public class JobController {
          * GET /api/v1/job/category-list/company/:id
          */
         @GetMapping("/category-list/company/{id}")
-        public ResponseEntity<ApiDataResponse<List<String>>> getCompanyIndustryList(
+        public ResponseEntity<ApiResultsResponse<String>> getCompanyIndustryList(
                         @PathVariable Long id) {
-                List<String> data = jobService.getCompanyIndustryList(id);
-                return ResponseEntity.ok(ApiDataResponse.<List<String>>builder()
-                                .data(data)
+                List<String> data = jobService.getCompanyIndustryListByCompanyId(id);
+                return ResponseEntity.ok(ApiResultsResponse.<String>builder()
+                                .statusCode(HttpStatus.OK.value())
                                 .message("Lấy danh sách danh mục công ty thành công!")
-                                .statusCode(200)
+                                .results(data)
                                 .build());
         }
 
@@ -107,12 +90,12 @@ public class JobController {
          * GET /api/v1/job/skill-list
          */
         @GetMapping("/skill-list")
-        public ResponseEntity<ApiDataResponse<List<String>>> getSkillList() {
+        public ResponseEntity<ApiResultsResponse<String>> getSkillList() {
                 List<String> data = jobService.getSkillList();
-                return ResponseEntity.ok(ApiDataResponse.<List<String>>builder()
-                                .data(data)
+                return ResponseEntity.ok(ApiResultsResponse.<String>builder()
+                                .statusCode(HttpStatus.OK.value())
                                 .message("Lấy danh sách kỹ năng thành công!")
-                                .statusCode(200)
+                                .results(data)
                                 .build());
         }
 
@@ -121,12 +104,12 @@ public class JobController {
          * GET /api/v1/job/city-list
          */
         @GetMapping("/city-list")
-        public ResponseEntity<ApiDataResponse<List<String>>> getCityList() {
+        public ResponseEntity<ApiResultsResponse<String>> getCityList() {
                 List<String> data = jobService.getCityList();
-                return ResponseEntity.ok(ApiDataResponse.<List<String>>builder()
-                                .data(data)
+                return ResponseEntity.ok(ApiResultsResponse.<String>builder()
+                                .statusCode(HttpStatus.OK.value())
                                 .message("Lấy danh sách thành phố thành công!")
-                                .statusCode(200)
+                                .results(data)
                                 .build());
         }
 
@@ -136,11 +119,11 @@ public class JobController {
          */
         @GetMapping("/max-salary")
         public ResponseEntity<ApiDataResponse<BigDecimal>> getMaxSalary(@RequestParam("currency") String currency) {
-                var data = jobService.getMaxSalaryWithCurrency(currency);
+                BigDecimal data = jobService.getMaxSalaryWithCurrency(currency);
                 return ResponseEntity.ok(ApiDataResponse.<BigDecimal>builder()
-                                .data(data)
+                                .statusCode(HttpStatus.OK.value())
                                 .message("Lấy mức lương cao nhất thành công!")
-                                .statusCode(200)
+                                .data(data)
                                 .build());
         }
 
@@ -149,14 +132,14 @@ public class JobController {
          * GET /api/v1/job/related-jobs/:id
          */
         @GetMapping("/related-jobs/{id}")
-        public ResponseEntity<ApiDataResponse<List<JobDetailDto>>> getRelatedJobs(
+        public ResponseEntity<ApiResultsResponse<JobDetailDto>> getRelatedJobs(
                         @PathVariable Long id,
                         @Valid @Nullable RelatedJobQueryParameters queryParams) {
                 List<JobDetailDto> data = jobService.getRelatedJobs(id, queryParams);
-                return ResponseEntity.ok(ApiDataResponse.<List<JobDetailDto>>builder()
-                                .data(data)
+                return ResponseEntity.ok(ApiResultsResponse.<JobDetailDto>builder()
+                                .statusCode(HttpStatus.OK.value())
                                 .message("Lấy danh sách công việc liên quan thành công!")
-                                .statusCode(200)
+                                .results(data)
                                 .build());
         }
 
@@ -164,12 +147,13 @@ public class JobController {
          * 10. GET List Job Dashboard of Company by ID Pageable
          * GET /api/v1/job/get-list/dashboard/company/:id
          */
-        @GetMapping("/get-list/dashboard/company/{id}")
+        @GetMapping("/dashboard/company/{id}")
         public ResponseEntity<ApiPageResponse<JobDashboardDto>> getJobsForDashboard(
                         @PathVariable Long id,
-                        @RequestBody EmployerJobQueryDto params) {
-                var res = jobService.getJobsForDashboard(id, params);
-                res.setStatusCode(200);
+                        @Nullable Pageable pageable,
+                        @Nullable EmployerJobQueryDto params) {
+                ApiPageResponse<JobDashboardDto> res = jobService.getJobsForDashboard(id, pageable, params);
+                res.setStatusCode(HttpStatus.OK.value());
                 res.setMessage("Get paginated list of dashboard successfully!");
                 return ResponseEntity.ok(res);
         }
@@ -183,9 +167,9 @@ public class JobController {
                         @Valid @RequestBody CreateJobDto createDto) {
                 JobDetailDto data = jobService.createJob(createDto);
                 return ResponseEntity.status(HttpStatus.CREATED).body(ApiDataResponse.<JobDetailDto>builder()
-                                .data(data)
-                                .message("Tạo công việc mới thành công!")
                                 .statusCode(HttpStatus.CREATED.value())
+                                .message("Tạo công việc mới thành công!")
+                                .data(data)
                                 .build());
         }
 
@@ -194,14 +178,26 @@ public class JobController {
          * PATCH /api/v1/job/:id
          */
         @PatchMapping("/{id}")
+        public ResponseEntity<ApiDataResponse<JobDetailDto>> updatePartialJob(
+                        @PathVariable Long id,
+                        @Valid @RequestBody UpdateJobDto updateDto) {
+                JobDetailDto data = jobService.updatePartialJob(id, updateDto);
+                return ResponseEntity.ok(ApiDataResponse.<JobDetailDto>builder()
+                                .statusCode(HttpStatus.OK.value())
+                                .message("Cập nhật công việc thành công!")
+                                .data(data)
+                                .build());
+        }
+
+        @PutMapping("/{id}")
         public ResponseEntity<ApiDataResponse<JobDetailDto>> updateJob(
                         @PathVariable Long id,
                         @Valid @RequestBody UpdateJobDto updateDto) {
                 JobDetailDto data = jobService.updateJob(id, updateDto);
                 return ResponseEntity.ok(ApiDataResponse.<JobDetailDto>builder()
-                                .data(data)
+                                .statusCode(HttpStatus.OK.value())
                                 .message("Cập nhật công việc thành công!")
-                                .statusCode(200)
+                                .data(data)
                                 .build());
         }
 
@@ -210,13 +206,12 @@ public class JobController {
          * DELETE /api/v1/job/:id
          */
         @DeleteMapping("/{id}")
-        public ResponseEntity<ApiDataResponse<Object>> softDeleteJob(
+        public ResponseEntity<ApiNoDataResponse> softDeleteJob(
                         @PathVariable Long id) {
                 jobService.softDeleteJob(id);
-                return ResponseEntity.ok(ApiDataResponse.builder()
-                                .data(null)
-                                .message("Xóa mềm công việc thành công!")
+                return ResponseEntity.ok(ApiNoDataResponse.builder()
                                 .statusCode(200)
+                                .message("Xóa mềm công việc thành công!")
                                 .build());
         }
 }

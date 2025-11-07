@@ -27,9 +27,6 @@ public class JobSalaryDto {
     @NotBlank(message = "Đơn vị tiền tệ (currency) không được để trống")
     private String currency; // "VND", "USD"
 
-    @NotBlank(message = "Đơn vị tính lương (unit) không được để trống")
-    private String unit; // "month", "hour"
-
     @NotNull(message = "Trường thỏa thuận (negotiable) không được để trống")
     private Boolean negotiable;
 }

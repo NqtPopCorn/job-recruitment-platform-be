@@ -26,8 +26,11 @@ public class JobEntity extends BaseEntity {
         @JoinColumn(name = "employer_id", nullable = true)
         private EmployerEntity employer;
 
+        @OneToMany(mappedBy = "job")
+        private List<ApplicationEntity> applications;
+
         @Column(columnDefinition = "TEXT")
-        private String name;
+        private String title;
 
         @Column(columnDefinition = "TEXT")
         private String description;
@@ -42,7 +45,7 @@ public class JobEntity extends BaseEntity {
         @Convert(converter = JsonListStringConverter.class)
         private List<String> skillAndExperiences; // JSON
 
-        private Integer experience;
+        private int experience;
 
         @Column(precision = 12, scale = 2)
         private BigDecimal minSalary;
@@ -55,30 +58,30 @@ public class JobEntity extends BaseEntity {
         private String workTimeTo;
 
         private String industry;
-        private Integer quantity;
+        private int quantity;
         private String country;
         private String city;
         private String location;
-        private LocalDate expirationDate;
+        private LocalDateTime expirationDate;
 
         @Column(nullable = false)
-        private boolean status;
+        private Boolean status;
 
-        @ManyToMany
-        @JoinTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
-        private List<SkillEntity> skills;
+        @Convert(converter = JsonListStringConverter.class)
+        @Column(columnDefinition = "JSON")
+        private List<String> skills;
 
-        @ManyToMany
-        @JoinTable(name = "job_job_type", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "job_type_id"))
-        private List<JobTypeEntity> jobTypes;
+        @Convert(converter = JsonListStringConverter.class)
+        @Column(columnDefinition = "JSON")
+        private List<String> jobTypes;
 
-        @Column(columnDefinition = "TEXT")
+        @Column(columnDefinition = "JSON")
         private String createdBy; // JSON {userId, email}
 
-        @Column(columnDefinition = "TEXT")
+        @Column(columnDefinition = "JSON")
         private String updatedBy;
 
-        @Column(columnDefinition = "TEXT")
+        @Column(columnDefinition = "JSON")
         private String deletedBy;
 
 }

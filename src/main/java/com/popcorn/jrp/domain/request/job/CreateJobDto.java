@@ -21,9 +21,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateJobDto {
 
-    @NotBlank(message = "Tên công việc (name) không được để trống")
+    @NotBlank(message = "Tên công việc không được để trống")
     @Size(max = 100, message = "Tên công việc không được vượt quá 100 ký tự")
-    private String name;
+    private String title;
 
     @NotBlank(message = "Company ID không được để trống")
     private String companyId;
@@ -35,7 +35,7 @@ public class CreateJobDto {
     private List<String> responsibilities;
 
     @NotEmpty(message = "Kỹ năng và kinh nghiệm (skillAndExperience) không được để trống")
-    private List<String> skillAndExperience;
+    private List<String> skillAndExperiences;
 
     @NotNull(message = "Số năm kinh nghiệm (experience) không được để trống")
     @Min(value = 0, message = "Số năm kinh nghiệm phải lớn hơn hoặc bằng 0")
@@ -66,7 +66,7 @@ public class CreateJobDto {
     private String description;
 
     @Valid // Thêm @Valid để kiểm tra các đối tượng lồng nhau
-    private List<JobTypeDto> jobType;
+    private List<String> jobTypes;
 
     @Valid // Thêm @Valid để kiểm tra đối tượng lồng nhau
     private JobSalaryDto salary;
