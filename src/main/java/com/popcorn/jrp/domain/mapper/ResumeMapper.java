@@ -9,7 +9,6 @@ import org.mapstruct.*;
 public interface ResumeMapper {
 
     @Mapping(target = "candidateId", source = "candidate.id")
-    @Mapping(target = "url", source = "fileName", qualifiedByName = "buildUrl")
     ResumeResponseDto toResponse(ResumeEntity resumeEntity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
