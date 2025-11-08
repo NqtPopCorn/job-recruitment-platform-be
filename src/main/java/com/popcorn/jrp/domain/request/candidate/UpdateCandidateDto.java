@@ -5,6 +5,8 @@ import com.popcorn.jrp.domain.response.common.SocialMediaDto;
 import lombok.*;
 import java.util.List;
 
+import com.popcorn.jrp.domain.response.common.SocialMediaResponse;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class WorkTimeDto {
-    private String from; // Ví dụ: "09:00"
-    private String to; // Ví dụ: "18:00"
+public class WorkTimeResponse {
+    private String from;
+    private String to;
 }

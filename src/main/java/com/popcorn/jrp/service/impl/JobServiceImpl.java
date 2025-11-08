@@ -3,60 +3,77 @@ package com.popcorn.jrp.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popcorn.jrp.domain.entity.EmployerEntity;
 import com.popcorn.jrp.domain.entity.JobEntity;
-import com.popcorn.jrp.domain.entity.SkillEntity;
 import com.popcorn.jrp.domain.mapper.JobMapper;
 import com.popcorn.jrp.domain.request.job.*;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.job.JobDashboardDto;
 import com.popcorn.jrp.domain.response.job.JobDetailDto;
+import com.popcorn.jrp.domain.response.job.JobResponseDto;
 import com.popcorn.jrp.exception.NotFoundException;
 import com.popcorn.jrp.repository.EmployerRepository;
 import com.popcorn.jrp.repository.JobRepository;
 // import com.popcorn.jrp.repository.ApplicationRepository; // Cần có để đếm
-import com.popcorn.jrp.repository.SkillRepository;
 import com.popcorn.jrp.service.JobService;
 import com.popcorn.jrp.repository.spec.JobSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JobServiceImpl implements JobService {
 
     private final JobRepository jobRepository;
     private final EmployerRepository employerRepository;
-    // private final ApplicationRepository applicationRepository; // Dùng cho Endpoint 10
+    // private final ApplicationRepository applicationRepository; // Dùng cho
+    // Endpoint 10
     private final JobMapper jobMapper;
     private final JobSpecification jobSpecification;
     private final ObjectMapper objectMapper = new ObjectMapper(); // Dùng cho xử lý JSON
-    private final SkillRepository skillRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public ApiPageResponse<JobDetailDto> getJobsPaginated(JobQueryParameters queryParams, Pageable pageable) {
-        Specification<JobEntity> spec = jobSpecification.publicFilter(queryParams);
-        Page<JobEntity> entityPage = jobRepository.findAll(spec, pageable);
+    public ApiPageResponse<JobResponseDto> getJobsPaginated(JobQueryParameters queryParams, Pageable pageable) {
+        log.info("Pagination info: page={}, size={}, sort={}",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        try {
+            Specification<JobEntity> spec = jobSpecification.publicFilter(queryParams);
+            log.debug("Specification filter created successfully.");
 
-        // Chuyển Page<Entity> sang Page<DTO>
-        Page<JobDetailDto> dtoPage = entityPage.map(jobMapper::toDetailDto);
+            Page<JobEntity> entityPage = jobRepository.findAll(spec, pageable);
+            log.debug("JobEntity query executed successfully. Found {} records.", entityPage.getTotalElements());
 
-        // Dùng PageMapper để tạo response
-        return jobMapper.toApiPageResponse(dtoPage);
-    }
+            // Map to DTO
+            Page<JobResponseDto> dtoPage = entityPage.map(jobMapper::toJobResponseDto);
+            log.debug("Entity-to-DTO mapping completed.");
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<JobDetailDto> getAllJobs() {
-        List<JobEntity> entities = jobRepository.findAll(); // @Where sẽ lọc isDeleted=false
-        return jobMapper.toDetailDtoList(entities);
+            ApiPageResponse<JobResponseDto> response = jobMapper.toApiPageResponse(dtoPage);
+            response.setMessage("Job list retrieved successfully with pagination!");
+            response.setStatusCode(HttpStatus.OK.value());
+
+            log.info("Returning successful response. Total pages: {}, total records: {}",
+                    response.getMeta().getTotalPages(), response.getMeta().getTotalItems());
+            return response;
+
+        } catch (Exception e) {
+            log.error("Error while retrieving job list: {}", e.getMessage(), e);
+            throw e; // rethrow to let Spring handle it as 500 Internal Server Error
+        }
     }
 
     @Override
@@ -75,14 +92,17 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> getCompanyIndustryList(Long companyId) {
+    public List<String> getCompanyIndustryListByCompanyId(Long companyId) {
         return jobRepository.findDistinctIndustriesByEmployerId(companyId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<String> getSkillList() {
-        return skillRepository.findAll().stream().map(SkillEntity::toString).toList();
+        return jobRepository.findAll().stream()
+                .flatMap(c -> c.getSkills().stream())
+                .distinct()
+                .toList();
     }
 
     @Override
@@ -109,27 +129,22 @@ public class JobServiceImpl implements JobService {
 
         List<JobEntity> relatedJobs = jobRepository
                 .findByIdNotAndIndustryAndCountryAndCityAndIsDeletedFalse(id, industry, country, city);
-
-        return jobMapper.toDetailDtoList(relatedJobs);
+        List<JobDetailDto> relatedJobDtos = relatedJobs.stream()
+                .map(jobMapper::toDetailDto)
+                .collect(Collectors.toList());
+        return relatedJobDtos;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ApiPageResponse<JobDashboardDto> getJobsForDashboard(Long companyId, EmployerJobQueryDto queryParams) {
-        employerRepository.findById(companyId).orElseThrow(() -> new NotFoundException("Company with ID: " + companyId));
+    public ApiPageResponse<JobDashboardDto> getJobsForDashboard(Long companyId, Pageable pageable,
+            EmployerJobQueryDto queryParams) {
+        employerRepository.findById(companyId)
+                .orElseThrow(() -> new NotFoundException("Company with ID: " + companyId));
         Page<JobEntity> jobs = jobRepository.findAll(
                 jobSpecification.dashboardFilter(queryParams),
-                PageRequest.of(queryParams.getPage(), queryParams.getSize()));
+                pageable);
         return jobMapper.toApiPageResponse(jobs.map(jobMapper::toDashboardDto));
-
-        // TODO: Cần inject ApplicationRepository để đếm số lượng hồ sơ
-        // for (JobDashboardDto dto : dtos) {
-        //     Long jobId = Long.parseLong(dto.getId());
-        //     int count = applicationRepository.countByJobId(jobId);
-        //     dto.setApplications(count);
-        // }
-
-//        return dtos;
     }
 
     @Override
@@ -148,10 +163,22 @@ public class JobServiceImpl implements JobService {
         JobEntity entity = jobMapper.toEntity(createDto);
         entity.setEmployer(employer);
         entity.setStatus(true); // Mặc định active
-        entity.setIsDeleted(false); // Mặc định không xóa
+        entity.setDeleted(false); // Mặc định không xóa
 
         JobEntity savedEntity = jobRepository.save(entity);
         return jobMapper.toDetailDto(savedEntity);
+    }
+
+    @Override
+    @Transactional
+    public JobDetailDto updatePartialJob(Long id, UpdateJobDto updateDto) {
+        JobEntity entity = jobRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Job với ID: " + id));
+
+        jobMapper.updatePartialEntityFromDto(updateDto, entity);
+
+        JobEntity updatedEntity = jobRepository.save(entity);
+        return jobMapper.toDetailDto(updatedEntity);
     }
 
     @Override
@@ -160,9 +187,12 @@ public class JobServiceImpl implements JobService {
         JobEntity entity = jobRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Job với ID: " + id));
 
+        // Cập nhật các trường từ DTO sang entity hiện có
         jobMapper.updateEntityFromDto(updateDto, entity);
 
+        // Lưu lại entity đã được cập nhật
         JobEntity updatedEntity = jobRepository.save(entity);
+
         return jobMapper.toDetailDto(updatedEntity);
     }
 
@@ -172,7 +202,7 @@ public class JobServiceImpl implements JobService {
         JobEntity entity = jobRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Job với ID: " + id));
 
-        entity.setIsDeleted(true);
+        entity.setDeleted(true);
         entity.setStatus(false); // Khi xóa mềm cũng nên tắt active
         jobRepository.save(entity);
     }

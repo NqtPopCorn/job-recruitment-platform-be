@@ -4,6 +4,8 @@ import com.popcorn.jrp.domain.request.job.*;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.job.JobDashboardDto;
 import com.popcorn.jrp.domain.response.job.JobDetailDto;
+import com.popcorn.jrp.domain.response.job.JobResponseDto;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,15 +25,7 @@ public interface JobService {
      * @param pageable    Đối tượng phân trang.
      * @return ApiPageResponse chứa danh sách JobDetailDto và thông tin meta.
      */
-    ApiPageResponse<JobDetailDto> getJobsPaginated(JobQueryParameters queryParams, Pageable pageable);
-
-    /**
-     * 2. Lấy danh sách tất cả công việc (không phân trang).
-     * Tương ứng với: GET /api/v1/job/get-list
-     *
-     * @return Danh sách JobDetailDto.
-     */
-    List<JobDetailDto> getAllJobs();
+    ApiPageResponse<JobResponseDto> getJobsPaginated(JobQueryParameters queryParams, Pageable pageable);
 
     /**
      * 3. Lấy chi tiết công việc bằng ID công việc.
@@ -57,7 +51,7 @@ public interface JobService {
      * @param companyId ID của công ty (Kiểu Long cho Entity).
      * @return Danh sách tên các ngành nghề của công ty đó.
      */
-    List<String> getCompanyIndustryList(Long companyId);
+    List<String> getCompanyIndustryListByCompanyId(Long companyId);
 
     /**
      * 6. Lấy danh sách các kỹ năng (skills) từ các công việc.
@@ -100,7 +94,7 @@ public interface JobService {
      * @param companyId ID của công ty (Kiểu Long).
      * @return Danh sách JobDashboardDto (bao gồm status và số lượng applications).
      */
-    ApiPageResponse<JobDashboardDto> getJobsForDashboard(Long companyId, EmployerJobQueryDto params);
+    ApiPageResponse<JobDashboardDto> getJobsForDashboard(Long companyId, Pageable pageable, EmployerJobQueryDto params);
 
     /**
      * (Implied) Tạo một công việc mới.
@@ -110,6 +104,16 @@ public interface JobService {
      * @return Chi tiết công việc vừa tạo.
      */
     JobDetailDto createJob(CreateJobDto createDto);
+
+    /**
+     * (Implied) Cập nhật một công việc.
+     * Tương ứng với: PATCH /api/v1/job/:id
+     *
+     * @param id        ID của công việc cần cập nhật (Kiểu Long).
+     * @param updateDto DTO chứa thông tin cập nhật.
+     * @return Chi tiết công việc sau khi cập nhật.
+     */
+    JobDetailDto updatePartialJob(Long id, UpdateJobDto updateDto);
 
     /**
      * (Implied) Cập nhật một công việc.

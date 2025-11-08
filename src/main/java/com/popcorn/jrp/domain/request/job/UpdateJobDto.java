@@ -26,7 +26,7 @@ public class UpdateJobDto {
     private String description;
 
     @Valid
-    private List<JobTypeDto> jobType;
+    private List<String> jobType;
 
     @Valid
     private JobSalaryDto salary;
@@ -35,7 +35,7 @@ public class UpdateJobDto {
 
     private List<String> responsibilities;
 
-    private List<String> skillAndExperience;
+    private List<String> skillAndExperiences;
 
     @Min(value = 0, message = "Số năm kinh nghiệm phải lớn hơn hoặc bằng 0")
     private Integer experience;
