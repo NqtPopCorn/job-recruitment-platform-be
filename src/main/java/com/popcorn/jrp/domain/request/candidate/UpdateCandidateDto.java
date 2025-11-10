@@ -27,6 +27,7 @@ public class UpdateCandidateDto {
     private Integer experience;
     private String currentSalary;
     private String expectedSalary;
+    private String currency;
     private String gender;
     private List<String> languages;
     private String educationLevel;

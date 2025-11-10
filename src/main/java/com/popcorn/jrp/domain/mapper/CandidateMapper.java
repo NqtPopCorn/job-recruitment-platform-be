@@ -20,8 +20,6 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", builder = @Builder(disableBuilder = false))
 public interface CandidateMapper extends PageMapper {
 
-    @Mapping(target = "tags", source = "skills")
-    @Mapping(target = "category", source = "industry")
     CandidateResponse toResponse(CandidateEntity candidateEntity);
 
     @InheritConfiguration(name = "toResponse")

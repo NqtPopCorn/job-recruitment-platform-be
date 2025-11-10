@@ -257,8 +257,7 @@ public class UploadController {
          * Xóa CV
          */
         @DeleteMapping("resume/{resumeId}")
-        public ResponseEntity<ApiNoDataResponse> deleteResume(@PathVariable("resumeId") Long resumeId,
-                        @RequestParam("filename") String filename) {
+        public ResponseEntity<ApiNoDataResponse> deleteResume(@PathVariable("resumeId") Long resumeId) {
                 resumeService.deleteResume(resumeId);
                 return ResponseEntity.ok(ApiNoDataResponse.builder()
                                 .statusCode(HttpStatus.OK.value())
