@@ -23,9 +23,9 @@ public class UpdateEmployerDto {
 
     private String primaryIndustry;
 
-    private int size;
+    private Integer size;
 
-    private int foundedIn;
+    private Integer foundedIn;
 
     private String description;
 
