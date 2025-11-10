@@ -3,6 +3,9 @@ package com.popcorn.jrp.domain.response.job;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.popcorn.jrp.domain.response.common.SocialMediaDto;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

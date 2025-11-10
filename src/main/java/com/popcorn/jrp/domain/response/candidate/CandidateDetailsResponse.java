@@ -23,9 +23,6 @@ public class CandidateDetailsResponse extends CandidateResponse {
     private Integer experience;
     private String qualification;
     private String phone;
-    private BigDecimal currentSalary;
-    private BigDecimal expectedSalary;
-    private String currency;
     private String description;
     private List<String> languages;
     private List<SocialMediaDto> socialMedias;

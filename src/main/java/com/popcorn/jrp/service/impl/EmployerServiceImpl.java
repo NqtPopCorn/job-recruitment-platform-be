@@ -2,7 +2,6 @@ package com.popcorn.jrp.service.impl;
 
 import com.popcorn.jrp.domain.entity.EmployerEntity;
 import com.popcorn.jrp.domain.mapper.EmployerMapper;
-import com.popcorn.jrp.domain.request.employer.CreateEmployerDto;
 import com.popcorn.jrp.domain.request.employer.EmployerQueryParameters;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
