@@ -2,20 +2,25 @@ package com.popcorn.jrp.service.impl;
 
 import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.entity.EmployerEntity;
+import com.popcorn.jrp.domain.mapper.CandidateMapper;
 import com.popcorn.jrp.domain.mapper.EmployerMapper;
 import com.popcorn.jrp.domain.request.employer.EmployerQueryParameters;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
 import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
+import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.NotFoundException;
 import com.popcorn.jrp.repository.CandidateRepository;
 import com.popcorn.jrp.repository.EmployerRepository;
+import com.popcorn.jrp.repository.spec.CandidateSpecification;
 import com.popcorn.jrp.repository.spec.EmployerSpecification;
 import com.popcorn.jrp.service.EmployerService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +41,7 @@ public class EmployerServiceImpl implements EmployerService {
     private final EmployerSpecification employerSpecification;
     // private final JobMapper jobMapper; // Cần cho getRelatedJobs
     private final CandidateRepository candidateRepository;
+    private final CandidateMapper candidateMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -164,6 +170,32 @@ public class EmployerServiceImpl implements EmployerService {
 
         // Kiểm tra xem danh sách có chứa candidate không
         return employer.getPotentialCandidates().contains(candidate);
+    }
+
+    @Override
+    public ApiPageResponse<CandidateResponse> getPotentialCanddiatesPaginated(Long employerId, String search,
+            Pageable pageable) {
+
+        String keyword = (search == null || search.trim().isEmpty()) ? "" : search.trim();
+
+        Page<CandidateEntity> candidatePage = employerRepository
+                .findPotentialCandidatesByEmployerId(employerId, keyword, pageable);
+
+        List<CandidateResponse> candidateResponses = candidatePage.getContent().stream()
+                .map(candidateMapper::toResponse) // dùng mapper convert Entity → DTO
+                .toList();
+
+        return ApiPageResponse.<CandidateResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Get potential candidates successfully")
+                .results(candidateResponses)
+                .meta(ApiPageResponse.Meta.builder().currentPage(candidatePage.getNumber())
+                        .pageSize(candidatePage.getSize())
+                        .totalPages(candidatePage.getTotalPages())
+                        .totalItems(candidatePage
+                                .getTotalElements())
+                        .build())
+                .build();
     }
 
 }
