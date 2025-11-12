@@ -3,7 +3,6 @@ package com.popcorn.jrp.service.impl;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.mapper.CandidateMapper;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
-import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;

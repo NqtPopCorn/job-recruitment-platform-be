@@ -25,6 +25,8 @@ public class WebConfig implements WebMvcConfigurer {
         private String CANDIDATE_UPLOAD_DIR;
         @Value("${upload.path.resumes}")
         private String RESUME_UPLOAD_DIR;
+        @Value("${upload.path.applications}")
+        private String APPLICATION_UPLOAD_DIR;
 
         // Pageable config
         // @Bean
@@ -69,9 +71,11 @@ public class WebConfig implements WebMvcConfigurer {
                 // Đường dẫn public client có thể truy cập
                 registry.addResourceHandler("/images/companies/**")
                                 .addResourceLocations("file:" + COMPANY_UPLOAD_DIR);
-                registry.addResourceHandler("/resumes/**")
+                registry.addResourceHandler("/images/resumes/**")
                                 .addResourceLocations("file:" + RESUME_UPLOAD_DIR);
                 registry.addResourceHandler("/images/candidates/**")
                                 .addResourceLocations("file:" + CANDIDATE_UPLOAD_DIR);
+                registry.addResourceHandler("/images/applications/**")
+                                .addResourceLocations("file:" + APPLICATION_UPLOAD_DIR);
         }
 }

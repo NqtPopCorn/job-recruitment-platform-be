@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class EmployerJobQueryDto {
 
-    private int page = 0;
-    private int size = 10;
-
     private String category;
     private Integer datePosted; // số ngày đã đăng bài
 }

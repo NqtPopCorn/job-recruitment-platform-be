@@ -8,6 +8,10 @@ import com.popcorn.jrp.domain.request.job.UpdateJobDto;
 import com.popcorn.jrp.domain.response.job.CompanyInJobDto;
 import com.popcorn.jrp.domain.response.job.JobDashboardDto;
 import com.popcorn.jrp.domain.response.job.JobDetailDto;
+import com.popcorn.jrp.domain.response.job.JobResponseDto;
+import com.popcorn.jrp.domain.response.job.SalaryDto;
+import com.popcorn.jrp.domain.response.job.WorkTimeDto;
+
 import org.mapstruct.*;
 
 import java.time.LocalDate;
@@ -17,7 +21,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = { JsonMapperHelper.class })
+@Mapper(componentModel = "spring", uses = { JsonMapperHelper.class, EmployerMapper.class })
 public interface JobMapper extends PageMapper {
 
     // Định dạng ngày theo "d/M/yyyy" (ví dụ: 6/8/2025)
@@ -25,25 +29,21 @@ public interface JobMapper extends PageMapper {
 
     // --- Entity to DTO ---
 
-    @Mapping(target = "jobType", ignore = true) // !!!
-    @Mapping(source = "id", target = "id", qualifiedByName = "longToString")
     @Mapping(source = "employer.logo", target = "logo") // Lấy logo từ Employer
     @Mapping(source = "employer", target = "company") // Map lồng ghép
-    @Mapping(source = "responsibilities", target = "responsibilities")
-    @Mapping(source = "skillAndExperiences", target = "skillAndExperience")
-    @Mapping(source = "expirationDate", target = "expireDate", qualifiedByName = "localDateToDateString")
-    @Mapping(target = "salary", source = ".")
-    @Mapping(target = "salary.min", source = "minSalary")
-    @Mapping(target = "salary.max", source = "maxSalary")
-    @Mapping(target = "workTime.from", source = "workTimeFrom")
-    @Mapping(target = "workTime.to", source = "workTimeTo")
+    @Mapping(source = "expirationDate", target = "expireDate")
+    @Mapping(source = ".", target = "salary", qualifiedByName = "mapSalary")
+    @Mapping(source = ".", target = "workTime", qualifiedByName = "mapWorkTimeDto")
     JobDetailDto toDetailDto(JobEntity entity);
 
-    @InheritConfiguration(name = "toDetailDto")
-    @Mapping(target = "applications", expression = "java(0)") // Service sẽ tính toán
-    JobDashboardDto toDashboardDto(JobEntity entity);
+    @Mapping(source = "employer", target = "company")
+    @Mapping(source = ".", target = "applications", qualifiedByName = "mapApplicationsCount")
+    @Mapping(source = "employer.logo", target = "logo")
+    JobResponseDto toJobResponseDto(JobEntity entity);
 
-    List<JobDetailDto> toDetailDtoList(List<JobEntity> entities);
+    @InheritConfiguration(name = "toDetailDto")
+    @Mapping(source = ".", target = "applications", qualifiedByName = "mapApplicationsCount")
+    JobDashboardDto toDashboardDto(JobEntity entity);
 
     List<JobDashboardDto> toDashboardDtoList(List<JobEntity> entities);
 
@@ -51,19 +51,18 @@ public interface JobMapper extends PageMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "socialMedias", target = "socialMedias", qualifiedByName = "jsonToSocialMediaList")
-    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "localDateTimeToInstant")
-    @Mapping(source = "updatedAt", target = "updatedAt", qualifiedByName = "localDateTimeToInstant")
     CompanyInJobDto employerToCompanyInJobDto(EmployerEntity employer);
 
     // --- DTO to Entity ---
     /**
-     * NEED UPDATE !!!!!!!!!!!!
+     * NEED CREATE !!!!!!!!!!!!
      */
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "skills", source = "skills", ignore = true)
-    @Mapping(target = "responsibilities", source = "responsibilities", ignore = true)
-    @Mapping(target = "skillAndExperiences", source = "skillAndExperience", ignore = true)
-    @Mapping(target = "jobTypes", source = "jobType", ignore = true)
+    @Mapping(source = "salary.min", target = "minSalary")
+    @Mapping(source = "salary.max", target = "maxSalary")
+    @Mapping(source = "salary.currency", target = "currency")
+    @Mapping(source = "salary.negotiable", target = "negotiable")
+    @Mapping(source = "workTime.from", target = "workTimeFrom")
+    @Mapping(source = "workTime.to", target = "workTimeTo")
     JobEntity toEntity(CreateJobDto dto);
 
     /**
@@ -72,37 +71,58 @@ public interface JobMapper extends PageMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "employer", ignore = true)
-    @Mapping(target = "isDeleted", ignore = true)
-    @Mapping(target = "skills", source = "skills", ignore = true)
-    @Mapping(target = "responsibilities", source = "responsibilities", ignore = true)
-    @Mapping(target = "skillAndExperiences", source = "skillAndExperience", ignore = true)
+    @Mapping(source = "salary.min", target = "minSalary")
+    @Mapping(source = "salary.max", target = "maxSalary")
+    @Mapping(source = "salary.currency", target = "currency")
+    @Mapping(source = "salary.negotiable", target = "negotiable")
+    @Mapping(source = "workTime.from", target = "workTimeFrom")
+    @Mapping(source = "workTime.to", target = "workTimeTo")
+    void updatePartialEntityFromDto(UpdateJobDto dto, @MappingTarget JobEntity entity);
+
+    @Mapping(source = "salary.min", target = "minSalary")
+    @Mapping(source = "salary.max", target = "maxSalary")
+    @Mapping(source = "salary.currency", target = "currency")
+    @Mapping(source = "salary.negotiable", target = "negotiable")
+    @Mapping(source = "workTime.from", target = "workTimeFrom")
+    @Mapping(source = "workTime.to", target = "workTimeTo")
     void updateEntityFromDto(UpdateJobDto dto, @MappingTarget JobEntity entity);
 
     // --- Helper Methods (Qualified By Name) ---
-
-    @Named("longToString")
-    default String longToString(Long id) {
-        return id != null ? String.valueOf(id) : null;
-    }
-
-    @Named("localDateTimeToDateString")
-    default String localDateTimeToDateString(LocalDateTime dateTime) {
-        if (dateTime == null)
-            return null;
-        return dateTime.format(DATE_FORMATTER);
-    }
-
-    @Named("localDateToDateString")
-    default String localDateToDateString(LocalDate date) {
-        if (date == null)
-            return null;
-        return date.format(DATE_FORMATTER);
-    }
-
     @Named("localDateTimeToInstant")
     default Instant localDateTimeToInstant(LocalDateTime localDateTime) {
         if (localDateTime == null)
             return null;
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+    }
+
+    @Named("mapApplicationsCount")
+    default int mapApplicationsCount(JobEntity entity) {
+        if (entity == null || entity.getApplications() == null)
+            return 0;
+        return entity.getApplications().size();
+    }
+
+    @Named("mapSalary")
+    default SalaryDto mapSalary(JobEntity entity) {
+        if (entity == null)
+            return null;
+        SalaryDto dto = SalaryDto.builder()
+                .min(entity.getMinSalary())
+                .max(entity.getMaxSalary())
+                .currency(entity.getCurrency())
+                .negotiable(entity.getNegotiable())
+                .build();
+        return dto;
+    }
+
+    @Named("mapWorkTimeDto")
+    default WorkTimeDto mapWorkTimeDto(JobEntity entity) {
+        if (entity == null)
+            return null;
+        WorkTimeDto dto = WorkTimeDto.builder()
+                .from(entity.getWorkTimeFrom())
+                .to(entity.getWorkTimeTo())
+                .build();
+        return dto;
     }
 }

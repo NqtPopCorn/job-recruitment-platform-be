@@ -5,6 +5,8 @@ import com.popcorn.jrp.domain.response.common.SocialMediaDto;
 import lombok.*;
 import java.util.List;
 
+import com.popcorn.jrp.domain.response.common.SocialMediaResponse;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,6 +27,7 @@ public class UpdateCandidateDto {
     private Integer experience;
     private String currentSalary;
     private String expectedSalary;
+    private String currency;
     private String gender;
     private List<String> languages;
     private String educationLevel;

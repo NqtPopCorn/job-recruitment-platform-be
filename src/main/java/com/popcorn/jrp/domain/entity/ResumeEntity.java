@@ -19,6 +19,7 @@ public class ResumeEntity extends BaseEntity {
 
     @Column(name = "file_name")
     private String fileName;
+
     private Boolean status;
 
 }

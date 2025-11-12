@@ -40,5 +40,12 @@ public class GlobalExceptionHandler {
                                                 .build());
         }
 
-        // handle Validate exception
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ApiNoDataResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+                return ResponseEntity.status(400)
+                                .body(ApiNoDataResponse.builder()
+                                                .statusCode(400)
+                                                .message(e.getMessage())
+                                                .build());
+        }
 }

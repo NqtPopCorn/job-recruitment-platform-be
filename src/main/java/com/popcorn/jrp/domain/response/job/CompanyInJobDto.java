@@ -1,7 +1,11 @@
 package com.popcorn.jrp.domain.response.job;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import com.popcorn.jrp.domain.response.common.SocialMediaDto;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,6 +25,6 @@ public class CompanyInJobDto {
     private String logo;
     private List<SocialMediaDto> socialMedias;
     private Boolean isDeleted;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
