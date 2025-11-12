@@ -44,10 +44,10 @@ public class EmployerAdminServiceV1 implements EmployerAdminService {
         EmployerEntity empl = employerAdminRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy công ty với ID: " + id));
 
-        empl.setStatus(!empl.isStatus());
+        empl.setStatus(!empl.getStatus());
         employerAdminRepository.save(empl);
 
-        String message = empl.isStatus()
+        String message = empl.getStatus()
                 ? "Mở khóa hồ sơ công ty thành công!"
                 : "Khóa hồ sơ công ty thành công!";
 
