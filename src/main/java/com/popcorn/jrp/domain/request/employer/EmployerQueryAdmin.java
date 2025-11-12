@@ -15,4 +15,5 @@ public class EmployerQueryAdmin {
     private String primaryIndustry;
     private int foundationDateMin = 1900;
     private int foundationDateMax = 2025;
+    private Boolean status;
 }

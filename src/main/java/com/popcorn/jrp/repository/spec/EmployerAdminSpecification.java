@@ -34,9 +34,9 @@ public class EmployerAdminSpecification {
 
             predicates.add(cb.between(root.get("foundedIn"), params.getFoundationDateMin(), params.getFoundationDateMax()));
 
-            // Luôn lọc status = true và isDeleted = false
-//            predicates.add(cb.isTrue(root.get("status")));
-//            predicates.add(cb.isFalse(root.get("isDeleted")));
+            if (params.getStatus() != null) {
+                predicates.add(cb.equal(root.get("status"), params.getStatus()));
+            }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
