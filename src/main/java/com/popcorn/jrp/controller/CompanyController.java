@@ -7,6 +7,7 @@ import com.popcorn.jrp.domain.response.ApiDataResponse;
 import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.ApiResultsResponse;
+import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
 import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
 import com.popcorn.jrp.service.EmployerService;
@@ -191,5 +192,20 @@ public class CompanyController {
                                 .build();
 
                 return ResponseEntity.ok(res);
+        }
+
+        /**
+         * GET LIST PAGINATION POTENTIAL CANDIDATE OF EMPLOYER
+         * GET /api/v1/company/{employerId}/potential-candidates
+         */
+        @GetMapping("/{employerId}/potential-candidates")
+        public ResponseEntity<ApiPageResponse<CandidateResponse>> getPotentialCandidatesPaginated(
+                        @PathVariable("employerId") Long employerId,
+                        Pageable pageable,
+                        @RequestParam String search) {
+
+                ApiPageResponse<CandidateResponse> potentialCandidatePage = employerService
+                                .getPotentialCanddiatesPaginated(employerId, search, pageable);
+                return ResponseEntity.ok(potentialCandidatePage);
         }
 }
