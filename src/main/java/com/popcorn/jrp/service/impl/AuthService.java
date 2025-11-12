@@ -115,7 +115,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
                             .name("")
                             .phone("")
                             .primaryIndustry("")
-                            .size(0)
+                            .size("")
                             .socialMedias("[]")
                             .build();
                     employerRepository.save(employer);

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class ApplicationPageResponseDto {
     private Long id;
     private JobResponseDto job;
-    private String fileName;
+    private String filename;
     private String coverLetter;
     private String status;
     private LocalDateTime createdAt;

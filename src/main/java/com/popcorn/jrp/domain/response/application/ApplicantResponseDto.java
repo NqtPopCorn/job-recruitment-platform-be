@@ -19,7 +19,7 @@ public class ApplicantResponseDto {
 
     private CandidateResponse candidate;
 
-    private String fileName;
+    private String filename;
     private String coverLetter;
     private String status;
     private LocalDateTime createdAt;

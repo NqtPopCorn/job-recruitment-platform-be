@@ -4,6 +4,7 @@ import com.popcorn.jrp.domain.request.employer.CreateEmployerDto;
 import com.popcorn.jrp.domain.request.employer.EmployerQueryParameters;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
 import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
 import org.springframework.data.domain.Pageable;
@@ -96,4 +97,25 @@ public interface EmployerService {
      * @return DTO chứa thông tin sau khi xóa mềm (ID, status, updatedAt).
      */
     EmployerSoftDeleteDto softDeleteEmployer(Long id);
+
+    /**
+     * Add potential candidate.
+     */
+    boolean togglePotentialCandidate(Long employerId, Long potentialCandidateId);
+
+    /**
+     * Check potential candidate.
+     */
+    boolean checkPotentialCandidate(Long employerId, Long potentialCandidateId);
+
+    /**
+     * Lấy danh sách các ứng viên tiềm năng có phân trang và lọc.
+     *
+     * @param queryParams Đối tượng chứa các tham số lọc (search, location,
+     *                    industry...).
+     * @param pageable    Đối tượng chứa thông tin phân trang (page, size, sort).
+     * @return Một trang (Page) chứa danh sách EmployerPaginationDto.
+     */
+    ApiPageResponse<CandidateResponse> getPotentialCanddiatesPaginated(Long employerId, String search,
+            Pageable pageable);
 }
