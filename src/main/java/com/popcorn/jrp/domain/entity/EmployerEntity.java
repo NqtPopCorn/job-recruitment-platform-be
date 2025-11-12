@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,11 +24,19 @@ public class EmployerEntity extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
+    // Danh sách ứng viên tiềm năng
+    @ManyToMany
+    @JoinTable(name = "potential_candidates", // tên bảng trung gian
+            joinColumns = @JoinColumn(name = "employer_id"), // khóa ngoại trỏ tới Employer
+            inverseJoinColumns = @JoinColumn(name = "candidate_id") // khóa ngoại trỏ tới Candidate
+    )
+    private List<CandidateEntity> potentialCandidates = new ArrayList<>();
+
     private String email;
     private String name;
     private String primaryIndustry;
-    private int size;
-    private int foundedIn;
+    private String size;
+    private Integer foundedIn;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -38,7 +47,7 @@ public class EmployerEntity extends BaseEntity {
     private String website;
     private String country;
     private String city;
-    private boolean status;
+    private Boolean status;
 
     @Column(columnDefinition = "JSON")
     private String socialMedias = "[]";

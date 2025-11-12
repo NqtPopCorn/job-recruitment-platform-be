@@ -23,7 +23,7 @@ public class UpdateEmployerDto {
 
     private String primaryIndustry;
 
-    private Integer size;
+    private String size;
 
     private Integer foundedIn;
 
