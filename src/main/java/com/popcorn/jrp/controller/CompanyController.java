@@ -4,6 +4,7 @@ import com.popcorn.jrp.domain.request.employer.CreateEmployerDto;
 import com.popcorn.jrp.domain.request.employer.EmployerQueryParameters;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
 import com.popcorn.jrp.domain.response.ApiDataResponse;
+import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.ApiResultsResponse;
 import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
@@ -150,5 +151,45 @@ public class CompanyController {
                                 deletedInfo);
 
                 return ResponseEntity.ok(response);
+        }
+
+        @PostMapping("/{employerId}/potential-candidates/{candidateId}/toggle")
+        public ResponseEntity<ApiDataResponse<Boolean>> togglePotentialCandidate(
+                        @PathVariable("employerId") Long employerId,
+                        @PathVariable("candidateId") Long candidateId) {
+
+                // toggle và nhận trạng thái hiện tại
+                boolean added = employerService.togglePotentialCandidate(employerId, candidateId);
+
+                ApiDataResponse<Boolean> res = ApiDataResponse.<Boolean>builder()
+                                .statusCode(HttpStatus.OK.value())
+                                .message(added
+                                                ? "Added potential candidate successfully"
+                                                : "Removed potential candidate successfully")
+                                .data(added)
+                                .build();
+
+                return ResponseEntity.ok(res);
+        }
+
+        /**
+         * Kiểm tra xem ứng viên đã được lưu là tiềm năng hay chưa
+         */
+        @GetMapping("/{employerId}/potential-candidates/{candidateId}")
+        public ResponseEntity<ApiDataResponse<Boolean>> checkPotentialCandidate(
+                        @PathVariable("employerId") Long employerId,
+                        @PathVariable("candidateId") Long candidateId) {
+
+                boolean isPotential = employerService.checkPotentialCandidate(employerId, candidateId);
+
+                ApiDataResponse<Boolean> res = ApiDataResponse.<Boolean>builder()
+                                .statusCode(HttpStatus.OK.value())
+                                .message(isPotential
+                                                ? "Candidate is in potential list"
+                                                : "Candidate is not in potential list")
+                                .data(isPotential)
+                                .build();
+
+                return ResponseEntity.ok(res);
         }
 }

@@ -15,7 +15,7 @@ public class ApplicationResponseDto {
     private Long id;
     private Long candidateId;
     private Long jobId;
-    private String fileName;
+    private String filename;
     private String coverLetter;
     private String status;
     private LocalDateTime createdAt;

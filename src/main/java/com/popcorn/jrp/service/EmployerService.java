@@ -96,4 +96,14 @@ public interface EmployerService {
      * @return DTO chứa thông tin sau khi xóa mềm (ID, status, updatedAt).
      */
     EmployerSoftDeleteDto softDeleteEmployer(Long id);
+
+    /**
+     * Add potential candidate.
+     */
+    boolean togglePotentialCandidate(Long employerId, Long potentialCandidateId);
+
+    /**
+     * Check potential candidate.
+     */
+    boolean checkPotentialCandidate(Long employerId, Long potentialCandidateId);
 }
