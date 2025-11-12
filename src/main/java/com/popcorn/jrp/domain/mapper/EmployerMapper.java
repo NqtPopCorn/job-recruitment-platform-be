@@ -79,5 +79,10 @@ public interface EmployerMapper extends PageMapper {
         }
     }
 
+    // Mapper cho Job (Giả định)
+    // RelatedJobDto toRelatedJobDto(JobEntity job);
+    // List<RelatedJobDto> toRelatedJobDtoList(List<JobEntity> jobs);
+    @Mapping(target = "jobNumber", expression = "java(0)")
+    EmployerListAdminResponse toListAdminResponse(EmployerEntity entity);
     EmployerResponse toEmployerResponse(EmployerEntity entity);
 }

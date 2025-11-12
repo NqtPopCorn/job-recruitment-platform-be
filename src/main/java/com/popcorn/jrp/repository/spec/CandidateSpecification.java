@@ -1,6 +1,7 @@
 package com.popcorn.jrp.repository.spec;
 
 import com.popcorn.jrp.domain.entity.CandidateEntity;
+import com.popcorn.jrp.domain.request.candidate.CandidateSearchAdminRequest;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
@@ -87,5 +88,14 @@ public class CandidateSpecification {
         return (root, query, cb) -> {
             return cb.isFalse(root.get("isDeleted"));
         };
+    }
+
+    public Specification<CandidateEntity> getAdminSpecification(CandidateSearchAdminRequest request) {
+        return hasNameLike(request.getSearch())
+                .and(hasLocationLike(request.getLocation()))
+                .and(hasIndustryLike(request.getIndustry()))
+                .and(hasGender(request.getGender()))
+                .and(hasStatus(request.getStatus()))
+                .and(hasIsDeleted());
     }
 }
