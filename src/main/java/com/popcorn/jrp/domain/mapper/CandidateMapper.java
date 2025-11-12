@@ -4,14 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
-import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
-import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
-import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
-import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
+import com.popcorn.jrp.domain.response.candidate.CandidateDetailsAdminResponse;
+import com.popcorn.jrp.domain.response.candidate.*;
 import com.popcorn.jrp.domain.response.common.SocialMediaDto;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +26,19 @@ public interface CandidateMapper extends PageMapper {
     @Mapping(target = "socialMedias", expression = "java(mapStringToSocialMedias(candidateEntity.getSocialMedias()))")
     @Mapping(target = "qualification", source = "educationLevel")
     CandidateDetailsResponse toDetailsResponse(CandidateEntity candidateEntity);
+
+    @Mapping(target = "tags", source = "skills")
+    @Mapping(target = "category", source = "industry")
+    CandidateListAdminResponse toListAdminResponse(CandidateEntity candidateEntity);
+
+    @Mapping(target = "tags", source = "skills")
+    @Mapping(target = "category", source = "industry")
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "socialMedias", expression = "java(mapStringToSocialMedias(candidateEntity.getSocialMedias()))")
+    @Mapping(target = "qualification", source = "educationLevel")
+    @Mapping(target = "currentSalary", expression = "java(formatSalary(candidateEntity.getCurrentSalary(), candidateEntity.getCurrency()))")
+    @Mapping(target = "expectedSalary", expression = "java(formatSalary(candidateEntity.getExpectedSalary(), candidateEntity.getCurrency()))")
+    CandidateDetailsAdminResponse toDetailsAdminResponse(CandidateEntity candidateEntity);
 
     SoftDeleteCandidateResponse toSoftDeleteResponse(CandidateEntity candidateEntity);
 
@@ -57,5 +67,10 @@ public interface CandidateMapper extends PageMapper {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error parsing JSON to socialMedias", e);
         }
+    }
+
+    default String formatSalary(java.math.BigDecimal salary, String currency) {
+        if (salary == null) return "0 VND";
+        return String.format("%,d %s", salary.longValue(), currency != null ? currency : "VND");
     }
 }
