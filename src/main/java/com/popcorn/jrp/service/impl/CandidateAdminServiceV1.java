@@ -3,6 +3,7 @@ package com.popcorn.jrp.service.impl;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.mapper.CandidateMapper;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchAdminRequest;
+import com.popcorn.jrp.domain.response.candidate.CandidateStatusStatisticResponse;
 import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateDetailsAdminResponse;
@@ -54,13 +55,30 @@ public class CandidateAdminServiceV1 implements CandidateAdminService {
         CandidateEntity candidate = candidateRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy ứng viên với ID: " + id));
 
-        candidate.setStatus(false);
+        candidate.setStatus(!candidate.isStatus());
         candidateRepository.save(candidate);
+
+        String message = candidate.isStatus()
+                ? "Mở khóa hồ sơ ứng viên thành công!"
+                : "Khóa hồ sơ ứng viên thành công!";
 
         return ApiNoDataResponse.builder()
                 .success(true)
                 .statusCode(HttpStatus.OK.value())
-                .message("Khóa hồ sơ ứng viên thành công!")
+                .message(message)
+                .build();
+    }
+
+    @Override
+    public CandidateStatusStatisticResponse getCandidateStatusStatistic() {
+        long total = candidateRepository.count();
+        long activeCount = candidateRepository.countByStatus(true);
+        long lockedCount = candidateRepository.countByStatus(false);
+
+        return CandidateStatusStatisticResponse.builder()
+                .total(total)
+                .activeCount(activeCount)
+                .lockedCount(lockedCount)
                 .build();
     }
 }

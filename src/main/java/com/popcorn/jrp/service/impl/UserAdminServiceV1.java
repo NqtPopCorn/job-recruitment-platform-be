@@ -6,6 +6,7 @@ import com.popcorn.jrp.domain.request.user.UserQueryAdmin;
 import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.user.UserAdminResponse;
+import com.popcorn.jrp.domain.response.user.UserStatusStatisticResponse;
 import com.popcorn.jrp.exception.NotFoundException;
 import com.popcorn.jrp.repository.UserAdminRepository;
 import com.popcorn.jrp.repository.spec.UserAdminSpecification;
@@ -43,13 +44,31 @@ public class UserAdminServiceV1 implements UserAdminService {
         UserEntity user = userAdminRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy Người dùng với ID: " + id));
 
-        user.setStatus(false);
+        user.setStatus(!user.isStatus());
         userAdminRepository.save(user);
+
+        String message = user.isStatus()
+                ? "Mở khóa hồ sơ Người dùng  thành công!"
+                : "Khóa hồ sơ Người dùng thành công!";
 
         return ApiNoDataResponse.builder()
                 .success(true)
                 .statusCode(HttpStatus.OK.value())
-                .message("Khóa hồ sơ Người dùng thành công!")
+                .message(message)
                 .build();
     }
+
+    @Override
+    public UserStatusStatisticResponse getUserStatusStatistic() {
+        long total = userAdminRepository.count();
+        long activeCount = userAdminRepository.countByStatus(true);
+        long lockedCount = userAdminRepository.countByStatus(false);
+
+        return UserStatusStatisticResponse.builder()
+                .total(total)
+                .activeCount(activeCount)
+                .lockedCount(lockedCount)
+                .build();
+    }
+
 }

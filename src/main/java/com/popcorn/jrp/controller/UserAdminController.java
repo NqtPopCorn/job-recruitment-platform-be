@@ -1,9 +1,11 @@
 package com.popcorn.jrp.controller;
 
 import com.popcorn.jrp.domain.request.user.UserQueryAdmin;
+import com.popcorn.jrp.domain.response.ApiDataResponse;
 import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.user.UserAdminResponse;
+import com.popcorn.jrp.domain.response.user.UserStatusStatisticResponse;
 import com.popcorn.jrp.service.UserAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -34,4 +36,17 @@ public class UserAdminController {
     public ApiNoDataResponse lockUser(@PathVariable Long id) {
         return userAdminService.lockUser(id);
     }
+
+    @GetMapping("/statistics")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiDataResponse<UserStatusStatisticResponse> getUserStatusStatistic() {
+        UserStatusStatisticResponse data = userAdminService.getUserStatusStatistic();
+
+        return ApiDataResponse.<UserStatusStatisticResponse>builder()
+                .data(data)
+                .message("Lấy thống kê số lượng người dùng theo trạng thái thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
 }

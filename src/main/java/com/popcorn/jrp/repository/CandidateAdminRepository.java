@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface CandidateAdminRepository extends JpaRepository<CandidateEntity, Long>, JpaSpecificationExecutor<CandidateEntity> {
     Optional<CandidateEntity> findById(Long id);
+    long countByStatus(boolean status);
 }

@@ -1,6 +1,7 @@
 package com.popcorn.jrp.controller;
 
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchAdminRequest;
+import com.popcorn.jrp.domain.response.candidate.CandidateStatusStatisticResponse;
 import com.popcorn.jrp.domain.response.ApiDataResponse;
 import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
@@ -56,4 +57,15 @@ public class CandidateAdminController {
         return candidateAdminService.lockCandidate(id);
     }
 
+    @GetMapping("/statistics")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiDataResponse<CandidateStatusStatisticResponse> getCandidateStatusStatistic() {
+        CandidateStatusStatisticResponse data = candidateAdminService.getCandidateStatusStatistic();
+
+        return ApiDataResponse.<CandidateStatusStatisticResponse>builder()
+                .data(data)
+                .message("Lấy thống kê số lượng ứng viên theo trạng thái thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
 }
