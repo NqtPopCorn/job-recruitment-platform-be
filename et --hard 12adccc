@@ -1,0 +1,55 @@
+[33mac004be[m[33m ([m[1;36mHEAD -> [m[1;32mfeature-employer[m[33m, [m[1;31morigin/feature-employer[m[33m)[m Merge branch 'main' of https://github.com/NqtPopCorn/job-recruitment-platform-be into feature-employer
+[33m12adccc[m feat(potential-candidate): add endpoint to getPotentialCandidatesPaginated
+[33m0ea8035[m Merge pull request #9 from NqtPopCorn/feature-employer
+[33mfdb49b6[m feat(employer): add two endpoints for toggling and checking potential candidate
+[33mf9bb777[m Merge pull request #7 from NqtPopCorn/feat-application
+[33m38e48b0[m[33m ([m[1;32mmain[m[33m)[m gitignore: ignore folder images
+[33m23abb26[m[33m ([m[1;31morigin/feat-application[m[33m, [m[1;32mfeat-application[m[33m)[m Merge branch 'main' of https://github.com/NqtPopCorn/job-recruitment-platform-be into feat-application
+[33m6f18b84[m fix(compay): update data type of UpdateEmployerDto from int to Integer to avoid error update partial
+[33m8708b67[m Merge pull request #6 from NqtPopCorn/feat-application
+[33m0fbccda[m feat(application): completed all endpoints
+[33mfe95c13[m Merge pull request #5 from NqtPopCorn/feature-job
+[33mb97e2c9[m[33m ([m[1;31morigin/feature-job[m[33m, [m[1;32mfeature-job[m[33m)[m feat(job): complete all feature
+[33m42d2ac3[m Merge and conflict with main
+[33m57ec2e9[m Commit to pull main
+[33mce80848[m Merge pull request #4 from NqtPopCorn/feat-upload
+[33m7fa78a2[m[33m ([m[1;31morigin/feat-upload[m[33m)[m feat(upload): completed all endpoints for uploading
+[33mbea1e8f[m Merge pull request #3 from NqtPopCorn/feat-candidate-section
+[33m6993c6d[m[33m ([m[1;31morigin/feat-candidate-section[m[33m, [m[1;32mfeat-candidate-section[m[33m)[m fix(candidate-section): fix response
+[33m57a10f4[m fix(candidate-section): fixed all endpoints
+[33mb364d20[m[33m ([m[1;31morigin/feat-candidate[m[33m, [m[1;32mfeat-candidate[m[33m)[m update(company): update endpoints and field in db
+[33maeb5f1f[m Merge branch 'feature-employer' into main
+[33mae15379[m conflict(employer): merge conflict with main
+[33m4d1ccbf[m feat(employer): complete all functions
+[33ma07acb3[m docs: update API docs module upload, resume
+[33m079cee2[m fix: fix warning
+[33me7a0b06[m merge(main -> feature-upload)
+[33m58a0504[m merge(main -> feature-upload)
+[33mcfb5587[m feat: module upload, resume
+[33m0491c13[m update: job entity, exclude job mapper
+[33md1b38a7[m[33m ([m[1;31morigin/auth[m[33m, [m[1;32mauth[m[33m)[m merge(main -> feature/auth): resolve conflicts in Auth and Candidate
+[33m9fee5d6[m feat(auth, candidate): hoàn thành các endpoints auth và cập nhật cấu trúc BaseEntity, CandidateEntity, thay đổi logic softDeleted
+[33m0a6a101[m Merge remote-tracking branch 'origin/feature-job'
+[33m367fe37[m Merge remote-tracking branch 'origin/auth'
+[33m827ce66[m docs: add application, package & subscription, auth api docs
+[33m5f5d36a[m Merge pull request #2 from NqtPopCorn/service
+[33m9b3b13c[m Merge pull request #1 from NqtPopCorn/auth
+[33m4197575[m feat: add account function
+[33m8aae918[m db(job): fix column unit
+[33m70baa0c[m fix(auth): fixing
+[33m8bce332[m fix(pom.xml): fixing
+[33m1c31dd0[m Merge branch 'main' into auth
+[33m7aa27c1[m feat(job): create JobController, JobService, JobRepository
+[33mf7841ba[m feat: add account function
+[33m6830445[m feat: module job
+[33mb80612c[m feat: module company(employer)
+[33m1103c93[m update(pom.xml): add version for lombok and update version of mapstruc in plugin
+[33m9edda2a[m integrate: auth module
+[33m344338d[m integrate: UI candidate module
+[33m10ef6a9[m feat: completed feature login, logout, register
+[33maf9efaa[m feat: setup JWT and fix bug Mapper
+[33mc1019b6[m feat: candidate module
+[33m77568e1[m add demo candidate service
+[33md506e4b[m add doc files
+[33mbc903f2[m project structure
+[33mf996c5c[m init commit
