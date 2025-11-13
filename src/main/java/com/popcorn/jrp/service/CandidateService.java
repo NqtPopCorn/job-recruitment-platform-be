@@ -1,5 +1,6 @@
 package com.popcorn.jrp.service;
 
+import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
 import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
@@ -14,12 +15,18 @@ import java.util.List;
 
 public interface CandidateService {
     ApiPageResponse<CandidateResponse> getCandidates(CandidateSearchRequest request, Pageable pageable);
+
     CandidateDetailsResponse getCandidateById(Long id);
+
     CandidateDetailsResponse getCandidateByUserId(Long userId);
-    CandidateDetailsResponse createCandidate(CreateCandidateDto dto);
+
     CandidateDetailsResponse updateCandidate(Long id, UpdateCandidateDto dto);
+
     SoftDeleteCandidateResponse softDeleteCandidate(Long id);
+
     void deleteCandidate(Long id);
+
     List<String> getIndustryList();
+
     List<String> getSkillList();
 }

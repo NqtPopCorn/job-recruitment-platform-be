@@ -1,9 +1,14 @@
 package com.popcorn.jrp.repository;
 
+import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.entity.EmployerEntity;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,4 +31,13 @@ public interface EmployerRepository extends JpaRepository<EmployerEntity, Long>,
     // Dùng cho: 9. SOFT DELETE (Để lấy cả entity đã bị xóa)
     @Query("SELECT e FROM EmployerEntity e WHERE e.id = :id AND e.status = false")
     Optional<EmployerEntity> findSoftDeletedById(Long id);
+
+    @Query("SELECT c FROM EmployerEntity e JOIN e.potentialCandidates c "
+            + "WHERE e.id = :employerId "
+            + "AND (LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')) "
+            + "OR LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<CandidateEntity> findPotentialCandidatesByEmployerId(
+            @Param("employerId") Long employerId,
+            @Param("search") String search,
+            Pageable pageable);
 }

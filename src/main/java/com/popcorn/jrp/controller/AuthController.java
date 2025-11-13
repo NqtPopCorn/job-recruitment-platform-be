@@ -1,14 +1,17 @@
 package com.popcorn.jrp.controller;
 
+import com.popcorn.jrp.domain.entity.UserEntity;
 import com.popcorn.jrp.domain.request.auth.LoginRequest;
 import com.popcorn.jrp.domain.request.auth.RegisterRequest;
 import com.popcorn.jrp.domain.response.auth.AccountResponse;
+import com.popcorn.jrp.domain.response.auth.UserResponse;
+import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiResponse;
 import com.popcorn.jrp.service.AuthService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,68 +23,69 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+        private final AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest request) {
-        authService.register(request);
+        @PostMapping("/register")
+        @ResponseStatus(HttpStatus.CREATED)
+        public ApiResponse<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+                UserEntity user = authService.register(request);
+                UserResponse userDto = UserResponse.builder()
+                                .id(user.getId())
+                                .email(user.getEmail())
+                                .role(user.getRole().name())
+                                .createdAt(user.getCreatedAt())
+                                .updatedAt(user.getUpdatedAt())
+                                .build();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                ApiResponse.builder()
-                        .success(true)
-                        .statusCode(HttpStatus.CREATED.value())
-                        .message("User registered successfully")
-                        .build()
-        );
-    }
+                return ApiResponse.<UserResponse>builder()
+                                .success(true)
+                                .statusCode(HttpStatus.CREATED.value())
+                                .message("User registered successfully")
+                                .data(userDto)
+                                .build();
+        }
 
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(
-            @Valid @RequestBody LoginRequest request,
-            HttpServletResponse response) {
+        @PostMapping("/login")
+        @ResponseStatus(HttpStatus.OK)
+        public ApiNoDataResponse login(
+                        @Valid @RequestBody LoginRequest request,
+                        HttpServletResponse response) {
 
-        String accessToken = authService.login(request);
+                String accessToken = authService.login(request);
 
-        // Tạo cookie với accessToken
-        Cookie cookie = new Cookie("accessToken", accessToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // Chỉ gửi qua HTTPS
-        cookie.setPath("/");
-        cookie.setMaxAge(15 * 60); // 15 phút
-        response.addCookie(cookie);
+                // Tạo cookie với accessToken
+                authService.addAccessTokenCookie(response, accessToken);
 
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .success(true)
-                        .statusCode(HttpStatus.OK.value())
-                        .message("Login successful")
-                        .build()
-        );
-    }
+                return ApiNoDataResponse.builder()
+                                .success(true)
+                                .statusCode(HttpStatus.OK.value())
+                                .message("Login successful")
+                                .build();
+        }
 
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse> logout(HttpServletResponse response) {
-        // Xóa cookie
-        Cookie cookie = new Cookie("accessToken", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        @PostMapping("/logout")
+        @ResponseStatus(HttpStatus.OK)
+        public ApiNoDataResponse logout(HttpServletRequest request, HttpServletResponse response) {
+                // Xóa cookie
+                authService.clearAccessTokenCookie(request, response);
 
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .success(true)
-                        .statusCode(HttpStatus.OK.value())
-                        .message("Logged out successfully")
-                        .build()
-        );
-    }
+                return ApiNoDataResponse.builder()
+                                .success(true)
+                                .statusCode(HttpStatus.OK.value())
+                                .message("Logout successful")
+                                .build();
+        }
 
-    @GetMapping("/account")
-    public ResponseEntity<AccountResponse> getAccount(Authentication authentication) {
-        String userId = authentication.getName(); // Lấy ID từ JWT
-        AccountResponse account = authService.getAccount(userId);
-        return ResponseEntity.ok(account);
-    }
+        @GetMapping("/account")
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<AccountResponse> getAccount(Authentication authentication) {
+                String userId = authentication.getName(); // Lấy ID từ JWT
+                AccountResponse account = authService.getAccount(userId);
+                return ApiResponse.<AccountResponse>builder()
+                                .success(true)
+                                .statusCode(HttpStatus.OK.value())
+                                .message("Get account successful!")
+                                .data(account)
+                                .build();
+        }
 }

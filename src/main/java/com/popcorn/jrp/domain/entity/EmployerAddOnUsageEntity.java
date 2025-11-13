@@ -39,7 +39,7 @@ public class EmployerAddOnUsageEntity extends BaseEntity {
         ACTIVE, EXPIRED
     }
 
-    @PrePersist
+    @Override
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }

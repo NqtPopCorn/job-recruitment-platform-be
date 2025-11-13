@@ -23,6 +23,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        System.out.println("🔥 [JwtAuthFilter] Request đi qua filter: " + request.getRequestURI());
+
         String path = request.getRequestURI();
 
         // Bỏ qua JWT filter cho các endpoint public
@@ -46,34 +48,32 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
+            System.out.println("Access Token: " + token);
             String userId = jwtUtil.extractID(token);
             String role = jwtUtil.extractRole(token);
 
             if (!jwtUtil.isAccessToken(token)) {
-//                sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
-//                        "This is a Refresh Token, rejecting...");
+                // sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
+                // "This is a Refresh Token, rejecting...");
             }
 
             if (userId != null && jwtUtil.isTokenValid(token, userId)) {
                 // Thêm authorities với role
                 List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
-                );
+                        new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
 
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userId, null, authorities);
-                logger.info("Authenticated with userId: "+ userId);
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userId, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
-            else {
+            } else {
                 logger.info("Token expired");
-//                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-//                        "Token has expired");
+                // sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                // "Token has expired");
             }
         } catch (Exception e) {
             logger.info("Invalid token or error");
-//            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-//                    "Invalid token");
+            // sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+            // "Invalid token");
         } finally {
             chain.doFilter(request, response);
         }
@@ -99,17 +99,16 @@ public class JwtFilter extends OncePerRequestFilter {
         return null;
     }
 
-//    private void sendErrorResponse(HttpServletResponse response, int status, String message)
-//            throws IOException {
-//        response.setStatus(status);
-//        response.setContentType("application/json");
-//        response.setCharacterEncoding("UTF-8");
-//
-//        String error = status == HttpServletResponse.SC_UNAUTHORIZED ? "Unauthorized" : "Forbidden";
-//        String jsonResponse = String.format(
-//                "{\"statusCode\": %d, \"message\": \"%s\", \"error\": \"%s\"}",
-//                status, message, error
-//        );
-//        response.getWriter().write(jsonResponse);
-//    }
+    private void sendErrorResponse(HttpServletResponse response, int status, String message)
+            throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        String error = status == HttpServletResponse.SC_UNAUTHORIZED ? "Unauthorized" : "Forbidden";
+        String jsonResponse = String.format(
+                "{\"statusCode\": %d, \"message\": \"%s\", \"error\": \"%s\"}",
+                status, message, error);
+        response.getWriter().write(jsonResponse);
+    }
 }

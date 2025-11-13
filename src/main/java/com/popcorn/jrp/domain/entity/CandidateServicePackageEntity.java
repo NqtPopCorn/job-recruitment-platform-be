@@ -42,7 +42,7 @@ public class CandidateServicePackageEntity extends BaseEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @PrePersist
+    @Override
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();

@@ -30,10 +30,6 @@ public interface CandidateSectionMapper {
     @Mapping(source = "category", target = "industry")
     @Mapping(target = "startTime", source = "startTime", qualifiedByName = "instantToLocalDate")
     @Mapping(target = "endTime", source = "endTime", qualifiedByName = "instantToLocalDate")
-    @Mapping(target = "candidate", ignore = true) // Service sẽ thiết lập quan hệ này
-    @Mapping(target = "id", ignore = true)        // Sẽ được tạo bởi DB
-    @Mapping(target = "createdAt", ignore = true) // Sẽ được xử lý bởi @PrePersist
-    @Mapping(target = "updatedAt", ignore = true) // Sẽ được xử lý bởi @PreUpdate
     CandidateSectionEntity toEntity(CreateCandidateAboutDto dto);
 
     // =================================================================
@@ -79,14 +75,16 @@ public interface CandidateSectionMapper {
 
     @Named("instantToLocalDate")
     default LocalDate instantToLocalDate(Instant instant) {
-        if (instant == null) return null;
+        if (instant == null)
+            return null;
         // Chuyển Instant (UTC) về múi giờ hệ thống để lấy ngày
         return instant.atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     @Named("localDateToInstant")
     default Instant localDateToInstant(LocalDate localDate) {
-        if (localDate == null) return null;
+        if (localDate == null)
+            return null;
         // Chuyển ngày (không có múi giờ) thành Instant (UTC) tại thời điểm 00:00
         // theo múi giờ hệ thống
         return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
@@ -94,7 +92,8 @@ public interface CandidateSectionMapper {
 
     @Named("localDateTimeToInstant")
     default Instant localDateTimeToInstant(LocalDateTime localDateTime) {
-        if (localDateTime == null) return null;
+        if (localDateTime == null)
+            return null;
         // Chuyển LDT (theo múi giờ hệ thống) sang Instant (UTC)
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
     }

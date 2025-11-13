@@ -1,4 +1,4 @@
-package com.popcorn.jrp.domain.response.employer;
+package com.popcorn.jrp.domain.response.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

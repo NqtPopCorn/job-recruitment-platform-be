@@ -1,50 +1,87 @@
 package com.popcorn.jrp.domain.entity;
+
+import com.popcorn.jrp.helper.JsonListStringConverter;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "jobs")
 @Getter
 @Setter
-public class JobEntity extends BaseEntity{
-    @ManyToOne
-    @JoinColumn(name = "employer_id", nullable = false)
-    private EmployerEntity employer;
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class JobEntity extends BaseEntity {
 
-    private String jobTitle;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "employer_id", nullable = true)
+        private EmployerEntity employer;
 
-    @Column(columnDefinition = "JSON")
-    private String skills; // JSON
+        @OneToMany(mappedBy = "job")
+        private List<ApplicationEntity> applications;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+        @Column(columnDefinition = "TEXT")
+        private String title;
 
-    @Column(columnDefinition = "JSON")
-    private String jobType; // JSON
+        @Column(columnDefinition = "TEXT")
+        private String description;
 
-    private String level;
+        private String level;
 
-    @Column(columnDefinition = "JSON")
-    private String responsibilities; // JSON
+        @Column(columnDefinition = "JSON")
+        @Convert(converter = JsonListStringConverter.class)
+        private List<String> responsibilities; // JSON
 
-    @Column(columnDefinition = "JSON")
-    private String skillAndExperiences; // JSON
+        @Column(columnDefinition = "JSON")
+        @Convert(converter = JsonListStringConverter.class)
+        private List<String> skillAndExperiences; // JSON
 
-    @Column(columnDefinition = "JSON")
-    private String workTime; // JSON
+        private int experience;
 
-    private String salary;
-    private Integer experience;
-    private String industry;
-    private Integer quantity;
-    private String country;
-    private String city;
-    private String location;
-    private LocalDate expirationDate;
-    private Boolean status;
-    private Boolean isDeleted;
+        @Column(precision = 12, scale = 2)
+        private BigDecimal minSalary;
+        @Column(precision = 12, scale = 2)
+        private BigDecimal maxSalary;
+        private String currency;
+        private Boolean negotiable;
+
+        private String workTimeFrom;
+        private String workTimeTo;
+
+        private String industry;
+        private int quantity;
+        private String country;
+        private String city;
+        private String location;
+        private LocalDateTime expirationDate;
+
+        @Column(nullable = false)
+        private Boolean status;
+
+        @Convert(converter = JsonListStringConverter.class)
+        @Column(columnDefinition = "JSON")
+        private List<String> skills;
+
+        @Convert(converter = JsonListStringConverter.class)
+        @Column(columnDefinition = "JSON")
+        private List<String> jobTypes;
+
+        @Column(columnDefinition = "JSON")
+        private String createdBy; // JSON {userId, email}
+
+        @Column(columnDefinition = "JSON")
+        private String updatedBy;
+
+        @Column(columnDefinition = "JSON")
+        private String deletedBy;
+
 }
-

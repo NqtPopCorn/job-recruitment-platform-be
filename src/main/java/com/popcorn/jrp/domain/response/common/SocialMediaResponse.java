@@ -1,4 +1,4 @@
-package com.popcorn.jrp.domain.response.candidate;
+package com.popcorn.jrp.domain.response.common;
 
 import lombok.*;
 
@@ -10,4 +10,3 @@ public class SocialMediaResponse {
     private String platform;
     private String url;
 }
-

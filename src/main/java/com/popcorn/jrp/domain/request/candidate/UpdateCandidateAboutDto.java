@@ -1,6 +1,9 @@
 package com.popcorn.jrp.domain.request.candidate;
 
 import java.time.Instant;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +14,8 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UpdateCandidateAboutDto {
 
     private String category;

@@ -87,3 +87,61 @@ interface CreateCandidateDto {
 ## 3. GET DETAIL CANDIDATE BY ID
 > GET /api/v1/candidate/details/:id
 
+## UPLOAD FILE AND RESUME 
+
+
+```js
+// <-- Upload candidate resume !-->
+  @Post('resume/candidate/:id')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(), // lưu tạm vào memory
+    }),
+  )
+  async uploadResumeFile(
+    @Param('id') candidateId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const existingFiles =
+      await this.resumeService.getTheNumberOfResumesByCandidateId(candidateId);
+    if (existingFiles >= Number(process.env.MAX_RESUME_COUNT)) {
+      throw new BadRequestException(
+        'Ứng viên đã đạt tối đa 10 CV, không thể upload thêm.',
+      );
+    }
+
+    // Lưu file từ memory vào disk
+    const ext = extname(file.originalname);
+    const fileName = ${basename(file.originalname, ext)}-${Date.now()}${ext};
+    await fs.promises.writeFile(./images/resumes/${fileName}, file.buffer);
+
+    // Lưu info vào DB
+    const res = await this.uploadService.uploadResume(candidateId, fileName);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Upload resume ứng viên thành công!',
+      data: ResumeResponseDto.builder()
+        .withId(res._id.toString())
+        .withCandidateId(res.candidateId.toString())
+        .withFileName(res.fileName || '')
+        .build(),
+    };
+  }
+
+  @Delete('resume/:id')
+  @HttpCode(HttpStatus.OK)
+  async deleteResume(
+    @Param('id') id: string,
+    @Body('filename') filename: string,
+  ) {
+    await this.uploadService.deleteResume(id, filename);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Xóa resume ứng viên thành công!',
+    };
+  }
+```

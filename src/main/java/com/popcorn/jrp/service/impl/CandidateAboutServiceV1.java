@@ -33,27 +33,26 @@ public class CandidateAboutServiceV1 implements CandidateAboutService {
 
     @Override
     @Transactional
-    public CandidateAboutDto createCandidateAbout(CreateCandidateAboutDto createDto) {
+    public CandidateSectionBlockDto createCandidateAbout(CreateCandidateAboutDto createDto) {
         CandidateEntity candidate = candidateRepository.findById(createDto.getCandidateId())
                 .orElseThrow(() -> new NotFoundException(
-                        "Candidate với ID: " + createDto.getCandidateId()
-                ));
+                        "Candidate với ID: " + createDto.getCandidateId()));
         CandidateSectionEntity newSection = candidateSectionMapper.toEntity(createDto);
         newSection.setCandidate(candidate);
 
         CandidateSectionEntity savedSection = candidateSectionRepository.save(newSection);
 
-        return candidateSectionMapper.toCandidateAboutDto(savedSection);
+        return candidateSectionMapper.toCandidateSectionBlockDto(savedSection);
     }
 
     @Override
     @Transactional
-    public CandidateAboutDto updateCandidateAbout(Long id, UpdateCandidateAboutDto updateDto) {
+    public CandidateSectionBlockDto updateCandidateAbout(Long id, UpdateCandidateAboutDto updateDto) {
         CandidateSectionEntity existingSection = candidateSectionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("CandidateSection với ID: " + id));
         candidateSectionMapper.updateEntityFromDto(updateDto, existingSection);
         CandidateSectionEntity updatedSection = candidateSectionRepository.save(existingSection);
-        return candidateSectionMapper.toCandidateAboutDto(updatedSection);
+        return candidateSectionMapper.toCandidateSectionBlockDto(updatedSection);
     }
 
     @Override
@@ -84,7 +83,8 @@ public class CandidateAboutServiceV1 implements CandidateAboutService {
                     List<CandidateSectionEntity> sectionsInCategory = entry.getValue();
 
                     // Chuyển danh sách entity trong category thành danh sách block DTO
-                    List<CandidateSectionBlockDto> blockList = candidateSectionMapper.toCandidateSectionBlockDtoList(sectionsInCategory);
+                    List<CandidateSectionBlockDto> blockList = candidateSectionMapper
+                            .toCandidateSectionBlockDtoList(sectionsInCategory);
 
                     // Tạo đối tượng Category DTO
                     CandidateSectionCategoryDto categoryDto = new CandidateSectionCategoryDto();
@@ -92,11 +92,15 @@ public class CandidateAboutServiceV1 implements CandidateAboutService {
                     categoryDto.setBlockList(blockList);
 
                     // TODO: Thêm logic để xác định themeColor dựa trên categoryName nếu cần
-                    // Ví dụ: if (categoryName.equals("Works & Experiences")) categoryDto.setThemeColor("theme-blue");
+                    // Ví dụ: if (categoryName.equals("Works & Experiences"))
+                    // categoryDto.setThemeColor("theme-blue");
 
-                    if (categoryName.equals("Works & Experiences")) categoryDto.setThemeColor("theme-blue");
-                    else if(categoryName.equals("'Awards")) categoryDto.setThemeColor("theme-yellow");
-                    else categoryDto.setThemeColor("");
+                    if (categoryName.equals("Works & Experiences"))
+                        categoryDto.setThemeColor("theme-blue");
+                    else if (categoryName.equals("'Awards"))
+                        categoryDto.setThemeColor("theme-yellow");
+                    else
+                        categoryDto.setThemeColor("");
 
                     return categoryDto;
                 })

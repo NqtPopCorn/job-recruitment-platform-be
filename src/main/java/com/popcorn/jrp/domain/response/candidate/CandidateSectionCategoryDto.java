@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 /**
  * DTO đại diện cho một danh mục (ví dụ: "Educations", "Works & Experiences")
  * chứa danh sách các khối thông tin.
- * Đây là một phần của response từ endpoint GET .../details/candidate/:candidateId
+ * Đây là một phần của response từ endpoint GET
+ * .../details/candidate/:candidateId
  */
 @Data
 @NoArgsConstructor

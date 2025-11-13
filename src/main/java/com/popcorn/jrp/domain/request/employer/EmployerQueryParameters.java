@@ -1,5 +1,7 @@
 package com.popcorn.jrp.domain.request.employer;
 
+import java.time.LocalDate;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,12 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmployerQueryParameters {
 
-    private int page = 1;
+    private int page = 0;
     private int size = 10;
     private String sort;
     private String search;
     private String location;
     private String primaryIndustry;
     private int foundationDateMin = 1900;
-    private int foundationDateMax = 2025;
+    private int foundationDateMax = LocalDate.now().getYear();
 }

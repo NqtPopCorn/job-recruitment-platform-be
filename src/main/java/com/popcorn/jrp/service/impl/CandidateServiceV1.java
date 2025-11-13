@@ -3,7 +3,6 @@ package com.popcorn.jrp.service.impl;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.mapper.CandidateMapper;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
-import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
@@ -24,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -33,17 +34,15 @@ import java.util.List;
 public class CandidateServiceV1 implements CandidateService {
 
     CandidateRepository candidateRepository;
-    @Qualifier("candidateMapper")
+    @Qualifier("candidateMapperImpl")
     CandidateMapper mapper;
     CandidateSpecification candidateSpecification;
-
 
     @Override
     public ApiPageResponse<CandidateResponse> getCandidates(CandidateSearchRequest request, Pageable pageable) {
         Specification<CandidateEntity> spec = candidateSpecification.getPublicSpecification(request);
         try {
-            var page = candidateRepository
-                    .findAll(spec, pageable);
+            var page = candidateRepository.findAll(spec, pageable);
             return mapper.toApiPageResponse(page.map(mapper::toResponse));
         } catch (Exception e) {
             throw new BadRequestException("Page request error: " + e.getMessage());
@@ -52,22 +51,16 @@ public class CandidateServiceV1 implements CandidateService {
 
     @Override
     public CandidateDetailsResponse getCandidateById(Long id) {
-        var found = candidateRepository.findById(id).orElseThrow(() -> new NotFoundException("Candidate"));
-        return mapper.toDetailsResponse(found);
-    }
-
-    @Override
-    public CandidateDetailsResponse getCandidateByUserId(Long userId) {
-        var found = candidateRepository.getCandidateByUserId(userId)
+        CandidateEntity found = candidateRepository.findByIdAndStatusTrueAndIsDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Candidate"));
         return mapper.toDetailsResponse(found);
     }
 
     @Override
-    public CandidateDetailsResponse createCandidate(CreateCandidateDto dto) {
-        CandidateEntity candidateEntity = mapper.createEntity(dto);
-        candidateRepository.save(candidateEntity);
-        return mapper.toDetailsResponse(candidateEntity);
+    public CandidateDetailsResponse getCandidateByUserId(Long userId) {
+        CandidateEntity found = candidateRepository.findByUserIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new NotFoundException("Candidate"));
+        return mapper.toDetailsResponse(found);
     }
 
     @Override
@@ -84,9 +77,10 @@ public class CandidateServiceV1 implements CandidateService {
         CandidateEntity candidateEntity = candidateRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Candidate"));
         candidateEntity.setStatus(false);
+        candidateEntity.setDeleted(true);
         candidateRepository.save(candidateEntity);
         var res = mapper.toSoftDeleteResponse(candidateEntity);
-        res.setUpdatedAt(LocalDateTime.now().toString());
+        res.setDeletedAt(LocalDateTime.now());
         return res;
     }
 
@@ -98,7 +92,7 @@ public class CandidateServiceV1 implements CandidateService {
     }
 
     @Override
-    @Cacheable("industryList") // just for demo, cache without TTL
+    @Cacheable("industryList")
     // @CacheEvict(cacheNames = "industryList") //delete cache
     public List<String> getIndustryList() {
         return candidateRepository.findAll().stream()

@@ -57,8 +57,9 @@ public class EmployerSubscriptionEntity extends BaseEntity {
         ACTIVE, EXPIRED, SUSPENDED, QUEUED
     }
 
-    @PrePersist
+    @Override
     protected void onCreate() {
+        super.onCreate();
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }

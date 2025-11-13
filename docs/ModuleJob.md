@@ -1079,7 +1079,7 @@ Content-Type: application/json
 }
 ```
 
-## 11. UPDATE PAGINATION Job
+## 11. UPDATE Job
 
 ### Description
 
