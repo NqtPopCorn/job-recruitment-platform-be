@@ -47,25 +47,7 @@ public class EmployerSubscriptionEntity extends BaseEntity {
     @Column(name = "renew_count", nullable = false)
     private Integer renewCount = 0;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     public enum SubscriptionStatus {
         ACTIVE, EXPIRED, SUSPENDED, QUEUED
-    }
-
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

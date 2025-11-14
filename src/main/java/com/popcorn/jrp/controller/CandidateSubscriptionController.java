@@ -60,7 +60,9 @@ public class CandidateSubscriptionController {
     @RequireRole({"candidate"})
     public ResponseEntity<CandidateSubscriptionResponse> getActiveSubscription(
             Authentication authentication) {
+        System.out.println(123);
         Long candidateId = Long.parseLong(authentication.getName());
+        System.out.println(candidateId);
         return ResponseEntity.ok(subscriptionService.getActiveSubscription(candidateId));
     }
 

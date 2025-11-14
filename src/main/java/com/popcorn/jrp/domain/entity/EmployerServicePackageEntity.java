@@ -33,17 +33,9 @@ public class EmployerServicePackageEntity extends BaseEntity {
     @Column(nullable = false)
     private Integer highlightJobLimit;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     @Override
     protected void onCreate() {
         super.onCreate();
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
         if (isLifetime) {
             durationDay = null;
         }
@@ -51,7 +43,6 @@ public class EmployerServicePackageEntity extends BaseEntity {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
         if (isLifetime) {
             durationDay = null;
         }
