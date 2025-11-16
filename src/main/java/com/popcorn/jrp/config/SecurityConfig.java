@@ -38,6 +38,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/login-google",
                                 "/api/v1/auth/register",
                                 "/refresh")
                         .permitAll()
@@ -50,13 +51,14 @@ public class SecurityConfig {
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3001")); // domain frontend
+        config.setAllowedOrigins(List.of("http://localhost:3001","http://localhost:5500" )); // domain frontend
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // nếu bạn dùng cookie hoặc Authorization header

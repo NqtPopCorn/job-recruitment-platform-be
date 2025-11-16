@@ -3,17 +3,21 @@ package com.popcorn.jrp.service.impl;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.entity.EmployerEntity;
 import com.popcorn.jrp.domain.entity.UserEntity;
+import com.popcorn.jrp.domain.request.auth.LoginGoogleRequest;
 import com.popcorn.jrp.domain.request.auth.LoginRequest;
+import com.popcorn.jrp.domain.request.auth.RegisterGoogleRequest;
 import com.popcorn.jrp.domain.request.auth.RegisterRequest;
 import com.popcorn.jrp.domain.response.auth.AccountResponse;
+import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.CustomException;
 import com.popcorn.jrp.exception.NotFoundException;
 import com.popcorn.jrp.repository.CandidateRepository;
 import com.popcorn.jrp.repository.EmployerRepository;
 import com.popcorn.jrp.repository.UserRepository;
+import com.popcorn.jrp.security.GoogleTokenVerifier;
 import com.popcorn.jrp.security.JwtUtil;
-import com.popcorn.jrp.service.CandidateService;
 
+import com.popcorn.jrp.service.GoogleAuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +30,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.math.BigDecimal;
-import java.sql.SQLOutput;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import com.popcorn.jrp.service.AuthService;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService implements com.popcorn.jrp.service.AuthService {
+public class AuthServiceImpl implements AuthService, GoogleAuthService {
 
     @Value("${jwt.token.expiration:1h}") // đọc từ application.properties, mặc định 1h
     private String jwtTokenExpiration;
@@ -53,6 +59,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
     private final JwtUtil jwtUtil;
     private final CandidateRepository candidateRepository;
     private final EmployerRepository employerRepository;
+    private final GoogleTokenVerifier googleTokenVerifier;
 
     @Transactional
     public UserEntity register(RegisterRequest request) {
@@ -140,17 +147,18 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
         }
     }
 
+    @Override
     public String login(LoginRequest request) {
         try {
             // Tìm user theo email
             UserEntity user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new CustomException(
                             HttpStatus.UNAUTHORIZED,
-                            "Invalid credentials"));
+                            "User not found"));
 
             // Kiểm tra password
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                throw new CustomException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+                throw new CustomException(HttpStatus.UNAUTHORIZED, "Invalid password");
             }
 
             // Tạo access token với ID, email và role
@@ -169,6 +177,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
         }
     }
 
+    @Override
     public AccountResponse getAccount(String userId) {
         try {
             UserEntity user = userRepository.findById(Long.parseLong(userId))
@@ -277,7 +286,7 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
     private UserEntity.Role parseRole(String roleStr) {
         return Arrays
                 .stream(UserEntity.Role.values())
-                .filter(r -> r.name().equalsIgnoreCase(roleStr.trim()))
+                .filter(r -> r.name().equalsIgnoreCase(roleStr))
                 .findFirst()
                 .orElseThrow(() -> new CustomException(
                         HttpStatus.BAD_REQUEST,
@@ -305,4 +314,66 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
         };
     }
 
+    @Override
+    public String loginWithGoogle(LoginGoogleRequest request) {
+        var payload = googleTokenVerifier.verify(request.getToken());
+        if(!payload.getEmailVerified()) {
+            throw new BadRequestException("Email is not verified by Google");
+        }
+        String email = payload.getEmail();
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User with email " + email));
+        return jwtUtil.generateAccessToken(
+                String.valueOf(user.getId()),
+                user.getEmail(),
+                user.getRole().name());
+    }
+
+    @Override
+    @Transactional
+    public String registerWithGoogle(RegisterGoogleRequest request) {
+        var payload = googleTokenVerifier.verify(request.getToken());
+        if(!payload.getEmailVerified()) {
+            throw new BadRequestException("Email is not verified by Google");
+        }
+        String email = payload.getEmail();
+        String name = payload.get("name").toString();
+        // Kiểm tra email đã tồn tại
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new CustomException(
+                    HttpStatus.BAD_REQUEST,
+                    "Email already exists");
+        }
+
+        // Tạo user mới
+        UserEntity user = UserEntity.builder()
+                .email(email)
+                .password(passwordEncoder.encode(UUID.randomUUID().toString())) // random password
+                .role(parseRole(request.getRole()))
+                .build();
+        userRepository.save(user);
+
+        switch (user.getRole()) {
+            case candidate -> {
+                CandidateEntity candidate = CandidateEntity.builder()
+                        .name(name)
+                        .email(email)
+                        .build();
+                candidate.setUser(user);
+                candidateRepository.save(candidate);
+            }
+            case employer -> {
+                EmployerEntity employer = EmployerEntity.builder()
+                        .name(name)
+                        .email(email)
+                        .build();
+                employer.setUser(user);
+                employerRepository.save(employer);
+            }
+            default -> throw new BadRequestException("Invalid role: " + request.getRole());
+        }
+        return jwtUtil.generateAccessToken(
+                String.valueOf(user.getId()),
+                user.getEmail(),
+                user.getRole().name());
+    }
 }
