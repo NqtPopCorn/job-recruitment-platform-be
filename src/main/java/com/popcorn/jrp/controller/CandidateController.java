@@ -1,13 +1,12 @@
 package com.popcorn.jrp.controller;
 
-import com.popcorn.jrp.domain.mapper.CandidateMapper;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
-import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
+import com.popcorn.jrp.domain.response.candidate.CandidateStatisticsResponse;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.*;
 import com.popcorn.jrp.domain.response.candidate.*;
+import com.popcorn.jrp.domain.response.notification.NotificationResponse;
 import com.popcorn.jrp.service.CandidateService;
-import com.popcorn.jrp.service.ResumeService;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -113,4 +111,46 @@ public class CandidateController {
                                 .data(data)
                                 .build());
         }
+
+    // GET CANDIDATE STATISTICS
+    @GetMapping("/statistics/{candidateId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiDataResponse<CandidateStatisticsResponse> getCandidateStatistics(
+            @PathVariable Long candidateId) {
+        CandidateStatisticsResponse data = candidateService.getCandidateStatistics(candidateId);
+        return ApiDataResponse.<CandidateStatisticsResponse>builder()
+                .data(data)
+                .message("Lấy thống kê dashboard candidate thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    // GET LATEST 6 NOTIFICATIONS
+    @GetMapping("/notifications/{candidateId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResultsResponse<NotificationResponse> getLatestNotifications(
+            @PathVariable Long candidateId) {
+        List<NotificationResponse> data = candidateService.getLatestNotifications(candidateId);
+        return ApiResultsResponse.<NotificationResponse>builder()
+                .results(data)
+                .message("Lấy 6 thông báo mới nhất thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    @GetMapping("/{candidateId}/jobs-applied-recently")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResultsResponse<JobAppliedRecentlyResponse> getJobsAppliedRecently(
+            @PathVariable Long candidateId,
+            @RequestParam(required = false, defaultValue = "6") Integer limit) {
+
+        List<JobAppliedRecentlyResponse> data = candidateService
+                .getRecentlyAppliedJobs(candidateId, limit);
+
+        return ApiResultsResponse.<JobAppliedRecentlyResponse>builder()
+                .results(data)
+                .message("Lấy danh sách công việc đã ứng tuyển gần đây thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
 }

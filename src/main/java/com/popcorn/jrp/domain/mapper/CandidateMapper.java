@@ -3,6 +3,7 @@ package com.popcorn.jrp.domain.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.popcorn.jrp.domain.entity.ApplicationEntity;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.candidate.CandidateDetailsAdminResponse;
@@ -40,6 +41,26 @@ public interface CandidateMapper extends PageMapper {
 
     SoftDeleteCandidateResponse toSoftDeleteResponse(CandidateEntity candidateEntity);
 
+    @Mapping(target = "jobId", source = "job.id")
+    @Mapping(target = "applicationId", source = "id")
+    @Mapping(target = "jobTitle", source = "job.title")
+    @Mapping(target = "companyName", source = "job.employer.name")
+    @Mapping(target = "companyLogo", source = "job.employer.logo")
+    @Mapping(target = "location", source = "job.location")
+    @Mapping(target = "city", source = "job.city")
+    @Mapping(target = "country", source = "job.country")
+    @Mapping(target = "minSalary", source = "job.minSalary")
+    @Mapping(target = "maxSalary", source = "job.maxSalary")
+    @Mapping(target = "currency", source = "job.currency")
+    @Mapping(target = "appliedAt", source = "appliedAt")
+    @Mapping(target = "applicationStatus", expression = "java(application.getStatus() != null ? application.getStatus().name() : \"PENDING\")")
+    @Mapping(target = "jobTypes", source = "job.jobTypes")
+    @Mapping(target = "isUrgent", expression = "java(application.getJob() != null && application.getJob().getExpirationDate() != null && application.getJob().getExpirationDate().isBefore(java.time.LocalDateTime.now().plusDays(3)))")
+    @Mapping(target = "level", source = "job.level")
+    JobAppliedRecentlyResponse toJobAppliedRecentlyResponse(ApplicationEntity application);
+
+    // Map list of applications
+    List<JobAppliedRecentlyResponse> toJobAppliedRecentlyResponseList(List<ApplicationEntity> applications);
     // CandidateEntity createEntity(CreateCandidateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

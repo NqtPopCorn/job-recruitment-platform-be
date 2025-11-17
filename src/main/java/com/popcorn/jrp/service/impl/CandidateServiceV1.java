@@ -1,31 +1,39 @@
 package com.popcorn.jrp.service.impl;
 
+import com.popcorn.jrp.domain.entity.ApplicationEntity;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
+import com.popcorn.jrp.domain.entity.NotificationEntity;
 import com.popcorn.jrp.domain.mapper.CandidateMapper;
+import com.popcorn.jrp.domain.mapper.NotificationMapper;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
+import com.popcorn.jrp.domain.response.candidate.CandidateStatisticsResponse;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
+import com.popcorn.jrp.domain.response.candidate.JobAppliedRecentlyResponse;
 import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
+import com.popcorn.jrp.domain.response.notification.NotificationResponse;
 import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.NotFoundException;
+import com.popcorn.jrp.repository.ApplicationRepository;
 import com.popcorn.jrp.repository.CandidateRepository;
+import com.popcorn.jrp.repository.ChatRepository;
+import com.popcorn.jrp.repository.NotificationRepository;
 import com.popcorn.jrp.repository.spec.CandidateSpecification;
 import com.popcorn.jrp.service.CandidateService;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,6 +42,11 @@ import java.util.Optional;
 public class CandidateServiceV1 implements CandidateService {
 
     CandidateRepository candidateRepository;
+    ApplicationRepository applicationRepository;
+    NotificationRepository notificationRepository;
+    ChatRepository chatRepository;
+    NotificationMapper notificationMapper;
+
     @Qualifier("candidateMapperImpl")
     CandidateMapper mapper;
     CandidateSpecification candidateSpecification;
@@ -108,5 +121,65 @@ public class CandidateServiceV1 implements CandidateService {
                 .flatMap(c -> c.getSkills().stream())
                 .distinct()
                 .toList();
+    }
+
+    @Override
+    public CandidateStatisticsResponse getCandidateStatistics(Long candidateId) {
+
+        CandidateEntity candidate = candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new NotFoundException("Candidate with ID " + candidateId + " not found"));
+
+        Long userId = candidate.getUser() != null ? candidate.getUser().getId() : null;
+        if (userId == null) {
+            throw new BadRequestException("Candidate does not have associated user");
+        }
+
+        Long appliedJobsCount = applicationRepository.countByCandidateId(candidateId);
+
+        Long jobAlertsCount = notificationRepository.countByUserId(userId);
+
+        Long messagesCount = chatRepository.countByUserId(userId);
+
+
+        Long shortlistCount = 0L;
+
+        return CandidateStatisticsResponse.builder()
+                .appliedJobsCount(appliedJobsCount)
+                .jobAlertsCount(jobAlertsCount)
+                .messagesCount(messagesCount)
+                .shortlistCount(shortlistCount)
+                .build();
+    }
+
+    @Override
+    public List<NotificationResponse> getLatestNotifications(Long candidateId) {
+
+        CandidateEntity candidate = candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new NotFoundException("Candidate with ID " + candidateId + " not found"));
+
+        Long userId = candidate.getUser() != null ? candidate.getUser().getId() : null;
+        if (userId == null) {
+            throw new BadRequestException("Candidate does not have associated user");
+        }
+
+        Pageable pageable = PageRequest.of(0, 6);
+        List<NotificationEntity> notifications = notificationRepository.findLatestByUserId(userId, pageable);
+
+        return notificationMapper.toResponseList(notifications);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<JobAppliedRecentlyResponse> getRecentlyAppliedJobs(Long candidateId, Integer limit) {
+        if (!candidateRepository.existsById(candidateId)) {
+            throw new BadRequestException("Candidate not found with id: " + candidateId);
+        }
+
+        int pageSize = (limit != null && limit > 0) ? limit : 6;
+
+        List<ApplicationEntity> applications = applicationRepository
+                .findRecentApplicationsByCandidateId(candidateId, PageRequest.of(0, pageSize));
+
+        return mapper.toJobAppliedRecentlyResponseList(applications);
     }
 }
