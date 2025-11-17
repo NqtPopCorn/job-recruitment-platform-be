@@ -21,18 +21,19 @@ public class CandidateDetailsAdminResponse {
     private String userId;
     private String avatar;
     private String name;
+    private String email;
     private LocalDate birthday;
     private String designation;
     private String location;
     private String country;
     private String city;
     private Double hourlyRate;
-    private List<String> tags;              // skills
-    private String category;                // industry
+    private List<String> tags; // skills
+    private String category; // industry
     private String gender;
     private LocalDateTime createdAt;
     private Integer experience;
-    private String qualification;           // educationLevel
+    private String qualification; // educationLevel
     private String currentSalary;
     private String expectedSalary;
     private String description;

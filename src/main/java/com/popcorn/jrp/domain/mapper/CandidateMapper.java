@@ -40,6 +40,9 @@ public interface CandidateMapper extends PageMapper {
 
     SoftDeleteCandidateResponse toSoftDeleteResponse(CandidateEntity candidateEntity);
 
+    @Mapping(target = "userId", source = "user.id")
+    CandidateForChat toForChat(CandidateEntity entity);
+
     // CandidateEntity createEntity(CreateCandidateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -68,7 +71,8 @@ public interface CandidateMapper extends PageMapper {
     }
 
     default String formatSalary(java.math.BigDecimal salary, String currency) {
-        if (salary == null) return "0 VND";
+        if (salary == null)
+            return "0 VND";
         return String.format("%,d %s", salary.longValue(), currency != null ? currency : "VND");
     }
 }

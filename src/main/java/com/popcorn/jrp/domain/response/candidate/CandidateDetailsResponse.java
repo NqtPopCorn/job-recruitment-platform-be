@@ -18,7 +18,6 @@ import com.popcorn.jrp.domain.response.common.SocialMediaDto;
 public class CandidateDetailsResponse extends CandidateResponse {
     private Long userId;
     private LocalDate birthday;
-    private String email;
     private String industry;
     private Integer experience;
     private String qualification;

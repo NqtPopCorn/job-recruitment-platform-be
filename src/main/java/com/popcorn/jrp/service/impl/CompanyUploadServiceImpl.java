@@ -60,8 +60,6 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
         }
     }
 
-    // --- CÁC HÀM GET URL (Triển khai Interface mới) ---
-
     @Override
     @Transactional(readOnly = true)
     public String getLogoUrl(Long companyId) {
@@ -206,14 +204,4 @@ public class CompanyUploadServiceImpl implements CompanyUploadService {
         }
     }
 
-    /**
-     * Xây dựng URL để client có thể truy cập file.
-     */
-    private String buildFileUrl(String pathPrefix, String filename) {
-        if (filename == null || filename.isEmpty()) {
-            return "";
-        }
-        // Ví dụ: /images/companies/abc-123.jpg
-        return "/" + pathPrefix + "/" + filename;
-    }
 }

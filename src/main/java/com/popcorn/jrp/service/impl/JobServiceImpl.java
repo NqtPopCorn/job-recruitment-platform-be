@@ -160,6 +160,9 @@ public class JobServiceImpl implements JobService {
         EmployerEntity employer = employerRepository.findById(employerId)
                 .orElseThrow(() -> new NotFoundException("Employer với ID: " + employerId));
 
+        // Check SemployerServicePackage
+
+        // Create new Job
         JobEntity entity = jobMapper.toEntity(createDto);
         entity.setEmployer(employer);
         entity.setStatus(true); // Mặc định active

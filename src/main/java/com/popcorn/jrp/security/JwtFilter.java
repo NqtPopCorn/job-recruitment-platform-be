@@ -23,7 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        System.out.println("🔥 [JwtAuthFilter] Request đi qua filter: " + request.getRequestURI());
+        System.out.println("[JwtAuthFilter] Request đi qua filter: " + request.getRequestURI());
 
         String path = request.getRequestURI();
 

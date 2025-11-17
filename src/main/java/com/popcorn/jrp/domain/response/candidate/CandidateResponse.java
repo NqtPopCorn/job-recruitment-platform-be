@@ -17,6 +17,7 @@ public class CandidateResponse {
     private Long id;
     private String avatar;
     private String name;
+    private String email;
     private String designation;
     private String location;
     private Double hourlyRate;

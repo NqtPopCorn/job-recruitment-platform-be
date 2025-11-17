@@ -21,12 +21,29 @@ public class CandidateSpecification {
                 .and(hasIsDeleted());
     }
 
+    // Filter candidates for chat
+    public Specification<CandidateEntity> getForChatSpecification(String search) {
+        return hasNameLike(search)
+                .and(hasEmailLike(search))
+                .and(hasStatus(true))
+                .and(hasIsDeleted());
+    }
+
     public Specification<CandidateEntity> hasNameLike(String name) {
         return (root, query, cb) -> {
             if (name == null || name.isEmpty()) {
                 return cb.conjunction(); // Trả về điều kiện luôn đúng (true)
             }
             return cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+        };
+    }
+
+    public Specification<CandidateEntity> hasEmailLike(String search) {
+        return (root, query, cb) -> {
+            if (search == null || search.isEmpty()) {
+                return cb.conjunction(); // Trả về điều kiện luôn đúng (true)
+            }
+            return cb.like(cb.lower(root.get("email")), "%" + search.toLowerCase() + "%");
         };
     }
 

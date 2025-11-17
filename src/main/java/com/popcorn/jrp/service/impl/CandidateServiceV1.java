@@ -6,6 +6,7 @@ import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
+import com.popcorn.jrp.domain.response.candidate.CandidateForChat;
 import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
 import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
 import com.popcorn.jrp.exception.BadRequestException;
@@ -17,6 +18,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -108,5 +110,13 @@ public class CandidateServiceV1 implements CandidateService {
                 .flatMap(c -> c.getSkills().stream())
                 .distinct()
                 .toList();
+    }
+
+    @Override
+    public Page<CandidateForChat> getCandidatesForChat(String search, Pageable pageable) {
+        Specification<CandidateEntity> spec = candidateSpecification.getForChatSpecification(search);
+        Page<CandidateEntity> pageEntity = candidateRepository.findAll(spec, pageable);
+        Page<CandidateForChat> pageForChat = pageEntity.map(mapper::toForChat);
+        return pageForChat;
     }
 }

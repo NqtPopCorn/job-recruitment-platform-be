@@ -34,6 +34,9 @@ public class UserEntity extends BaseEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConversationMemberEntity> conversations = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -49,6 +52,9 @@ public class UserEntity extends BaseEntity implements UserDetails {
 
     // @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     // private CandidateEntity candidate;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private EmployerEntity employer;
 
     private boolean status;
 

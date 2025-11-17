@@ -9,7 +9,6 @@ import java.util.List;
  * (Đã refactor để giống với CandidateUploadService)
  */
 public interface CompanyUploadService {
-
     /**
      * Lấy URL logo của công ty.
      * Tương ứng với: getAvatarUrl(Long candidateId)

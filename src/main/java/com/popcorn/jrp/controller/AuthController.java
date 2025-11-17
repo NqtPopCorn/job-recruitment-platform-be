@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
         private final AuthService authService;
@@ -78,9 +81,11 @@ public class AuthController {
 
         @GetMapping("/account")
         @ResponseStatus(HttpStatus.OK)
-        public ApiResponse<AccountResponse> getAccount(Authentication authentication) {
+        public ApiResponse<AccountResponse> getAccount(Authentication authentication,
+                        @CookieValue(name = "accessToken", required = false) String accessToken) {
                 String userId = authentication.getName(); // Lấy ID từ JWT
                 AccountResponse account = authService.getAccount(userId);
+                log.info("AccessToken from cookie: {}", accessToken);
                 return ApiResponse.<AccountResponse>builder()
                                 .success(true)
                                 .statusCode(HttpStatus.OK.value())

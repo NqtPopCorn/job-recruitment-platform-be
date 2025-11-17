@@ -70,8 +70,6 @@ public class CandidateUploadServiceImpl implements CandidateUploadService {
         }
     }
 
-    // --- CÁC HÀM GET URL ---
-
     @Override
     @Transactional(readOnly = true)
     public String getAvatarUrl(Long candidateId) {

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat WebSocket Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        #container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            color: #1a1a1a;
+        }
+        .control-group, .chat-group {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fdfdfd;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+        #btnConnect { background-color: #28a745; color: white; }
+        #btnConnect:hover { background-color: #218838; }
+        #btnDisconnect { background-color: #dc3545; color: white; }
+        #btnDisconnect:hover { background-color: #c82333; }
+        #btnSend { background-color: #007bff; color: white; }
+        #btnSend:hover { background-color: #0069d9; }
+        #btnMarkRead { background-color: #ffc107; color: #212529; }
+        #btnMarkRead:hover { background-color: #e0a800; }
+
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        #messages li {
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        #messages li:nth-child(odd) {
+            background-color: #e9ecef;
+        }
+        .status {
+            font-size: 12px;
+            font-family: monospace;
+            padding: 5px;
+            background: #eee;
+            border-radius: 3px;
+            display: inline-block;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+</head>
+<body>
+
+<div id="container">
+    <h2>WebSocket Chat Tester</h2>
+
+    <div class="control-group">
+        <h3>1. Kết nối (Authentication)</h3>
+        <label for="token">JWT Access Token (Không bao gồm "Bearer "):</label>
+        <input type="text" id="token" placeholder="Dán access token của bạn vào đây...">
+        <br/><br/>
+        <button id="btnConnect">Kết nối</button>
+        <button id="btnDisconnect" disabled>Ngắt kết nối</button>
+        <br/><br/>
+        <div id="status">Trạng thái: <span class="status" style="color: #dc3545;">🔴 CHƯA KẾT NỐI</span></div>
+    </div>
+
+    <div class="chat-group">
+        <h3>2. Gửi và Nhận Tin nhắn</h3>
+        <label for="conversationId">Conversation ID:</label>
+        <input type="number" id="conversationId" placeholder="Nhập ID cuộc hội thoại (ví dụ: 123)">
+
+        <br/><br/>
+        <label for="message">Nội dung tin nhắn:</label>
+        <input type="text" id="message" placeholder="Nhập tin nhắn...">
+
+        <br/><br/>
+        <button id="btnSend" disabled>Gửi tin nhắn (sendMessage)</button>
+        <button id="btnMarkRead" disabled>Đánh dấu đã đọc (markAsRead)</button>
+    </div>
+
+    <div class="chat-group">
+        <h3>3. Log Tin Nhắn Nhận Được</h3>
+        <ul id="messages">
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Khai báo các biến
+    let stompClient = null;
+    let currentConversationId = null;
+
+    const btnConnect = document.getElementById('btnConnect');
+    const btnDisconnect = document.getElementById('btnDisconnect');
+    const btnSend = document.getElementById('btnSend');
+    const btnMarkRead = document.getElementById('btnMarkRead');
+    const tokenInput = document.getElementById('token');
+    const conversationIdInput = document.getElementById('conversationId');
+    const messageInput = document.getElementById('message');
+    const statusEl = document.getElementById('status');
+    const messagesEl = document.getElementById('messages');
+
+    // Gán sự kiện cho các nút
+    btnConnect.addEventListener('click', connect);
+    btnDisconnect.addEventListener('click', disconnect);
+    btnSend.addEventListener('click', sendMessage);
+    btnMarkRead.addEventListener('click', markAsRead);
+
+    function updateStatus(message, isConnected) {
+        let color = isConnected ? '#28a745' : '#dc3545';
+        let icon = isConnected ? '🟢' : '🔴';
+        statusEl.innerHTML = `Trạng thái: <span class="status" style="color: ${color};">${icon} ${message}</span>`;
+
+        btnConnect.disabled = isConnected;
+        btnDisconnect.disabled = !isConnected;
+        btnSend.disabled = !isConnected;
+        btnMarkRead.disabled = !isConnected;
+    }
+
+    function logMessage(message) {
+        const li = document.createElement('li');
+        li.textContent = message;
+        messagesEl.appendChild(li);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    // ==========================================================
+    // SỬA HÀM CONNECT - KHÔNG DÙNG SOCKJS
+    // ==========================================================
+    function connect(event) {
+        event.preventDefault();
+        const token = tokenInput.value;
+        currentConversationId = conversationIdInput.value;
+
+        if (!token || !currentConversationId) {
+            alert('Vui lòng nhập JWT Token và Conversation ID.');
+            return;
+        }
+
+        updateStatus('ĐANG KẾT NỐI...', false);
+
+        // Khởi tạo StompJs.Client
+        stompClient = new StompJs.Client({
+            brokerURL: 'ws://localhost:3000/ws',
+
+            connectHeaders: {
+                'Authorization': `Bearer ${token}`
+            },
+
+            // Bật debug để xem log trên Console
+            debug: (str) => {
+                console.log('STOMP Debug: ' + str);
+            },
+
+            // 3. Callback khi kết nối thành công
+            onConnect: (frame) => {
+                updateStatus('ĐÃ KẾT NỐI!', true);
+                logMessage('--- Kết nối thành công tới server ---');
+
+                // 4. Subscribe vào topic của cuộc hội thoại
+                const topic = `/topic/conversation/${currentConversationId}`;
+                stompClient.subscribe(topic, (message) => {
+                    logMessage(`Nhận từ ${topic}: ${message.body}`);
+
+                    try {
+                        const msgDTO = JSON.parse(message.body);
+                        if (msgDTO.content) {
+                            logMessage(`[Msg from ${msgDTO.senderName}]: ${msgDTO.content}`);
+                        } else {
+                            // Có thể là tin nhắn "đã đọc"
+                            logMessage(`[Event]: ${message.body}`);
+                        }
+                    } catch (e) {
+                        logMessage(`[Raw]: ${message.body}`);
+                    }
+                });
+
+                logMessage(`--- Đã subscribe vào topic: ${topic} ---`);
+            },
+
+            // 5. Callback khi có lỗi STOMP (ví dụ: token sai)
+            onStompError: (frame) => {
+                updateStatus('LỖI KẾT NỐI', false);
+                const errorMessage = frame.headers['message'] || 'Không rõ lỗi';
+                logMessage(`Lỗi STOMP: ${errorMessage}`);
+                console.error('Lỗi STOMP: ', frame.body);
+            },
+
+            // Callback khi WebSocket bị lỗi (ví dụ: không kết nối được server)
+            onWebSocketError: (error) => {
+                updateStatus('LỖI WEBSOCKET', false);
+                logMessage(`Lỗi WebSocket: ${error.message}`);
+                console.error('Lỗi WebSocket: ', error);
+            }
+        });
+
+        // 6. Kích hoạt kết nối
+        stompClient.activate();
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            // Dùng deactivate() cho v7
+            stompClient.deactivate();
+            stompClient = null; // Quan trọng: set lại là null
+            updateStatus('ĐÃ NGẮT KẾT NỐI', false);
+            logMessage('--- Đã ngắt kết nối ---');
+        }
+    }
+
+    // ==========================================================
+    // SỬA HÀM SENDMESSAGE THEO STOMPJS v7
+    // ==========================================================
+    function sendMessage() {
+        const content = messageInput.value;
+        if (!content || !stompClient || !stompClient.connected) {
+            alert('Chưa kết nối hoặc chưa nhập tin nhắn!');
+            return;
+        }
+
+        const destination = '/app/chat.sendMessage';
+        const payload = {
+            conversationId: parseInt(currentConversationId),
+            content: content
+        };
+
+        // Dùng .publish() thay vì .send()
+        stompClient.publish({
+            destination: destination,
+            body: JSON.stringify(payload)
+        });
+
+        logMessage(`--- Gửi đến ${destination}: ${JSON.stringify(payload)} ---`);
+        messageInput.value = ''; // Xóa nội dung input
+    }
+
+    // Hàm markAsRead của bạn đã đúng cú pháp v7 (dùng publish)
+    function markAsRead() {
+        if (!stompClient || !stompClient.connected) {
+            alert('Chua kết nối!');
+            return;
+        }
+
+        const destination = '/app/chat.markAsRead';
+        const payload = {
+            conversationId: parseInt(currentConversationId)
+            // Bạn có thể cần thêm messageId cuối cùng ở đây
+        };
+
+        stompClient.publish({
+            destination: destination,
+            body: JSON.stringify(payload)
+        });
+
+        logMessage(`--- Gửi đến ${destination}: ${JSON.stringify(payload)} ---`);
+    }
+
+</script>
+</body>
+</html>
