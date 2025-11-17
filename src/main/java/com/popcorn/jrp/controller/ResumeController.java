@@ -2,6 +2,7 @@ package com.popcorn.jrp.controller;
 
 import com.popcorn.jrp.domain.request.candidate.UpdateResumeDto;
 import com.popcorn.jrp.domain.response.ApiDataResponse;
+import com.popcorn.jrp.domain.response.ApiResultsResponse;
 import com.popcorn.jrp.domain.response.candidate.ResumeResponseDto;
 import com.popcorn.jrp.service.ResumeService;
 import jakarta.annotation.Nullable;
@@ -19,69 +20,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ResumeController {
 
-    private final ResumeService resumeService;
+        private final ResumeService resumeService;
 
-    // CREATE RESUME IS IN CANDIDATE UPLOAD CONTROLLER
+        /**
+         * Lấy chi tiết một CV
+         * GET /api/v1/resume/:id
+         */
+        @GetMapping("/candidate/{candidateId}")
+        public ResponseEntity<ApiResultsResponse<ResumeResponseDto>> getListResumeByCandidateId(
+                        @PathVariable("candidateId") Long candidateId) {
+                List<ResumeResponseDto> result = resumeService.getResumesByCandidateId(candidateId);
 
-    // find pageable resumes by job id through application entity
-    // path: /api/v1/resume&jobId=123456&page=&size=1
-    // => ApplicationController?
+                ApiResultsResponse<ResumeResponseDto> response = ApiResultsResponse.<ResumeResponseDto>builder()
+                                .statusCode(HttpStatus.OK.value()) // 200
+                                .message("Lấy chi tiết hồ sơ công việc thành công!")
+                                .results(result)
+                                .build();
 
-    /**
-     * Lấy chi tiết một CV
-     * GET /api/v1/resume/:id
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiDataResponse<ResumeResponseDto>> getResumeById(
-            @PathVariable("id") Long resumeId
-    ) {
-        ResumeResponseDto result = resumeService.getResumeById(resumeId);
-
-        var response = ApiDataResponse.<ResumeResponseDto>builder()
-                .statusCode(HttpStatus.OK.value()) // 200
-                .message("Lấy chi tiết hồ sơ thành công!")
-                .data(result)
-                .build();
-
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     *  Cập nhật thông tin CV
-     * PUT /api/v1/resume/:id
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiDataResponse<ResumeResponseDto>> updateResume(
-            @PathVariable("id") Long resumeId,
-            @RequestBody UpdateResumeDto updateDto
-    ) {
-        ResumeResponseDto result = resumeService.updateResume(resumeId, updateDto);
-
-        var response = ApiDataResponse.<ResumeResponseDto>builder()
-                .statusCode(HttpStatus.OK.value()) // 200
-                .message("Cập nhật hồ sơ thành công!")
-                .data(result)
-                .build();
-
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Xóa một CV
-     * DELETE /api/v1/resume/:id
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiDataResponse<Object>> deleteResume(
-            @PathVariable("id") Long resumeId
-    ) {
-        resumeService.deleteResume(resumeId);
-
-        var response = ApiDataResponse.builder()
-                .statusCode(HttpStatus.OK.value()) // 200
-                .message("Xóa hồ sơ thành công!")
-                .data(null) // data là null
-                .build();
-
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 }

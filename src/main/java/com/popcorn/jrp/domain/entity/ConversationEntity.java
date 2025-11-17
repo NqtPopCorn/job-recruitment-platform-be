@@ -13,11 +13,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ConversationEntity extends BaseEntity{
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
+public class ConversationEntity extends BaseEntity {
     // Dự phòng cho future scale
     // @Column(length = 20)
     // private String type; // "private", "group"
@@ -32,4 +28,3 @@ public class ConversationEntity extends BaseEntity{
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages = new ArrayList<>();
 }
-

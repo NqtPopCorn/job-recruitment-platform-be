@@ -34,3 +34,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### Folder Images ###
+/images/

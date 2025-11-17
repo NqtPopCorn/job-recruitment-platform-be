@@ -4,10 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
-import com.popcorn.jrp.domain.entity.JobTypeEntity;
+import com.popcorn.jrp.domain.response.common.SocialMediaDto;
 import com.popcorn.jrp.domain.response.job.JobTypeDto;
 import com.popcorn.jrp.domain.response.job.SalaryDto;
-import com.popcorn.jrp.domain.response.job.SocialMediaDto;
 import com.popcorn.jrp.domain.response.job.WorkTimeDto;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
@@ -24,18 +23,12 @@ public class JsonMapperHelper {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public String toString(JobTypeEntity entity) {
-        return entity.toString();
-    }
-    public List<String> toString(List<JobTypeEntity> entity) {
-        return entity.stream().map(JobTypeEntity::getName).collect(Collectors.toList());
-    }
-
     // --- Object to JSON String ---
 
     @Named("objectToJsonString")
     public String objectToJsonString(Object obj) {
-        if (obj == null) return null;
+        if (obj == null)
+            return null;
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
@@ -48,9 +41,11 @@ public class JsonMapperHelper {
 
     @Named("jsonToListString")
     public List<String> jsonToListString(String json) {
-        if (json == null || json.isEmpty()) return Collections.emptyList();
+        if (json == null || json.isEmpty())
+            return Collections.emptyList();
         try {
-            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
+            return objectMapper.readValue(json, new TypeReference<List<String>>() {
+            });
         } catch (JsonProcessingException e) {
             return Collections.emptyList();
         }
@@ -58,9 +53,11 @@ public class JsonMapperHelper {
 
     @Named("jsonToJobTypeList")
     public List<JobTypeDto> jsonToJobTypeList(String json) {
-        if (json == null || json.isEmpty()) return Collections.emptyList();
+        if (json == null || json.isEmpty())
+            return Collections.emptyList();
         try {
-            return objectMapper.readValue(json, new TypeReference<List<JobTypeDto>>() {});
+            return objectMapper.readValue(json, new TypeReference<List<JobTypeDto>>() {
+            });
         } catch (JsonProcessingException e) {
             return Collections.emptyList();
         }
@@ -68,23 +65,26 @@ public class JsonMapperHelper {
 
     @Named("jsonToSocialMediaList")
     public List<SocialMediaDto> jsonToSocialMediaList(String json) {
-        if (json == null || json.isEmpty()) return Collections.emptyList();
+        if (json == null || json.isEmpty())
+            return Collections.emptyList();
         try {
-            return objectMapper.readValue(json, new TypeReference<List<SocialMediaDto>>() {});
+            return objectMapper.readValue(json, new TypeReference<List<SocialMediaDto>>() {
+            });
         } catch (JsonProcessingException e) {
             return Collections.emptyList();
         }
     }
 
-//    @Named("parseSalary")
-//    public SalaryDto parseSalary(CandidateEntity candidate) {
-//        if (candidate == null ) return null;
-//        return
-//    }
+    // @Named("parseSalary")
+    // public SalaryDto parseSalary(CandidateEntity candidate) {
+    // if (candidate == null ) return null;
+    // return
+    // }
 
     @Named("jsonToWorkTimeDto")
     public WorkTimeDto jsonToWorkTimeDto(String json) {
-        if (json == null || json.isEmpty()) return null;
+        if (json == null || json.isEmpty())
+            return null;
         try {
             return objectMapper.readValue(json, WorkTimeDto.class);
         } catch (JsonProcessingException e) {

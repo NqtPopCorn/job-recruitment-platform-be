@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateEmployerDto {
 
-    @NotBlank(message = "User ID không được để trống")
-    private String userId;
+    @NotNull
+    private Long userId;
 
     @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không đúng định dạng")

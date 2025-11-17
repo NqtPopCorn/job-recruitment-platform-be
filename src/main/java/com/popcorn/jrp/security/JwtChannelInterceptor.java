@@ -14,49 +14,43 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Objects;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtChannelInterceptor implements ChannelInterceptor {
 
-    private final JwtUtil jwtUtil;
-
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor =
-                MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (Objects.requireNonNull(accessor).getCommand() == StompCommand.CONNECT) {
-            log.info("🔥 [JwtChannelInterceptor] Client is connecting...");
+        StompHeaderAccessor accessor = MessageHeaderAccessor
+                .getAccessor(message, StompHeaderAccessor.class);
 
-            String authHeader = accessor.getFirstNativeHeader("Authorization");
-            log.info("Authorization header: {}", authHeader);
+        if (accessor == null)
+            return message;
 
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-
-                try {
-                    String userId = jwtUtil.extractID(token);
-
-                    if (userId != null && jwtUtil.isTokenValid(token, userId)) {
-                        String role = jwtUtil.extractRole(token);
-                        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
-
-                        UsernamePasswordAuthenticationToken authenticationToken =
-                                new UsernamePasswordAuthenticationToken(userId, null, authorities);
-
-                        accessor.setUser(authenticationToken);
-                        log.info("✅ [JwtChannelInterceptor] Authenticated user: {}, role: {}", userId, role);
-                    }
-                } catch (Exception e) {
-                    log.error("❌ [JwtChannelInterceptor] Authentication failed: {}", e.getMessage());
-                    throw new CustomException(HttpStatus.UNAUTHORIZED, "Authentication failed");
-                }
-            }
+        if (accessor.getCommand() == StompCommand.CONNECT) {
+            log.info("[JwtChannelInterceptor] CONNECT...");
         }
+
+        // Xác thực cho SEND / SUBSCRIBE
+        if (accessor.getCommand() == StompCommand.SEND ||
+                accessor.getCommand() == StompCommand.SUBSCRIBE) {
+
+            // LẤY USER TỪ SESSION ATTRIBUTES
+            UsernamePasswordAuthenticationToken user = (UsernamePasswordAuthenticationToken) accessor
+                    .getSessionAttributes().get("user");
+
+            if (accessor.getSessionAttributes() == null || accessor.getSessionAttributes().get("user") == null) {
+                log.error("Không tìm thấy user trong SessionAttributes!");
+                throw new CustomException(HttpStatus.UNAUTHORIZED, "WebSocket unauthorized");
+            }
+
+            // Gắn lại vào accessor → để @MessageMapping nhận được Principal
+            accessor.setUser(user);
+
+            log.info("[JwtChannelInterceptor] User hợp lệ: {}", user.getName());
+        }
+
         return message;
     }
 }

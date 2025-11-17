@@ -9,5 +9,6 @@ public class ConversationDetailsDTO {
     private Long id;
     private String displayName;
     private String displayImageUrl;
-    private List<ConversationMemberDTO> members;
+    // private List<ConversationMemberDTO> members;
+    private ConversationMemberDTO otherMember;
 }

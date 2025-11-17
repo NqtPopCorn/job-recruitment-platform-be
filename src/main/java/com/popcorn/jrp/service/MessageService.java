@@ -17,7 +17,7 @@ public interface MessageService {
      * This will create a MessageEntity and potentially update
      * the conversation's last activity timestamp.
      *
-     * @param request DTO containing conversation ID and message content.
+     * @param request      DTO containing conversation ID and message content.
      * @param senderUserId The ID of the user sending the message.
      * @return A DTO representation of the message.
      */
@@ -28,18 +28,20 @@ public interface MessageService {
      * Messages are typically ordered from newest to oldest.
      *
      * @param conversationId The ID of the conversation.
-     * @param currentUserId The ID of the user requesting messages (for permission checking).
-     * @param pageable Pagination information.
+     * @param currentUserId  The ID of the user requesting messages (for permission
+     *                       checking).
+     * @param pageable       Pagination information.
      * @return A Page of MessageDTOs.
      */
-    ApiPageResponse<MessageDTO> getMessagesForConversation(Long conversationId, Long currentUserId, Pageable pageable);
+    Page<MessageDTO> getMessagesForConversation(Long conversationId, Long currentUserId, Pageable pageable);
 
     /**
      * Deletes a message. This should be a soft delete (setting isDeleted = true)
      * as per your MessageEntity.
      *
-     * @param messageId The ID of the message to delete.
-     * @param currentUserId The ID of the user attempting to delete (must be the sender).
+     * @param messageId     The ID of the message to delete.
+     * @param currentUserId The ID of the user attempting to delete (must be the
+     *                      sender).
      */
     void deleteMessage(Long messageId, Long currentUserId);
 
@@ -48,7 +50,7 @@ public interface MessageService {
      * by updating the 'lastSeenAt' timestamp in ConversationMemberEntity.
      *
      * @param conversationId The ID of the conversation.
-     * @param currentUserId The ID of the user who has read the messages.
+     * @param currentUserId  The ID of the user who has read the messages.
      */
     ReadReceiptDTO markConversationAsRead(Long conversationId, Long currentUserId);
 }

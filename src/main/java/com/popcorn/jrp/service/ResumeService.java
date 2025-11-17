@@ -32,26 +32,16 @@ public interface ResumeService {
     ResumeResponseDto createResume(Long candidateId, MultipartFile file, boolean status);
 
     /**
-     * Lấy chi tiết một CV
-     *
-     * @param resumeId ID của hồ sơ (ResumeEntity)
-     * @return DTO của hồ sơ
-     */
-    ResumeResponseDto getResumeById(Long resumeId);
-
-    /**
-     * Cập nhật thông tin CV
-     *
-     * @param resumeId  ID của hồ sơ (ResumeEntity)
-     * @param updateDto DTO chứa thông tin cập nhật (fileName, status)
-     * @return DTO của hồ sơ đã được cập nhật
-     */
-    ResumeResponseDto updateResume(Long resumeId, UpdateResumeDto updateDto);
-
-    /**
      * Xóa một CV
      *
      * @param resumeId ID của hồ sơ (ResumeEntity)
      */
     void deleteResume(Long resumeId);
+
+    /**
+     * Xóa một CV
+     *
+     * @param candidateId ID của của ứng viên
+     */
+    void checkTheNumberOfResumesByCandidateId(Long candidateId);
 }

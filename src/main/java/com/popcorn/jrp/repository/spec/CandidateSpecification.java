@@ -1,6 +1,7 @@
 package com.popcorn.jrp.repository.spec;
 
 import com.popcorn.jrp.domain.entity.CandidateEntity;
+import com.popcorn.jrp.domain.request.candidate.CandidateSearchAdminRequest;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
@@ -16,7 +17,16 @@ public class CandidateSpecification {
                 .and(hasGender(request.getGender()))
                 .and(hasExperienceLessThanOrEqual(request.getExperience()))
                 .and(withEducationLevel(request.getEducation()))
-                .and(hasStatus(true));
+                .and(hasStatus(true))
+                .and(hasIsDeleted());
+    }
+
+    // Filter candidates for chat
+    public Specification<CandidateEntity> getForChatSpecification(String search) {
+        return hasNameLike(search)
+                .and(hasEmailLike(search))
+                .and(hasStatus(true))
+                .and(hasIsDeleted());
     }
 
     public Specification<CandidateEntity> hasNameLike(String name) {
@@ -25,6 +35,15 @@ public class CandidateSpecification {
                 return cb.conjunction(); // Trả về điều kiện luôn đúng (true)
             }
             return cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+        };
+    }
+
+    public Specification<CandidateEntity> hasEmailLike(String search) {
+        return (root, query, cb) -> {
+            if (search == null || search.isEmpty()) {
+                return cb.conjunction(); // Trả về điều kiện luôn đúng (true)
+            }
+            return cb.like(cb.lower(root.get("email")), "%" + search.toLowerCase() + "%");
         };
     }
 
@@ -67,20 +86,9 @@ public class CandidateSpecification {
     public Specification<CandidateEntity> withEducationLevel(String education) {
         return (root, query, cb) -> {
             if (education == null || education.isEmpty()) {
-                return cb.conjunction();
+                return cb.conjunction(); // không lọc nếu không có giá trị
             }
-
-            String eduLower = education.toLowerCase();
-            if ("university".equals(eduLower)) {
-                return cb.like(cb.lower(root.get("educationLevel")), "%đại học%");
-            } else if ("college".equals(eduLower)) {
-                return cb.like(cb.lower(root.get("educationLevel")), "%cao đẳng%");
-            } else if ("other".equals(eduLower)) {
-                Predicate notUniversity = cb.notLike(cb.lower(root.get("educationLevel")), "%đại học%");
-                Predicate notCollege = cb.notLike(cb.lower(root.get("educationLevel")), "%cao đẳng%");
-                return cb.and(notUniversity, notCollege);
-            }
-            return cb.conjunction(); // Nếu không khớp case nào thì không lọc gì
+            return cb.like(cb.lower(root.get("educationLevel")), "%" + education.toLowerCase() + "%");
         };
     }
 
@@ -93,4 +101,18 @@ public class CandidateSpecification {
         };
     }
 
+    public Specification<CandidateEntity> hasIsDeleted() {
+        return (root, query, cb) -> {
+            return cb.isFalse(root.get("isDeleted"));
+        };
+    }
+
+    public Specification<CandidateEntity> getAdminSpecification(CandidateSearchAdminRequest request) {
+        return hasNameLike(request.getSearch())
+                .and(hasLocationLike(request.getLocation()))
+                .and(hasIndustryLike(request.getIndustry()))
+                .and(hasGender(request.getGender()))
+                .and(hasStatus(request.getStatus()))
+                .and(hasIsDeleted());
+    }
 }

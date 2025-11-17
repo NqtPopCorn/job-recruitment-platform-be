@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageEntity extends BaseEntity{
+public class MessageEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conversation_id", nullable = false)
@@ -24,9 +24,4 @@ public class MessageEntity extends BaseEntity{
 
     @Column(columnDefinition = "TEXT")
     private String content;
-
-    @Column(nullable = false)
-    private boolean isDeleted = false;
-
-    private LocalDateTime createAt;
 }

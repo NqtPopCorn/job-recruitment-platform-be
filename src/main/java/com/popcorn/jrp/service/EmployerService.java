@@ -4,6 +4,8 @@ import com.popcorn.jrp.domain.request.employer.CreateEmployerDto;
 import com.popcorn.jrp.domain.request.employer.EmployerQueryParameters;
 import com.popcorn.jrp.domain.request.employer.UpdateEmployerDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
+import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -17,11 +19,13 @@ public interface EmployerService {
      * Lấy danh sách nhà tuyển dụng có phân trang và lọc.
      * Tương ứng với: GET /api/v1/company
      *
-     * @param queryParams Đối tượng chứa các tham số lọc (search, location, industry...).
+     * @param queryParams Đối tượng chứa các tham số lọc (search, location,
+     *                    industry...).
      * @param pageable    Đối tượng chứa thông tin phân trang (page, size, sort).
      * @return Một trang (Page) chứa danh sách EmployerPaginationDto.
      */
-    ApiPageResponse<EmployerPaginationDto> getEmployersPaginated(EmployerQueryParameters queryParams, Pageable pageable);
+    ApiPageResponse<EmployerPaginationDto> getEmployersPaginated(EmployerQueryParameters queryParams,
+            Pageable pageable);
 
     /**
      * Lấy danh sách tất cả nhà tuyển dụng (không phân trang).
@@ -29,7 +33,7 @@ public interface EmployerService {
      *
      * @return Danh sách EmployerSimpleDto.
      */
-    List<EmployerSimpleDto> getAllEmployers();
+    // List<EmployerSimpleDto> getAllEmployers();
 
     /**
      * Lấy thông tin chi tiết nhà tuyển dụng bằng ID của nhà tuyển dụng.
@@ -73,7 +77,7 @@ public interface EmployerService {
      * @param createDto DTO chứa thông tin để tạo mới.
      * @return Chi tiết nhà tuyển dụng vừa được tạo.
      */
-    EmployerDetailDto createEmployer(CreateEmployerDto createDto);
+    // EmployerDetailDto createEmployer(CreateEmployerDto createDto);
 
     /**
      * Cập nhật thông tin của một nhà tuyển dụng.
@@ -93,4 +97,25 @@ public interface EmployerService {
      * @return DTO chứa thông tin sau khi xóa mềm (ID, status, updatedAt).
      */
     EmployerSoftDeleteDto softDeleteEmployer(Long id);
+
+    /**
+     * Add potential candidate.
+     */
+    boolean togglePotentialCandidate(Long employerId, Long potentialCandidateId);
+
+    /**
+     * Check potential candidate.
+     */
+    boolean checkPotentialCandidate(Long employerId, Long potentialCandidateId);
+
+    /**
+     * Lấy danh sách các ứng viên tiềm năng có phân trang và lọc.
+     *
+     * @param queryParams Đối tượng chứa các tham số lọc (search, location,
+     *                    industry...).
+     * @param pageable    Đối tượng chứa thông tin phân trang (page, size, sort).
+     * @return Một trang (Page) chứa danh sách EmployerPaginationDto.
+     */
+    ApiPageResponse<CandidateResponse> getPotentialCanddiatesPaginated(Long employerId, String search,
+            Pageable pageable);
 }

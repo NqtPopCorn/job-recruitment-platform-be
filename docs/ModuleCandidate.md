@@ -44,7 +44,7 @@ Content-Type: application/json
       "designation": "Backend Developer",
       "location": "Hồ Chí Minh",
       "hourlyRate": 30,
-      "tags": ["JavaScript", "NestJS", "MongoDB"],
+      "skills": ["JavaScript", "NestJS", "MongoDB"],
       "category": "Information Technology",
       "gender": "male",
       "createdAt": "09/07/2025",
@@ -57,7 +57,7 @@ Content-Type: application/json
       "designation": "Frontend Developer",
       "location": "Hà Nội",
       "hourlyRate": 20,
-      "tags": ["React", "TypeScript"],
+      "skills": ["React", "TypeScript"],
       "category": "Information Technology",
       "gender": "female",
       "createdAt": "08/09/2025",
@@ -86,7 +86,7 @@ Content-Type: application/json
 | results[].designation | string  | Vị trí hoặc chức danh            |
 | results[].location    | string  | Địa điểm làm việc                |
 | results[].hourlyRate  | number  | Mức lương theo giờ               |
-| results[].tags        | array   | Danh sách kỹ năng của ứng viên   |
+| results[].skills      | array   | Danh sách kỹ năng của ứng viên   |
 | results[].category    | string  | Ngành nghề hoặc lĩnh vực         |
 | results[].gender      | string  | Giới tính của ứng viên           |
 | results[].createdAt   | string  | Ngày tạo hồ sơ                   |
@@ -137,7 +137,7 @@ Content-Type: application/json
     "designation": "Backend Developer",
     "location": "63/2 Tân Hóa",
     "hourlyRate": 0,
-    "tags": ["JavaScript", "NestJS", "MongoDB"],
+    "skills": ["JavaScript", "NestJS", "MongoDB"],
     "category": "Information Technology",
     "gender": "male",
     "createdAt": "2025-09-08T08:20:14.763Z",
@@ -167,7 +167,7 @@ Content-Type: application/json
 | data.designation    | string       | Chức danh hoặc vị trí hiện tại        |
 | data.location       | string       | Địa điểm làm việc                     |
 | data.hourlyRate     | number       | Mức lương theo giờ                    |
-| data.tags           | array        | Danh sách kỹ năng                     |
+| data.skills         | array        | Danh sách kỹ năng                     |
 | data.category       | string       | Ngành nghề hoặc lĩnh vực              |
 | data.gender         | string       | Giới tính (`male`, `female`, `other`) |
 | data.createdAt      | Date or null | Ngày tạo hồ sơ                        |
@@ -261,7 +261,7 @@ Content-Type: application/json
     "city": "HCM",
     "location": "63/2 Tân Hóa",
     "hourlyRate": 0,
-    "tags": ["JavaScript", "NestJS", "MongoDB"],
+    "skills": ["JavaScript", "NestJS", "MongoDB"],
     "category": "Information Technology",
     "gender": "male",
     "createdAt": "2025-09-08T00:00:00.000Z",
@@ -308,7 +308,7 @@ Content-Type: application/json
 | data.city           | string       | Thành phố sinh sống                   |
 | data.location       | string       | Địa chỉ cụ thể                        |
 | data.hourlyRate     | number       | Mức lương theo giờ                    |
-| data.tags           | array        | Danh sách kỹ năng (tags)              |
+| data.skills         | array        | Danh sách kỹ năng (skills)            |
 | data.category       | string       | Lĩnh vực làm việc                     |
 | data.gender         | string       | Giới tính (`male`, `female`, `other`) |
 | data.createdAt      | Date or null | Thời điểm tạo hồ sơ                   |

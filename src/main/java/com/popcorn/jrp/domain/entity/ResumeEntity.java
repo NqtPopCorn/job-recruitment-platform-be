@@ -1,4 +1,5 @@
 package com.popcorn.jrp.domain.entity;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import java.util.List;
 @Table(name = "resumes")
 @Getter
 @Setter
-public class ResumeEntity extends BaseEntity{
+public class ResumeEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "candidate_id", nullable = false)
@@ -18,7 +19,7 @@ public class ResumeEntity extends BaseEntity{
 
     @Column(name = "file_name")
     private String fileName;
+
     private Boolean status;
 
 }
-

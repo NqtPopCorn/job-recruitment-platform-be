@@ -3,8 +3,12 @@ package com.popcorn.jrp.domain.response.candidate;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.popcorn.jrp.domain.response.common.SocialMediaDto;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,17 +17,12 @@ import java.util.List;
 @Getter
 public class CandidateDetailsResponse extends CandidateResponse {
     private Long userId;
-    private String email;
+    private LocalDate birthday;
     private String industry;
-    private String country;
-    private String city;
     private Integer experience;
     private String qualification;
-    private String birthday;
     private String phone;
-    private String currentSalary;
-    private String expectedSalary;
     private String description;
     private List<String> languages;
-    private List<SocialMediaResponse> socialMedias;
+    private List<SocialMediaDto> socialMedias;
 }

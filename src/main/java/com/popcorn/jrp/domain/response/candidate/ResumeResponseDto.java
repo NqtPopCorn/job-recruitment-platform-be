@@ -12,5 +12,4 @@ public class ResumeResponseDto {
     private Long candidateId;
     private String fileName;
     private boolean status;
-    private String url;
 }

@@ -11,8 +11,10 @@ import com.popcorn.jrp.domain.response.chat.ConversationSummaryDTO;
 import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.CustomException;
 import com.popcorn.jrp.exception.NotFoundException;
+import com.popcorn.jrp.repository.CandidateRepository;
 import com.popcorn.jrp.repository.ConversationMemberRepository;
 import com.popcorn.jrp.repository.ConversationRepository;
+import com.popcorn.jrp.repository.EmployerRepository;
 import com.popcorn.jrp.repository.MessageRepository;
 import com.popcorn.jrp.repository.UserRepository;
 import com.popcorn.jrp.service.CandidateUploadService;
@@ -40,8 +42,10 @@ public class ConversationServiceImpl implements ConversationService {
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final ConversationMapper conversationMapper;
-    private final CandidateUploadService candidateUploadService;
-    private final CompanyUploadService companyUploadService;
+    // private final CandidateUploadService candidateUploadService;
+    // private final CompanyUploadService companyUploadService;
+    private final CandidateRepository candidateRepository;
+    private final EmployerRepository employerRepository;
 
     @Transactional
     public ConversationSummaryDTO createPrivateConversation(Long creatorUserId, Long otherUserId) {
@@ -70,7 +74,7 @@ public class ConversationServiceImpl implements ConversationService {
         savedConversation.setMembers(members);
 
         // 3. Map sang DTO và trả về (sẽ không có tin nhắn cuối)
-        var dto = convertToSummaryDTO(savedConversation, creatorUserId);
+        ConversationSummaryDTO dto = convertToSummaryDTO(savedConversation, creatorUserId);
         dto.setOtherUserId(otherUserId);
         return dto;
     }
@@ -78,7 +82,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     @Transactional
     public ConversationSummaryDTO findOrCreatePrivateConversation(Long userId1, Long userId2) {
-        if(Objects.equals(userId1, userId2)) {
+        if (Objects.equals(userId1, userId2)) {
             throw new BadRequestException("2 userIds is equals, please check again");
         }
         // 1. Thử tìm cuộc hội thoại 1-1 đã tồn tại
@@ -100,8 +104,10 @@ public class ConversationServiceImpl implements ConversationService {
 
         // 2. Map Page<Entity> sang Page<DTO>
         // CẢNH BÁO: Đoạn code này gây ra N+1 query.
-        // Mỗi lần convertToSummaryDTO, nó sẽ query DB để lấy lastMessage, unreadCount, etc.
-        // TODO: Tối ưu bằng cách sử dụng DTO Projection (truy vấn tùy chỉnh trong Repository)
+        // Mỗi lần convertToSummaryDTO, nó sẽ query DB để lấy lastMessage, unreadCount,
+        // etc.
+        // TODO: Tối ưu bằng cách sử dụng DTO Projection (truy vấn tùy chỉnh trong
+        // Repository)
         return conversationMapper.toApiPageResponse(conversationPage
                 .map(conv -> convertToSummaryDTO(conv, userId)));
     }
@@ -115,15 +121,15 @@ public class ConversationServiceImpl implements ConversationService {
 
         // 2. Lấy thông tin
         ConversationEntity conversation = conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new NotFoundException("Conversation with id: "+conversationId));
+                .orElseThrow(() -> new NotFoundException("Conversation with id: " + conversationId));
 
         // 3. Map
-        ConversationDetailsDTO dto = conversationMapper.toDetailsDto(conversation);
+        ConversationDetailsDTO dto = conversationMapper.toDetailsDto(conversation, currentUserId);
 
         // 4. Set tên hiển thị (logic cho chat 1-1)
-        var statsMap = getConversationStatsMap(conversation, currentUserId);
+        Map<String, String> statsMap = getConversationStatsMap(conversation, currentUserId);
         dto.setDisplayName(statsMap.get("displayName"));
-         dto.setDisplayImageUrl(statsMap.get("displayImageUrl"));
+        dto.setDisplayImageUrl(statsMap.get("displayImageUrl"));
 
         return dto;
     }
@@ -132,8 +138,10 @@ public class ConversationServiceImpl implements ConversationService {
     @Transactional
     public void leaveConversation(Long conversationId, Long currentUserId) {
         // 1. Tìm thành viên
-        ConversationMemberEntity member = conversationMemberRepository.findByConversationIdAndUserId(conversationId, currentUserId)
-                .orElseThrow(() -> new CustomException(HttpStatus.FORBIDDEN, "You are not a member of this conversation."));
+        ConversationMemberEntity member = conversationMemberRepository
+                .findByConversationIdAndUserId(conversationId, currentUserId)
+                .orElseThrow(
+                        () -> new CustomException(HttpStatus.FORBIDDEN, "You are not a member of this conversation."));
 
         // 2. Xóa thành viên này (rời khỏi nhóm)
         conversationMemberRepository.delete(member);
@@ -157,13 +165,13 @@ public class ConversationServiceImpl implements ConversationService {
         Map<String, String> stats = getConversationStatsMap(conversation, currentUserId);
         dto.setDisplayName(stats.get("displayName"));
         dto.setDisplayImageUrl(stats.get("displayImageUrl"));
-        if(stats.containsKey("otherUserId")) {
+        if (stats.containsKey("otherUserId")) {
             dto.setOtherUserId(Long.valueOf(stats.get("otherUserId")));
         }
 
-
         // 2. Lấy tin nhắn cuối cùng
-        Optional<MessageEntity> lastMessageOpt = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId());
+        Optional<MessageEntity> lastMessageOpt = messageRepository
+                .findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId());
         if (lastMessageOpt.isPresent()) {
             MessageEntity lastMessage = lastMessageOpt.get();
             dto.setLastMessageContent(lastMessage.isDeleted() ? "Message deleted" : lastMessage.getContent());
@@ -171,19 +179,21 @@ public class ConversationServiceImpl implements ConversationService {
         }
 
         // 3. Lấy số tin nhắn chưa đọc
-        ConversationMemberEntity currentUserMember = conversationMemberRepository.findByConversationIdAndUserId(conversation.getId(), currentUserId)
+        ConversationMemberEntity currentUserMember = conversationMemberRepository
+                .findByConversationIdAndUserId(conversation.getId(), currentUserId)
                 .orElse(null); // Nên luôn tồn tại
 
         if (currentUserMember != null) {
             LocalDateTime lastSeen = currentUserMember.getLastSeenAt();
-            long unreadCount = messageRepository.countByConversationIdAndCreatedAtAfter(conversation.getId(), lastSeen);
+            long unreadCount = messageRepository.countByConversationIdAndSenderUserIdNotAndCreatedAtAfter(
+                    conversation.getId(), currentUserId, lastSeen);
             dto.setUnreadCount(unreadCount);
         }
 
         return dto;
     }
 
-    private Map<String,String> getConversationStatsMap(ConversationEntity conversation, Long currentUserId) {
+    private Map<String, String> getConversationStatsMap(ConversationEntity conversation, Long currentUserId) {
         try {
             Map<String, String> result = new HashMap<>();
             // Chat 1-1 ~~ conversation.getMembers().size() == 2
@@ -195,26 +205,31 @@ public class ConversationServiceImpl implements ConversationService {
                 UserEntity user = otherMember.get().getUser();
                 switch (user.getRole()) {
                     case candidate -> {
-                        var candidate = user.getCandidate();
-                        String displayImageUrl = candidateUploadService.generateFileUrl(candidate.getAvatar(), "avatar");
+                        CandidateEntity candidate = candidateRepository.findByUserId(
+                                user.getId())
+                                .orElseThrow(() -> new NotFoundException("Candidate with user id " + user.getId()));
+                        String displayImageUrl = candidate.getAvatar();
                         String displayName = candidate.getName();
                         result.put("displayImageUrl", displayImageUrl);
                         result.put("displayName", displayName);
                         result.put("otherUserId", user.getId().toString());
                     }
                     case employer -> {
-                        String displayImageUrl = companyUploadService.generateFileUrl(user.getEmployer().getLogo());
-                        String displayName = user.getEmployer().getName();
+                        EmployerEntity employer = employerRepository.findByUserId(user.getId())
+                                .orElseThrow(() -> new NotFoundException("Employer with user id " + user.getId()));
+                        String displayImageUrl = employer.getLogo();
+                        String displayName = employer.getName();
                         result.put("displayImageUrl", displayImageUrl);
                         result.put("displayName", displayName);
                         result.put("otherUserId", user.getId().toString());
                     }
-                    default -> {}
+                    default -> {
+                    }
                 }
             }
             return result;
         } catch (Exception e) {
-            if(e instanceof NullPointerException) {
+            if (e instanceof NullPointerException) {
                 log.error("Failed to get conversation stats for current user");
                 throw new NotFoundException("Please check again, Candidate, or Employer");
             }

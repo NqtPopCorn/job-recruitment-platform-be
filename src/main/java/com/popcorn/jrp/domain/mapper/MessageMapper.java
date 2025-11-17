@@ -12,7 +12,7 @@ import org.mapstruct.MappingTarget;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface MessageMapper extends PageMapper {
+public interface MessageMapper {
 
     @Mapping(source = "conversation.id", target = "conversationId")
     @Mapping(source = "senderUser.id", target = "senderUserId")
@@ -23,11 +23,6 @@ public interface MessageMapper extends PageMapper {
 
     @AfterMapping
     default void setCustomFields(@MappingTarget MessageDTO dto, MessageEntity entity) {
-
-//        if (entity.getSenderUser() != null) {
-//            dto.setSenderName("User " + entity.getSenderUser().getId());
-//        }
-
         if (entity.isDeleted()) {
             dto.setContent("This message has been deleted.");
         }

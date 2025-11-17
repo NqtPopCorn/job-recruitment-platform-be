@@ -19,6 +19,9 @@ import com.popcorn.jrp.repository.MessageRepository;
 import com.popcorn.jrp.repository.UserRepository;
 import com.popcorn.jrp.service.MessageService;
 import lombok.RequiredArgsConstructor;
+import lombok.Locked.Read;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,6 +33,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
@@ -41,51 +45,75 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public MessageDTO sendMessage(SendMessageRequestDTO request, Long senderUserId) {
-        // 1. Kiểm tra xem người gửi có phải là thành viên của cuộc hội thoại không
-        if (!conversationMemberRepository.existsByConversationIdAndUserId(request.getConversationId(), senderUserId)) {
+        log.info("sendMessage called with conversationId={} and senderUserId={}",
+                request.getConversationId(), senderUserId);
+
+        // 1. Kiểm tra quyền thành viên
+        log.debug("Checking if sender is a member of the conversation...");
+        boolean isMember = conversationMemberRepository.existsByConversationIdAndUserId(
+                request.getConversationId(), senderUserId);
+        if (!isMember) {
+            log.warn("User {} is not a member of conversation {}", senderUserId, request.getConversationId());
             throw new CustomException(HttpStatus.FORBIDDEN, "User is not a member of this conversation.");
         }
+        log.debug("Sender is a member, proceeding...");
 
-        // 2. Lấy các entity cần thiết từ database
+        // 2. Lấy entity sender và conversation
+        log.debug("Fetching sender user entity...");
         UserEntity sender = userRepository.findById(senderUserId)
-                .orElseThrow(() -> new NotFoundException("Sender with id: " + senderUserId));
+                .orElseThrow(() -> {
+                    log.error("Sender with id {} not found", senderUserId);
+                    return new NotFoundException("Sender with id: " + senderUserId);
+                });
 
+        log.debug("Fetching conversation entity...");
         ConversationEntity conversation = conversationRepository.findById(request.getConversationId())
-                .orElseThrow(() -> new NotFoundException("Conversation with id: " + request.getConversationId()));
+                .orElseThrow(() -> {
+                    log.error("Conversation with id {} not found", request.getConversationId());
+                    return new NotFoundException("Conversation with id: " + request.getConversationId());
+                });
 
-        // 3. Tạo và lưu MessageEntity mới
+        log.info("Sender and conversation retrieved successfully");
+
+        // 3. Tạo và lưu message
+        log.debug("Creating new message entity with content: {}", request.getContent());
         MessageEntity newMessage = MessageEntity.builder()
                 .senderUser(sender)
                 .conversation(conversation)
                 .content(request.getContent())
-                .isDeleted(false)
                 .build();
 
-        // onCreate() trong BaseEntity sẽ tự động set createdAt và updatedAt
-
+        log.debug("Saving new message to database...");
         MessageEntity savedMessage = messageRepository.save(newMessage);
+        log.info("Message saved with id: {}", savedMessage.getId());
 
-        // (Tùy chọn) Cập nhật lại updatedAt của conversation để nó nổi lên đầu danh sách
-        conversation.setUpdatedAt(LocalDateTime.now());
+        // 4. Cập nhật updatedAt của conversation (nếu cần)
+        log.debug("Updating conversation's updatedAt timestamp...");
         conversationRepository.save(conversation);
+        log.info("Conversation updatedAt refreshed for conversationId={}", conversation.getId());
 
-        // 4. Map sang DTO để trả về
-        return messageMapper.toDto(savedMessage);
+        // 5. Map sang DTO và trả về
+        MessageDTO dto = messageMapper.toDto(savedMessage);
+        log.info("Returning MessageDTO for messageId={}", dto.getId());
+
+        return dto;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ApiPageResponse<MessageDTO> getMessagesForConversation(Long conversationId, Long currentUserId, Pageable pageable) {
+    public Page<MessageDTO> getMessagesForConversation(Long conversationId, Long currentUserId,
+            Pageable pageable) {
         // 1. Kiểm tra quyền truy cập
         if (!conversationMemberRepository.existsByConversationIdAndUserId(conversationId, currentUserId)) {
             throw new CustomException(HttpStatus.FORBIDDEN, "You do not have access to this conversation.");
         }
 
         // 2. Lấy danh sách tin nhắn đã phân trang từ repository
-        Page<MessageEntity> messagePage = messageRepository.findByConversationIdOrderByCreatedAtDesc(conversationId, pageable);
-
+        Page<MessageEntity> messagePage = messageRepository.findByConversationId(conversationId,
+                pageable);
+        Page<MessageDTO> messagePageDto = messagePage.map(messageMapper::toDto);
         // 3. Map Page<Entity> sang Page<DTO>
-        return messageMapper.toApiPageResponse(messagePage.map(messageMapper::toDto));
+        return messagePageDto;
     }
 
     @Override
@@ -107,13 +135,18 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public ReadReceiptDTO markConversationAsRead(Long conversationId, Long currentUserId) {
-        ConversationMemberEntity member = conversationMemberRepository.findByConversationIdAndUserId(conversationId, currentUserId)
+        ConversationMemberEntity member = conversationMemberRepository
+                .findByConversationIdAndUserId(conversationId, currentUserId)
                 .orElseThrow(() -> new NotFoundException("User is not a member of this conversation."));
 
         member.setLastSeenAt(LocalDateTime.now());
         conversationMemberRepository.save(member);
-        return new ReadReceiptDTO(conversationId, currentUserId, member.getLastSeenAt());
+        ReadReceiptDTO dto = ReadReceiptDTO.builder()
+                .conversationId(conversationId)
+                .userId(currentUserId)
+                .readAt(member.getLastSeenAt())
+                .build();
+        return dto;
     }
-
 
 }

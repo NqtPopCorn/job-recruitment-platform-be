@@ -9,4 +9,6 @@ public class SendMessageRequestDTO {
     private Long conversationId;
     @NotNull
     private String content;
+
+    private String tempId; // ID tạm thời để theo dõi trạng thái gửi
 }

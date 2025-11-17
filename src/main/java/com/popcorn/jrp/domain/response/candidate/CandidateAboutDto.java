@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class CandidateAboutDto {
-
-    private String id;
     private String candidateId;
     private String category;
     private String title;
@@ -23,5 +21,4 @@ public class CandidateAboutDto {
     private String text;
     private Instant createdAt;
     private Instant updatedAt;
-
 }

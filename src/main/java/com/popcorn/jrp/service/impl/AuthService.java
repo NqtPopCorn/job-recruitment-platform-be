@@ -1,12 +1,15 @@
 package com.popcorn.jrp.service.impl;
 
 import com.popcorn.jrp.domain.entity.CandidateEntity;
+import com.popcorn.jrp.domain.entity.EmployerEntity;
 import com.popcorn.jrp.domain.entity.UserEntity;
 import com.popcorn.jrp.domain.request.auth.LoginRequest;
 import com.popcorn.jrp.domain.request.auth.RegisterRequest;
 import com.popcorn.jrp.domain.response.auth.AccountResponse;
 import com.popcorn.jrp.exception.CustomException;
+import com.popcorn.jrp.exception.NotFoundException;
 import com.popcorn.jrp.repository.CandidateRepository;
+import com.popcorn.jrp.repository.EmployerRepository;
 import com.popcorn.jrp.repository.UserRepository;
 import com.popcorn.jrp.security.JwtUtil;
 import com.popcorn.jrp.service.CandidateService;
@@ -24,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Pattern;
+import java.math.BigDecimal;
 import java.sql.SQLOutput;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +36,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequiredArgsConstructor
 public class AuthService implements com.popcorn.jrp.service.AuthService {
 
-    @Value("${jwt.token-expiration:1h}") // đọc từ application.properties, mặc định 1h
+    @Value("${jwt.token.expiration:1h}") // đọc từ application.properties, mặc định 1h
     private String jwtTokenExpiration;
 
     @Value("${role.candidate}")
@@ -47,9 +51,8 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final CandidateService candidateService;
     private final CandidateRepository candidateRepository;
-    // private final CompanyService companyService;
+    private final EmployerRepository employerRepository;
 
     @Transactional
     public UserEntity register(RegisterRequest request) {
@@ -70,40 +73,65 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
 
             UserEntity newUser = userRepository.save(user);
 
-            if (request.getRole().equals(roleCandidate)) {
-                // Xử lý cho role candidate
-                CandidateEntity candidate = CandidateEntity.builder()
-                        .user(newUser)
-                        .name("") // trống
-                        .birthday(null)
-                        .avatar("")
-                        .industry("")
-                        .designation("")
-                        .location("")
-                        .description("")
-                        .experience(null)
-                        .currentSalary("")
-                        .expectedSalary("")
-                        .gender("")
-                        .email(newUser.getEmail())
-                        .phone("")
-                        .hourlyRate(null)
-                        .city("")
-                        .country("")
-                        .languages(new ArrayList<>())
-                        .skills(new ArrayList<>())
-                        .educationLevel("")
-                        .status(true)
-                        .build();
+            switch (user.getRole()) {
+                case candidate:
+                    CandidateEntity candidate = CandidateEntity.builder()
+                            .user(newUser)
+                            .name("") // trống
+                            .birthday(null)
+                            .avatar("")
+                            .industry("")
+                            .designation("")
+                            .location("")
+                            .description("")
+                            .experience(null)
+                            .currentSalary(BigDecimal.valueOf(0))
+                            .expectedSalary(BigDecimal.valueOf(0))
+                            .gender("")
+                            .email(newUser.getEmail())
+                            .phone("")
+                            .hourlyRate(null)
+                            .city("")
+                            .country("")
+                            .languages(new ArrayList<>())
+                            .skills(new ArrayList<>())
+                            .educationLevel("")
+                            .status(true)
+                            .build();
 
-                candidateRepository.save(candidate);
-            } else if (request.getRole().equals(roleEmployer)) {
-                // Xử lý cho role khác
+                    candidateRepository.save(candidate);
+                    break;
+
+                case employer:
+                    EmployerEntity employer = EmployerEntity.builder()
+                            .user(newUser)
+                            .address("")
+                            .city("")
+                            .country("")
+                            .description("")
+                            .email(request.getEmail())
+                            .foundedIn(1900)
+                            .logo("")
+                            .name("")
+                            .phone("")
+                            .primaryIndustry("")
+                            .size("")
+                            .socialMedias("[]")
+                            .build();
+                    employerRepository.save(employer);
+                    break;
+
+                case admin:
+                    // Admin không có data bổ sung
+                    break;
+
+                default:
+                    throw new CustomException(
+                            HttpStatus.BAD_REQUEST,
+                            "Unsupported user role: " + user.getRole().name());
             }
 
             return newUser;
-        } catch (CustomException e) {
-            throw e;
         } catch (Exception e) {
             throw new CustomException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
@@ -156,17 +184,19 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
             // Lấy data tùy theo role
             switch (user.getRole()) {
                 case candidate:
-                    CandidateEntity candidate = candidateService.getCandidateByUserId(user.getId());
+                    CandidateEntity candidate = candidateRepository.findByUserId(Long.valueOf(userId))
+                            .orElseThrow(() -> new NotFoundException("Candidate"));
                     response.setId(candidate.getId());
                     response.setName(candidate.getName());
                     response.setImageUrl(candidate.getAvatar());
                     break;
 
                 case employer:
-                    CandidateEntity employer = candidateService.getCandidateByUserId(user.getId());
+                    EmployerEntity employer = employerRepository.findByUserId(Long.valueOf(userId))
+                            .orElseThrow(() -> new NotFoundException("Candidate"));
                     response.setId(employer.getId());
                     response.setName(employer.getName());
-                    response.setImageUrl(employer.getAvatar());
+                    response.setImageUrl(employer.getLogo());
                     break;
 
                 case admin:
