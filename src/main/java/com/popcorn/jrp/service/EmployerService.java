@@ -118,4 +118,9 @@ public interface EmployerService {
      */
     ApiPageResponse<CandidateResponse> getPotentialCanddiatesPaginated(Long employerId, String search,
             Pageable pageable);
+
+    EmployerDashboardStatsResponse getDashboardStats(Long employerId);
+
+    EmployerDashboardStatsResponse getDashboardStatsByUserId(Long userId);
+
 }

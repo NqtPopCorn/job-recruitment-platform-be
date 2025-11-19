@@ -2,6 +2,9 @@ package com.popcorn.jrp.service;
 
 import java.util.List;
 
+import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.candidate.JobAppliedRecentlyResponse;
+import com.popcorn.jrp.domain.response.employer.RecentApplicantResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,4 +26,12 @@ public interface ApplicationService {
     public List<ApplicantResponseDto> getApplicantsAppliedByJobId(Long jobId);
 
     public void updateApplicantStatus(Long applicationId, String status);
+
+    List<JobAppliedRecentlyResponse> getRecentAppliedJobs(Long candidateId, Integer limit);
+
+    ApiPageResponse<JobAppliedRecentlyResponse> getAllAppliedJobs(Long candidateId, Pageable pageable);
+
+    boolean hasAppliedJob(Long candidateId, Long jobId);
+
+    ApiPageResponse<RecentApplicantResponse> getAllApplicantsByEmployer(Long employerId, Pageable pageable);
 }

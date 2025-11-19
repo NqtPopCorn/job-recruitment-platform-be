@@ -6,6 +6,7 @@ import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.*;
 import com.popcorn.jrp.domain.response.candidate.*;
+import com.popcorn.jrp.service.ApplicationService;
 import com.popcorn.jrp.service.CandidateService;
 import com.popcorn.jrp.service.ResumeService;
 import jakarta.annotation.Nullable;
@@ -15,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,6 +25,7 @@ import java.util.List;
 public class CandidateController {
 
         private final CandidateService candidateService;
+        private  final  ApplicationService applicationService;
 
         // GET PAGINATED LIST
         @GetMapping
@@ -113,4 +114,51 @@ public class CandidateController {
                                 .data(data)
                                 .build());
         }
+
+    @GetMapping("/{candidateId}/dashboard-stats")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiDataResponse<CandidateDashboardStatsResponse> getDashboardStats(
+            @PathVariable Long candidateId) {
+
+        CandidateDashboardStatsResponse data = candidateService.getDashboardStats(candidateId);
+
+        return ApiDataResponse.<CandidateDashboardStatsResponse>builder()
+                .data(data)
+                .message("Lấy thống kê dashboard thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    @GetMapping("/dashboard-stats/user/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiDataResponse<CandidateDashboardStatsResponse> getDashboardStatsByUserId(
+            @PathVariable Long userId) {
+
+        CandidateDetailsResponse candidate = candidateService.getCandidateByUserId(userId);
+        CandidateDashboardStatsResponse data = candidateService.getDashboardStats(candidate.getId());
+
+        return ApiDataResponse.<CandidateDashboardStatsResponse>builder()
+                .data(data)
+                .message("Lấy thống kê dashboard thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    /**
+     * GET /candidate/apply-recent?candidateId=1&page=0&size=10
+     */
+    @GetMapping("/apply-recent")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiPageResponse<JobAppliedRecentlyResponse> getAllAppliedJobs(
+            @RequestParam Long candidateId,
+            Pageable pageable) {
+
+        ApiPageResponse<JobAppliedRecentlyResponse> response = applicationService
+                .getAllAppliedJobs(candidateId, pageable);
+        response.setMessage("Lấy danh sách tất cả công việc đã apply thành công!");
+        response.setStatusCode(HttpStatus.OK.value());
+
+        return response;
+    }
+
 }

@@ -3,39 +3,25 @@ package com.popcorn.jrp.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.popcorn.jrp.domain.response.*;
+import com.popcorn.jrp.domain.response.candidate.JobAppliedRecentlyResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.popcorn.jrp.domain.entity.ApplicationEntity;
 import com.popcorn.jrp.domain.query.ApplicationQueryDto;
 import com.popcorn.jrp.domain.request.application.CreateApplicationRequestDto;
 import com.popcorn.jrp.domain.request.application.UpdateApplicationStatusRequest;
-import com.popcorn.jrp.domain.response.ApiNoDataResponse;
-import com.popcorn.jrp.domain.response.ApiPageResponse;
-import com.popcorn.jrp.domain.response.ApiResponse;
-import com.popcorn.jrp.domain.response.ApiResultsResponse;
 import com.popcorn.jrp.domain.response.application.ApplicantResponseDto;
 import com.popcorn.jrp.domain.response.application.ApplicationPageResponseDto;
 import com.popcorn.jrp.domain.response.application.ApplicationResponseDto;
-import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
 import com.popcorn.jrp.service.ApplicationService;
 
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/v1/application")

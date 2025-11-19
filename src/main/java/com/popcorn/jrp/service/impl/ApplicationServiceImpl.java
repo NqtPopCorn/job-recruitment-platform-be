@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import com.popcorn.jrp.domain.response.ApiPageResponse;
+import com.popcorn.jrp.domain.response.ApiResultsResponse;
+import com.popcorn.jrp.domain.response.candidate.JobAppliedRecentlyResponse;
+import com.popcorn.jrp.domain.response.employer.RecentApplicantResponse;
+import com.popcorn.jrp.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,10 +37,6 @@ import com.popcorn.jrp.domain.response.application.ApplicationResponseDto;
 import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
 import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.NotFoundException;
-import com.popcorn.jrp.repository.ApplicationRepository;
-import com.popcorn.jrp.repository.CandidateRepository;
-import com.popcorn.jrp.repository.JobRepository;
-import com.popcorn.jrp.repository.ResumeRepository;
 import com.popcorn.jrp.repository.spec.ApplicationSpecification;
 import com.popcorn.jrp.service.ApplicationService;
 
@@ -60,6 +61,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final CandidateMapper candidateMapper;
 
     private final ApplicationSpecification applicationSpecification;
+
+    private final EmployerRepository employerRepository;
 
     @Override
     @Transactional
@@ -247,6 +250,73 @@ public class ApplicationServiceImpl implements ApplicationService {
         applicationRepository.save(application);
         log.info("Status updated successfully for applicationId={} → {}",
                 applicationId, application.getStatus());
+    }
+
+    @Override
+    public List<JobAppliedRecentlyResponse> getRecentAppliedJobs(Long candidateId, Integer limit) {
+        if (limit == null || limit <= 0) {
+            limit = 4; // Default 4 jobs
+        }
+
+        Pageable pageable = PageRequest.of(0, limit);
+        List<ApplicationEntity> applications = applicationRepository
+                .findRecentApplicationsByCandidateId(candidateId, pageable);
+
+        return applications.stream()
+                .map(applicationMapper::toJobAppliedRecentlyResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ApiPageResponse<JobAppliedRecentlyResponse> getAllAppliedJobs(
+            Long candidateId, Pageable pageable) {
+
+        Page<ApplicationEntity> page = applicationRepository
+                .findAllByCandidateIdWithDetails(candidateId, pageable);
+
+        Page<JobAppliedRecentlyResponse> responsePage = page
+                .map(applicationMapper::toJobAppliedRecentlyResponse);
+
+        ApiPageResponse.Meta meta = ApiPageResponse.Meta.builder()
+                .totalItems(responsePage.getTotalElements())
+                .currentPage(responsePage.getNumber())
+                .pageSize(responsePage.getSize())
+                .totalPages(responsePage.getTotalPages())
+                .build();
+
+        return ApiPageResponse.<JobAppliedRecentlyResponse>builder()
+                .results(responsePage.getContent())
+                .meta(meta)
+                .build();
+    }
+
+    @Override
+    public boolean hasAppliedJob(Long candidateId, Long jobId) {
+        return applicationRepository.existsByCandidateIdAndJobIdAndIsDeletedFalse(
+                candidateId, jobId);
+    }
+
+    @Override
+    public ApiPageResponse<RecentApplicantResponse> getAllApplicantsByEmployer(
+            Long employerId, Pageable pageable) {
+
+        Page<ApplicationEntity> page = applicationRepository
+                .findAllApplicationsByEmployerId(employerId, pageable);
+
+        Page<RecentApplicantResponse> responsePage = page
+                .map(applicationMapper::toRecentApplicantResponse);
+
+        ApiPageResponse.Meta meta = ApiPageResponse.Meta.builder()
+                .totalItems(responsePage.getTotalElements())
+                .currentPage(responsePage.getNumber())
+                .pageSize(responsePage.getSize())
+                .totalPages(responsePage.getTotalPages())
+                .build();
+
+        return ApiPageResponse.<RecentApplicantResponse>builder()
+                .results(responsePage.getContent())
+                .meta(meta)
+                .build();
     }
 
 }

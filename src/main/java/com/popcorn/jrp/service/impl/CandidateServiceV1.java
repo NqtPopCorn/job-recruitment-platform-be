@@ -5,10 +5,7 @@ import com.popcorn.jrp.domain.mapper.CandidateMapper;
 import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
-import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
-import com.popcorn.jrp.domain.response.candidate.CandidateForChat;
-import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
-import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
+import com.popcorn.jrp.domain.response.candidate.*;
 import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.NotFoundException;
 import com.popcorn.jrp.repository.CandidateRepository;
@@ -118,5 +115,23 @@ public class CandidateServiceV1 implements CandidateService {
         Page<CandidateEntity> pageEntity = candidateRepository.findAll(spec, pageable);
         Page<CandidateForChat> pageForChat = pageEntity.map(mapper::toForChat);
         return pageForChat;
+    }
+
+    @Override
+    public CandidateDashboardStatsResponse getDashboardStats(Long candidateId) {
+        candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new NotFoundException("Candidate not found"));
+
+        Long appliedJobs = candidateRepository.countAppliedJobsByCandidateId(candidateId);
+        Long jobAlerts = candidateRepository.countJobAlertsByCandidateId(candidateId);
+        Long messages = candidateRepository.countUnreadMessagesByCandidateId(candidateId);
+        Long shortlist = candidateRepository.countShortlistedJobsByCandidateId(candidateId);
+
+        return CandidateDashboardStatsResponse.builder()
+                .appliedJobs(appliedJobs != null ? appliedJobs : 0L)
+                .jobAlerts(jobAlerts != null ? jobAlerts : 0L)
+                .messages(messages != null ? messages : 0L)
+                .shortlist(shortlist != null ? shortlist : 0L)
+                .build();
     }
 }

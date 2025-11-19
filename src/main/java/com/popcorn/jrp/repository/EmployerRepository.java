@@ -20,6 +20,7 @@ public interface EmployerRepository extends JpaRepository<EmployerEntity, Long>,
 
     // Dùng cho: 4. GET DETAIL COMPANY BY USER ID
     Optional<EmployerEntity> findByUserId(Long userId);
+    Optional<EmployerEntity> findByUserIdAndIsDeletedFalse(Long userId);
 
     // Dùng cho: 6. GET INDUSTRY LIST
     @Query("SELECT DISTINCT e.primaryIndustry FROM EmployerEntity e WHERE e.primaryIndustry IS NOT NULL AND e.primaryIndustry != ''")
@@ -40,4 +41,30 @@ public interface EmployerRepository extends JpaRepository<EmployerEntity, Long>,
             @Param("employerId") Long employerId,
             @Param("search") String search,
             Pageable pageable);
+
+    @Query("SELECT COUNT(j) FROM JobEntity j " +
+            "WHERE j.employer.id = :employerId " +
+            "AND j.isDeleted = false")
+    Long countPostedJobsByEmployerId(@Param("employerId") Long employerId);
+
+    @Query("SELECT COUNT(a) FROM ApplicationEntity a " +
+            "JOIN a.job j " +
+            "WHERE j.employer.id = :employerId " +
+            "AND a.isDeleted = false")
+    Long countApplicationsByEmployerId(@Param("employerId") Long employerId);
+
+
+    @Query("SELECT COUNT(DISTINCT m) FROM MessageEntity m " +
+            "JOIN ConversationMemberEntity cm ON cm.conversation.id = m.conversation.id " +
+            "WHERE cm.user.id = (SELECT e.user.id FROM EmployerEntity e WHERE e.id = :employerId) " +
+            "AND m.isDeleted = false " +
+            "AND m.senderUser.id != (SELECT e.user.id FROM EmployerEntity e WHERE e.id = :employerId)")
+    Long countMessagesByEmployerId(@Param("employerId") Long employerId);
+
+
+    @Query("SELECT COUNT(pc) FROM EmployerEntity e " +
+            "JOIN e.potentialCandidates pc " +
+            "WHERE e.id = :employerId " +
+            "AND pc.isDeleted = false")
+    Long countShortlistedCandidatesByEmployerId(@Param("employerId") Long employerId);
 }

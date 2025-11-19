@@ -12,12 +12,14 @@ import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
 import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.NotFoundException;
+import com.popcorn.jrp.repository.ApplicationRepository;
 import com.popcorn.jrp.repository.CandidateRepository;
 import com.popcorn.jrp.repository.EmployerRepository;
 import com.popcorn.jrp.repository.spec.CandidateSpecification;
 import com.popcorn.jrp.repository.spec.EmployerSpecification;
 import com.popcorn.jrp.service.EmployerService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,7 @@ public class EmployerServiceImpl implements EmployerService {
     // private final JobMapper jobMapper; // Cần cho getRelatedJobs
     private final CandidateRepository candidateRepository;
     private final CandidateMapper candidateMapper;
+    ApplicationRepository applicationRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -196,6 +199,32 @@ public class EmployerServiceImpl implements EmployerService {
                                 .getTotalElements())
                         .build())
                 .build();
+    }
+
+    @Override
+    public EmployerDashboardStatsResponse getDashboardStats(Long employerId) {
+        employerRepository.findById(employerId)
+                .orElseThrow(() -> new NotFoundException("Employer not found"));
+
+        Long postedJobs = employerRepository.countPostedJobsByEmployerId(employerId);
+        Long applications = employerRepository.countApplicationsByEmployerId(employerId);
+        Long messages = employerRepository.countMessagesByEmployerId(employerId);
+        Long shortlist = employerRepository.countShortlistedCandidatesByEmployerId(employerId);
+
+        return EmployerDashboardStatsResponse.builder()
+                .postedJobs(postedJobs != null ? postedJobs : 0L)
+                .applications(applications != null ? applications : 0L)
+                .messages(messages != null ? messages : 0L)
+                .shortlist(shortlist != null ? shortlist : 0L)
+                .build();
+    }
+
+    @Override
+    public EmployerDashboardStatsResponse getDashboardStatsByUserId(Long userId) {
+        EmployerEntity employer = employerRepository.findByUserIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new NotFoundException("Employer not found for userId: " + userId));
+
+        return getDashboardStats(employer.getId());
     }
 
 }

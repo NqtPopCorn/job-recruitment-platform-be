@@ -5,10 +5,7 @@ import com.popcorn.jrp.domain.request.candidate.CandidateSearchRequest;
 import com.popcorn.jrp.domain.request.candidate.CreateCandidateDto;
 import com.popcorn.jrp.domain.request.candidate.UpdateCandidateDto;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
-import com.popcorn.jrp.domain.response.candidate.CandidateDetailsResponse;
-import com.popcorn.jrp.domain.response.candidate.CandidateForChat;
-import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
-import com.popcorn.jrp.domain.response.candidate.SoftDeleteCandidateResponse;
+import com.popcorn.jrp.domain.response.candidate.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -32,4 +29,6 @@ public interface CandidateService {
     List<String> getSkillList();
 
     Page<CandidateForChat> getCandidatesForChat(String search, Pageable pageable);
+
+    CandidateDashboardStatsResponse getDashboardStats(Long candidateId);
 }

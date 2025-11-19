@@ -8,9 +8,12 @@ import com.popcorn.jrp.domain.response.ApiNoDataResponse;
 import com.popcorn.jrp.domain.response.ApiPageResponse;
 import com.popcorn.jrp.domain.response.ApiResultsResponse;
 import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
+import com.popcorn.jrp.domain.response.candidate.NotificationResponse;
 import com.popcorn.jrp.domain.response.common.IndustryLabelValueDto;
 import com.popcorn.jrp.domain.response.employer.*;
+import com.popcorn.jrp.service.ApplicationService;
 import com.popcorn.jrp.service.EmployerService;
+import com.popcorn.jrp.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +34,8 @@ import java.util.List;
 public class CompanyController {
 
         private final EmployerService employerService;
+        private  final ApplicationService applicationService;
+        private  final NotificationService notificationService;
 
         /**
          * 1. GET LIST PAGINATION COMPANY
@@ -208,4 +213,69 @@ public class CompanyController {
                                 .getPotentialCanddiatesPaginated(employerId, search, pageable);
                 return ResponseEntity.ok(potentialCandidatePage);
         }
+
+    @GetMapping("/{employerId}/dashboard-stats")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiDataResponse<EmployerDashboardStatsResponse> getDashboardStats(
+            @PathVariable Long employerId) {
+
+        EmployerDashboardStatsResponse data = employerService.getDashboardStats(employerId);
+
+        return ApiDataResponse.<EmployerDashboardStatsResponse>builder()
+                .data(data)
+                .message("Lấy thống kê dashboard thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    @GetMapping("/dashboard-stats/user/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiDataResponse<EmployerDashboardStatsResponse> getDashboardStatsByUserId(
+            @PathVariable Long userId) {
+
+        EmployerDashboardStatsResponse data = employerService.getDashboardStatsByUserId(userId);
+
+        return ApiDataResponse.<EmployerDashboardStatsResponse>builder()
+                .data(data)
+                .message("Lấy thống kê dashboard thành công!")
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    /**
+     * GET ALL APPLICANTS FOR EMPLOYER WITH PAGINATION
+     * GET /api/v1/company/employer?employerId={employerId}&page=0&size=10
+     */
+    @GetMapping("/employer")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiPageResponse<RecentApplicantResponse> getAllApplicantsByEmployer(
+            @RequestParam Long employerId,
+            Pageable pageable) {
+
+        ApiPageResponse<RecentApplicantResponse> response = applicationService
+                .getAllApplicantsByEmployer(employerId, pageable);
+        response.setMessage("Lấy danh sách tất cả ứng viên thành công!");
+        response.setStatusCode(HttpStatus.OK.value());
+
+        return response;
+    }
+
+    /**
+     * GET ALL UNREAD NOTIFICATIONS
+     * GET /api/v1/company/unread?userId={userId}
+     */
+    @GetMapping("/unread")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResultsResponse<NotificationResponse> getAllUnreadNotifications(
+            @RequestParam Long userId) {
+
+        List<NotificationResponse> notifications = notificationService
+                .getAllUnreadNotifications(userId);
+
+        return ApiResultsResponse.<NotificationResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Lấy danh sách thông báo chưa đọc thành công!")
+                .results(notifications)
+                .build();
+    }
 }
