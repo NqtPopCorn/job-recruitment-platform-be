@@ -28,7 +28,7 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
 
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     @CreatedDate
     @Column(updatable = false)

@@ -1,6 +1,7 @@
 package com.popcorn.jrp.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.popcorn.jrp.domain.dto.notification.JobNotificationDto;
 import com.popcorn.jrp.domain.entity.EmployerEntity;
 import com.popcorn.jrp.domain.entity.JobEntity;
 import com.popcorn.jrp.domain.mapper.JobMapper;
@@ -10,6 +11,7 @@ import com.popcorn.jrp.domain.response.job.JobDashboardDto;
 import com.popcorn.jrp.domain.response.job.JobDetailDto;
 import com.popcorn.jrp.domain.response.job.JobResponseDto;
 import com.popcorn.jrp.exception.NotFoundException;
+import com.popcorn.jrp.messaging.producer.NotificationProducer;
 import com.popcorn.jrp.repository.EmployerRepository;
 import com.popcorn.jrp.repository.JobRepository;
 // import com.popcorn.jrp.repository.ApplicationRepository; // Cần có để đếm
@@ -31,6 +33,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.management.Notification;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -40,11 +44,9 @@ public class JobServiceImpl implements JobService {
 
     private final JobRepository jobRepository;
     private final EmployerRepository employerRepository;
-    // private final ApplicationRepository applicationRepository; // Dùng cho
-    // Endpoint 10
     private final JobMapper jobMapper;
     private final JobSpecification jobSpecification;
-    private final ObjectMapper objectMapper = new ObjectMapper(); // Dùng cho xử lý JSON
+    private final NotificationProducer notificationProducer;
 
     @Override
     @Transactional(readOnly = true)
@@ -160,15 +162,19 @@ public class JobServiceImpl implements JobService {
         EmployerEntity employer = employerRepository.findById(employerId)
                 .orElseThrow(() -> new NotFoundException("Employer với ID: " + employerId));
 
-        // Check SemployerServicePackage
+        // Check employerServicePackage
 
         // Create new Job
         JobEntity entity = jobMapper.toEntity(createDto);
         entity.setEmployer(employer);
         entity.setStatus(true); // Mặc định active
-        entity.setDeleted(false); // Mặc định không xóa
+        entity.setIsDeleted(false); // Mặc định không xóa
 
         JobEntity savedEntity = jobRepository.save(entity);
+
+        // Send notification about new job creation
+        notificationProducer.sendJobCreatedCreatedNotification(savedEntity);
+
         return jobMapper.toDetailDto(savedEntity);
     }
 
@@ -205,7 +211,7 @@ public class JobServiceImpl implements JobService {
         JobEntity entity = jobRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Job với ID: " + id));
 
-        entity.setDeleted(true);
+        entity.setIsDeleted(true);
         entity.setStatus(false); // Khi xóa mềm cũng nên tắt active
         jobRepository.save(entity);
     }

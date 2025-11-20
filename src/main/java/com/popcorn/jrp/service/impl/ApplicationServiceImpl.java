@@ -14,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
@@ -32,6 +34,7 @@ import com.popcorn.jrp.domain.response.application.ApplicationResponseDto;
 import com.popcorn.jrp.domain.response.candidate.CandidateResponse;
 import com.popcorn.jrp.exception.BadRequestException;
 import com.popcorn.jrp.exception.NotFoundException;
+import com.popcorn.jrp.messaging.producer.NotificationProducer;
 import com.popcorn.jrp.repository.ApplicationRepository;
 import com.popcorn.jrp.repository.CandidateRepository;
 import com.popcorn.jrp.repository.JobRepository;
@@ -60,6 +63,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final CandidateMapper candidateMapper;
 
     private final ApplicationSpecification applicationSpecification;
+
+    private final NotificationProducer notificationProducer;
 
     @Override
     @Transactional
@@ -150,6 +155,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         // Lưu ứng dụng (mới hoặc cập nhật)
         ApplicationEntity savedApplication = applicationRepository.save(application);
         log.info("Application saved successfully with id={}", savedApplication.getId());
+
+        // Send message to kafka
+        notificationProducer.sendApplicantAppliesNotification(savedApplication);
 
         return applicationMapper.toApplicationResponseDto(savedApplication);
     }
@@ -244,9 +252,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         // Lưu thay đổi
-        applicationRepository.save(application);
+        ApplicationEntity newApplication = applicationRepository.save(application);
         log.info("Status updated successfully for applicationId={} → {}",
                 applicationId, application.getStatus());
+
+        // Gui message toi kafka để thông báo với ứng viên
+        notificationProducer.sendApplicationStatusNotification(newApplication);
+        log.info("Send application status to kafka for application={}", newApplication);
     }
 
 }

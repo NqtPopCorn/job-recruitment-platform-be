@@ -3,6 +3,7 @@ package com.popcorn.jrp.service.impl;
 import com.popcorn.jrp.domain.entity.CandidateEntity;
 import com.popcorn.jrp.domain.entity.EmployerEntity;
 import com.popcorn.jrp.domain.entity.UserEntity;
+import com.popcorn.jrp.domain.enums.Role;
 import com.popcorn.jrp.domain.request.auth.LoginRequest;
 import com.popcorn.jrp.domain.request.auth.RegisterRequest;
 import com.popcorn.jrp.domain.response.auth.AccountResponse;
@@ -274,9 +275,9 @@ public class AuthService implements com.popcorn.jrp.service.AuthService {
         }
     }
 
-    private UserEntity.Role parseRole(String roleStr) {
+    private Role parseRole(String roleStr) {
         return Arrays
-                .stream(UserEntity.Role.values())
+                .stream(Role.values())
                 .filter(r -> r.name().equalsIgnoreCase(roleStr.trim()))
                 .findFirst()
                 .orElseThrow(() -> new CustomException(

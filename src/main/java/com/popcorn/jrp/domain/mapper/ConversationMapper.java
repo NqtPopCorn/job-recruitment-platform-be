@@ -15,7 +15,6 @@ public interface ConversationMapper extends PageMapper {
      */
     @Mapping(target = "displayName", ignore = true)
     @Mapping(target = "displayImageUrl", ignore = true)
-    // @Mapping(source = "members", target = "members")
     @Mapping(target = "otherMember", expression = "java(getOtherMember(entity, currentUserId))")
     ConversationDetailsDTO toDetailsDto(ConversationEntity entity, Long currentUserId);
 
@@ -41,5 +40,6 @@ public interface ConversationMapper extends PageMapper {
     @Mapping(target = "lastMessageContent", ignore = true)
     @Mapping(target = "lastMessageAt", ignore = true)
     @Mapping(target = "unreadCount", ignore = true)
+    @Mapping(target = "otherUserId", ignore = true)
     ConversationSummaryDTO toSummaryDto(ConversationEntity entity);
 }

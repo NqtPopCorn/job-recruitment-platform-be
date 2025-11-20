@@ -32,7 +32,10 @@ public interface JobMapper extends PageMapper {
     @Mapping(source = "employer.logo", target = "logo") // Lấy logo từ Employer
     @Mapping(source = "employer", target = "company") // Map lồng ghép
     @Mapping(source = "expirationDate", target = "expireDate")
+    @Mapping(source = "createdAt", target = "datePosted")
+    @Mapping(source = "industry", target = "destination")
     @Mapping(source = ".", target = "salary", qualifiedByName = "mapSalary")
+    @Mapping(source = ".", target = "applications", qualifiedByName = "mapApplicationsCount")
     @Mapping(source = ".", target = "workTime", qualifiedByName = "mapWorkTimeDto")
     JobDetailDto toDetailDto(JobEntity entity);
 

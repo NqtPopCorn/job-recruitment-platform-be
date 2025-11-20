@@ -21,12 +21,12 @@ import lombok.NoArgsConstructor;
 public class UpdateJobDto {
 
     @Size(max = 100, message = "Tên công việc không được vượt quá 100 ký tự")
-    private String name;
+    private String title;
 
     private String description;
 
     @Valid
-    private List<String> jobType;
+    private List<String> jobTypes;
 
     @Valid
     private JobSalaryDto salary;
@@ -58,8 +58,6 @@ public class UpdateJobDto {
     private LocalDate expirationDate;
 
     private List<String> skills;
-
-    private Boolean isActive; // Tên trong tài liệu
 
     private Boolean status; // Tên trong tài liệu
 }

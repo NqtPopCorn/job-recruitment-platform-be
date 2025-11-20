@@ -57,7 +57,7 @@ public class ConversationController {
         public ResponseEntity<ApiPageResponse<MessageDTO>> getConversationMessages(
                         Authentication auth,
                         @PathVariable Long conversationId,
-                        @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
+                        @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
                 Long userId = Long.parseLong(auth.getName());
                 Page<MessageDTO> page = messageService.getMessagesForConversation(conversationId, userId,

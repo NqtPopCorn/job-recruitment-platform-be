@@ -40,7 +40,7 @@ public class JwtUtil {
         this.accessExpirationMs = parseExpirationTime(tokenExpiration);
     }
 
-    // ✅ Hàm parse "1d", "15m", "900000" -> mili giây
+    // Hàm parse "1d", "15m", "900000" -> mili giây
     private long parseExpirationTime(String value) {
         value = value.trim().toLowerCase();
         if (value.endsWith("d")) {

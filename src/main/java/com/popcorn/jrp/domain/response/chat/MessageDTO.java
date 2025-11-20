@@ -11,5 +11,5 @@ public class MessageDTO {
     private Long senderUserId;
     private String content;
     private LocalDateTime createdAt;
-    private boolean isDeleted;
+    private Boolean isDeleted;
 }

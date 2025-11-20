@@ -116,7 +116,7 @@ public class EmployerServiceImpl implements EmployerService {
                 .orElseThrow(() -> new NotFoundException("Công ty với ID: " + id));
 
         entity.setStatus(false);
-        entity.setDeleted(true);
+        entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now()); // Cập nhật thủ công vì @PreUpdate có thể không chạy
 
         EmployerEntity savedEntity = employerRepository.save(entity);

@@ -53,8 +53,8 @@ public class JwtFilter extends OncePerRequestFilter {
             String role = jwtUtil.extractRole(token);
 
             if (!jwtUtil.isAccessToken(token)) {
-                // sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
-                // "This is a Refresh Token, rejecting...");
+                sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
+                        "This is a Refresh Token, rejecting...");
             }
 
             if (userId != null && jwtUtil.isTokenValid(token, userId)) {
@@ -72,8 +72,8 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             logger.info("Invalid token or error");
-            // sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-            // "Invalid token");
+            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "Invalid token");
         } finally {
             chain.doFilter(request, response);
         }

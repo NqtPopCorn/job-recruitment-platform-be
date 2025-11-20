@@ -5,11 +5,16 @@ import java.util.List;
 
 import com.popcorn.jrp.domain.response.employer.EmployerDetailDto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
 public class JobDetailDto {
     private Long id;
     private String logo;
@@ -30,6 +35,10 @@ public class JobDetailDto {
     private List<String> jobTypes; // DTO lồng nhau
     private List<String> skills;
     private String destination;
+    private Boolean status;
     private LocalDateTime datePosted;
     private LocalDateTime expireDate;
+
+    @Builder.Default
+    private Integer applications = 0;
 }

@@ -11,6 +11,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.popcorn.jrp.domain.enums.Role;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,7 +66,4 @@ public class UserEntity extends BaseEntity implements UserDetails {
         this.status = true;
     }
 
-    public enum Role {
-        admin, candidate, employer
-    }
 }

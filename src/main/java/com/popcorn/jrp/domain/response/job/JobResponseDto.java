@@ -29,7 +29,7 @@ public class JobResponseDto {
     private String city;
 
     @Builder.Default
-    private int applications = 0;
+    private Integer applications = 0;
 
     @Builder.Default
     private List<String> jobTypes = new ArrayList<>();

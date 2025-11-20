@@ -16,14 +16,13 @@ public interface MessageMapper {
 
     @Mapping(source = "conversation.id", target = "conversationId")
     @Mapping(source = "senderUser.id", target = "senderUserId")
-    @Mapping(source = "deleted", target = "deleted") // Map `isDeleted` (boolean) sang `deleted` (boolean)
     MessageDTO toDto(MessageEntity entity);
 
     List<MessageDTO> toDtoList(List<MessageEntity> entities);
 
     @AfterMapping
     default void setCustomFields(@MappingTarget MessageDTO dto, MessageEntity entity) {
-        if (entity.isDeleted()) {
+        if (Boolean.TRUE.equals(entity.getIsDeleted())) {
             dto.setContent("This message has been deleted.");
         }
     }

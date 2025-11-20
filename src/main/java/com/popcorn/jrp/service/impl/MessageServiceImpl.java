@@ -128,7 +128,7 @@ public class MessageServiceImpl implements MessageService {
         }
 
         // soft delete
-        message.setDeleted(true);
+        message.setIsDeleted(true);
         messageRepository.save(message);
     }
 

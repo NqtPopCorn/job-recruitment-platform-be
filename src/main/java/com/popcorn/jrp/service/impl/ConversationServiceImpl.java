@@ -174,7 +174,9 @@ public class ConversationServiceImpl implements ConversationService {
                 .findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId());
         if (lastMessageOpt.isPresent()) {
             MessageEntity lastMessage = lastMessageOpt.get();
-            dto.setLastMessageContent(lastMessage.isDeleted() ? "Message deleted" : lastMessage.getContent());
+            dto.setLastMessageContent(Boolean.TRUE.equals(lastMessage.getIsDeleted())
+                    ? "Message deleted"
+                    : lastMessage.getContent());
             dto.setLastMessageAt(lastMessage.getCreatedAt());
         }
 
