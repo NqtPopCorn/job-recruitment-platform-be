@@ -1,15 +1,16 @@
 package com.popcorn.jrp.service;
 
-import com.popcorn.jrp.domain.request.service.CreateAddOnRequest;
-import com.popcorn.jrp.domain.request.service.CreateEmployerPackageRequest;
-import com.popcorn.jrp.domain.request.service.PurchasePackageRequest;
-import com.popcorn.jrp.domain.request.service.UpgradePackageRequest;
+import com.popcorn.jrp.domain.request.service.*;
 import com.popcorn.jrp.domain.response.service.*;
 
 import java.util.List;
 
 public interface EmployerSubscriptionService {
     EmployerPackageResponse createPackage(CreateEmployerPackageRequest request);
+    public EmployerPackageResponse updatePackage(Long packageId, UpdateEmployerPackageRequest request);
+    public void deletePackage(Long packageId);
+    public AddOnResponse updateAddOn(Long addOnId, UpdateAddOnRequest request);
+    public void deleteAddOn(Long addOnId);
     List<EmployerPackageResponse> getAllPackages();
     EmployerPackageResponse getPackageById(Long packageId);
     EmployerSubscriptionResponse purchasePackage(Long employerId, PurchasePackageRequest request);

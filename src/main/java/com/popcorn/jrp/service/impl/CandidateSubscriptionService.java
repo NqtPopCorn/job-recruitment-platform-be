@@ -47,6 +47,67 @@ public class CandidateSubscriptionService implements com.popcorn.jrp.service.Can
         return mapToPackageResponse(packageEntity);
     }
 
+    @Transactional
+    public CandidatePackageResponse updatePackage(Long packageId, UpdateCandidatePackageRequest request) {
+        CandidateServicePackageEntity packageEntity = packageRepository.findById(packageId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "Package not found"));
+
+        // Kiểm tra xem có subscription nào đang sử dụng package này không
+        boolean hasActiveSubscriptions = subscriptionRepository
+                .existsByServicePackageIdAndStatus(packageId, SubscriptionStatus.ACTIVE);
+
+        if (hasActiveSubscriptions) {
+            throw new CustomException(HttpStatus.BAD_REQUEST,
+                    "Cannot update package with active subscriptions. Please wait for all subscriptions to expire.");
+        }
+
+        // Update package fields
+        if (request.getName() != null) {
+            packageEntity.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            packageEntity.setDescription(request.getDescription());
+        }
+        if (request.getPrice() != null) {
+            packageEntity.setPrice(request.getPrice());
+        }
+        if (request.getDurationDay() != null) {
+            packageEntity.setDurationDay(request.getDurationDay());
+        }
+        if (request.getIsLifetime() != null) {
+            packageEntity.setIsLifetime(request.getIsLifetime());
+        }
+        if (request.getHighlightProfileDays() != null) {
+            packageEntity.setHighlightProfileDays(request.getHighlightProfileDays());
+        }
+        if (request.getJobApplyLimit() != null) {
+            packageEntity.setJobApplyLimit(request.getJobApplyLimit());
+        }
+        if (request.getCanViewOtherCandidates() != null) {
+            packageEntity.setCanViewOtherCandidates(request.getCanViewOtherCandidates());
+        }
+
+        packageEntity = packageRepository.save(packageEntity);
+        return mapToPackageResponse(packageEntity);
+    }
+
+    @Transactional
+    public void deletePackage(Long packageId) {
+        CandidateServicePackageEntity packageEntity = packageRepository.findById(packageId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "Package not found"));
+
+        // Kiểm tra xem có subscription nào đang sử dụng package này không
+        boolean hasSubscriptions = subscriptionRepository.existsByServicePackageId(packageId);
+
+        if (hasSubscriptions) {
+            throw new CustomException(HttpStatus.BAD_REQUEST,
+                    "Cannot delete package with existing subscriptions. Consider deactivating instead.");
+        }
+
+        packageRepository.delete(packageEntity);
+    }
+
+
     public List<CandidatePackageResponse> getAllPackages() {
         return packageRepository.findAllByOrderByPriceAsc().stream()
                 .map(this::mapToPackageResponse)
@@ -196,30 +257,55 @@ public class CandidateSubscriptionService implements com.popcorn.jrp.service.Can
     private BigDecimal calculateRefundPercent(CandidateSubscriptionEntity subscription) {
         CandidateServicePackageEntity pkg = subscription.getServicePackage();
 
-        // Tính % ứng tuyển còn lại
-        BigDecimal remainingApplyPercent = BigDecimal.ONE.subtract(
-                new BigDecimal(subscription.getUsedApplyCount())
-                        .divide(new BigDecimal(pkg.getJobApplyLimit()), 4, RoundingMode.HALF_UP)
-        );
+        BigDecimal sum = BigDecimal.ZERO;
+        int count = 0;
 
-        // Tính % highlight còn lại
-        BigDecimal remainingHighlightPercent = BigDecimal.ONE.subtract(
-                new BigDecimal(subscription.getUsedHighlightDays())
-                        .divide(new BigDecimal(pkg.getHighlightProfileDays()), 4, RoundingMode.HALF_UP)
-        );
+        // ===== 1. % Ứng tuyển còn lại =====
+        int jobLimit = pkg.getJobApplyLimit();
+        if (jobLimit > 0) {
+            BigDecimal used = BigDecimal.valueOf(subscription.getUsedApplyCount());
+            BigDecimal total = BigDecimal.valueOf(jobLimit);
 
-        // Tính % thời gian còn lại
+            BigDecimal remainingApplyPercent = BigDecimal.ONE.subtract(
+                    used.divide(total, 4, RoundingMode.HALF_UP)
+            );
+
+            sum = sum.add(remainingApplyPercent);
+            count++;
+        }
+
+        // ===== 2. % Highlight còn lại =====
+        int highlightDays = pkg.getHighlightProfileDays();
+        if (highlightDays > 0) {
+            BigDecimal used = BigDecimal.valueOf(subscription.getUsedHighlightDays());
+            BigDecimal total = BigDecimal.valueOf(highlightDays);
+
+            BigDecimal remainingHighlightPercent = BigDecimal.ONE.subtract(
+                    used.divide(total, 4, RoundingMode.HALF_UP)
+            );
+
+            sum = sum.add(remainingHighlightPercent);
+            count++;
+        }
+
+        // ===== 3. % Thời gian còn lại =====
         long totalDays = ChronoUnit.DAYS.between(subscription.getStartDate(), subscription.getEndDate());
-        long remainingDays = ChronoUnit.DAYS.between(LocalDate.now(), subscription.getEndDate());
+        if (totalDays > 0) {
+            long remainingDays = ChronoUnit.DAYS.between(LocalDate.now(), subscription.getEndDate());
+            if (remainingDays < 0) remainingDays = 0;
 
-        if (remainingDays < 0) remainingDays = 0;
+            BigDecimal remainingTimePercent = BigDecimal.valueOf(remainingDays)
+                    .divide(BigDecimal.valueOf(totalDays), 4, RoundingMode.HALF_UP);
 
-        BigDecimal remainingTimePercent = new BigDecimal(remainingDays)
-                .divide(new BigDecimal(totalDays), 4, RoundingMode.HALF_UP);
+            sum = sum.add(remainingTimePercent);
+            count++;
+        }
 
-        // Trung bình 3 tỷ lệ
-        return remainingApplyPercent.add(remainingHighlightPercent).add(remainingTimePercent)
-                .divide(new BigDecimal("3"), 4, RoundingMode.HALF_UP);
+        // Nếu count = 0 → gói vô lý → coi như 0% refund
+        if (count == 0) return BigDecimal.ZERO;
+
+        // ===== Trung bình =====
+        return sum.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
     }
 
     // ========================================

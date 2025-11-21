@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface CandidateSubscriptionService {
     CandidatePackageResponse createPackage(CreateCandidatePackageRequest request);
+    public CandidatePackageResponse updatePackage(Long packageId, UpdateCandidatePackageRequest request);
+    public void deletePackage(Long packageId);
     List<CandidatePackageResponse> getAllPackages();
     CandidatePackageResponse getPackageById(Long packageId);
     CandidateSubscriptionResponse purchasePackage(Long candidateId, PurchasePackageRequest request);

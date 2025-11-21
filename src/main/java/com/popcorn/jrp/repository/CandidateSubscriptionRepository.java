@@ -21,4 +21,9 @@ public interface CandidateSubscriptionRepository extends JpaRepository<Candidate
 
     @Query("SELECT c FROM CandidateSubscriptionEntity c WHERE c.candidateId = :candidateId AND c.status = 'ACTIVE'")
     Optional<CandidateSubscriptionEntity> findActiveSubscription(Long candidateId);
+
+    boolean existsByServicePackageId(Long packageId);
+
+    boolean existsByServicePackageIdAndStatus(Long packageId, SubscriptionStatus status);
+
 }

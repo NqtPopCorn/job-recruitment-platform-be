@@ -49,6 +49,120 @@ public class EmployerSubscriptionService implements com.popcorn.jrp.service.Empl
         return mapToPackageResponse(packageEntity);
     }
 
+    @Transactional
+    public EmployerPackageResponse updatePackage(Long packageId, UpdateEmployerPackageRequest request) {
+        EmployerServicePackageEntity packageEntity = packageRepository.findById(packageId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "Package not found"));
+
+        // Kiểm tra xem có subscription nào đang sử dụng package này không
+        boolean hasActiveSubscriptions = subscriptionRepository
+                .existsByServicePackageIdAndStatus(packageId, SubscriptionStatus.ACTIVE);
+
+        if (hasActiveSubscriptions) {
+            throw new CustomException(HttpStatus.BAD_REQUEST,
+                    "Cannot update package with active subscriptions. Please wait for all subscriptions to expire.");
+        }
+
+        // Update package fields
+        if (request.getName() != null) {
+            packageEntity.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            packageEntity.setDescription(request.getDescription());
+        }
+        if (request.getPrice() != null) {
+            packageEntity.setPrice(request.getPrice());
+        }
+        if (request.getDurationDay() != null) {
+            packageEntity.setDurationDay(request.getDurationDay());
+        }
+        if (request.getIsLifetime() != null) {
+            packageEntity.setIsLifetime(request.getIsLifetime());
+        }
+        if (request.getJobPostLimit() != null) {
+            packageEntity.setJobPostLimit(request.getJobPostLimit());
+        }
+        if (request.getHighlightJobLimit() != null) {
+            packageEntity.setHighlightJobLimit(request.getHighlightJobLimit());
+        }
+
+        packageEntity = packageRepository.save(packageEntity);
+        return mapToPackageResponse(packageEntity);
+    }
+
+    @Transactional
+    public void deletePackage(Long packageId) {
+        EmployerServicePackageEntity packageEntity = packageRepository.findById(packageId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "Package not found"));
+
+        // Kiểm tra xem có subscription nào đang sử dụng package này không
+        boolean hasSubscriptions = subscriptionRepository.existsByServicePackageId(packageId);
+
+        if (hasSubscriptions) {
+            throw new CustomException(HttpStatus.BAD_REQUEST,
+                    "Cannot delete package with existing subscriptions. Consider deactivating instead.");
+        }
+
+        packageRepository.delete(packageEntity);
+    }
+
+    @Transactional
+    public AddOnResponse updateAddOn(Long addOnId, UpdateAddOnRequest request) {
+        EmployerAddOnPackageEntity addOn = addOnPackageRepository.findById(addOnId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "Add-on not found"));
+
+        // Kiểm tra xem có ai đang sử dụng add-on này không
+        boolean hasActiveUsage = addOnUsageRepository
+                .existsByAddOnPackageIdAndStatus(addOnId, EmployerAddOnUsageEntity.Status.ACTIVE);
+
+        if (hasActiveUsage) {
+            throw new CustomException(HttpStatus.BAD_REQUEST,
+                    "Cannot update add-on with active usage. Please wait for all usages to expire.");
+        }
+
+        // Update add-on fields
+        if (request.getName() != null) {
+            addOn.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            addOn.setDescription(request.getDescription());
+        }
+        if (request.getPrice() != null) {
+            addOn.setPrice(request.getPrice());
+        }
+        if (request.getType() != null) {
+            addOn.setType(EmployerAddOnPackageEntity.AddOnType.valueOf(request.getType()));
+        }
+        if (request.getQuantity() != null) {
+            addOn.setQuantity(request.getQuantity());
+        }
+        if (request.getDurationDay() != null) {
+            addOn.setDurationDay(request.getDurationDay());
+        }
+        if (request.getIsLifetime() != null) {
+            addOn.setIsLifetime(request.getIsLifetime());
+        }
+
+        addOn = addOnPackageRepository.save(addOn);
+        return mapToAddOnResponse(addOn);
+    }
+
+    @Transactional
+    public void deleteAddOn(Long addOnId) {
+        EmployerAddOnPackageEntity addOn = addOnPackageRepository.findById(addOnId)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "Add-on not found"));
+
+        // Kiểm tra xem có ai đã mua add-on này chưa
+        boolean hasUsage = addOnUsageRepository.existsByAddOnPackageId(addOnId);
+
+        if (hasUsage) {
+            throw new CustomException(HttpStatus.BAD_REQUEST,
+                    "Cannot delete add-on with existing purchase history.");
+        }
+
+        addOnPackageRepository.delete(addOn);
+    }
+
     public List<EmployerPackageResponse> getAllPackages() {
         return packageRepository.findAllByOrderByPriceAsc().stream()
                 .map(this::mapToPackageResponse)
@@ -195,16 +309,22 @@ public class EmployerSubscriptionService implements com.popcorn.jrp.service.Empl
         EmployerServicePackageEntity pkg = subscription.getServicePackage();
 
         // Tính % job còn lại
-        BigDecimal remainingJobPercent = BigDecimal.ONE.subtract(
-                new BigDecimal(subscription.getUsedJobCount())
-                        .divide(new BigDecimal(pkg.getJobPostLimit()), 4, RoundingMode.HALF_UP)
-        );
+        BigDecimal remainingJobPercent = BigDecimal.ZERO;
+        if (pkg.getJobPostLimit() > 0) {
+            remainingJobPercent = BigDecimal.ONE.subtract(
+                    new BigDecimal(subscription.getUsedJobCount())
+                            .divide(new BigDecimal(pkg.getJobPostLimit()), 4, RoundingMode.HALF_UP)
+            );
+        }
 
         // Tính % highlight còn lại
-        BigDecimal remainingHighlightPercent = BigDecimal.ONE.subtract(
-                new BigDecimal(subscription.getUsedHighlightCount())
-                        .divide(new BigDecimal(pkg.getHighlightJobLimit()), 4, RoundingMode.HALF_UP)
-        );
+        BigDecimal remainingHighlightPercent = BigDecimal.ZERO;
+        if (pkg.getHighlightJobLimit() > 0) {
+            remainingHighlightPercent = BigDecimal.ONE.subtract(
+                    new BigDecimal(subscription.getUsedHighlightCount())
+                            .divide(new BigDecimal(pkg.getHighlightJobLimit()), 4, RoundingMode.HALF_UP)
+            );
+        }
 
         // Tính % thời gian còn lại
         long totalDays = ChronoUnit.DAYS.between(subscription.getStartDate(), subscription.getEndDate());
@@ -212,12 +332,37 @@ public class EmployerSubscriptionService implements com.popcorn.jrp.service.Empl
 
         if (remainingDays < 0) remainingDays = 0;
 
-        BigDecimal remainingTimePercent = new BigDecimal(remainingDays)
-                .divide(new BigDecimal(totalDays), 4, RoundingMode.HALF_UP);
+        BigDecimal remainingTimePercent = BigDecimal.ZERO;
+        if (totalDays > 0) {
+            remainingTimePercent = new BigDecimal(remainingDays)
+                    .divide(new BigDecimal(totalDays), 4, RoundingMode.HALF_UP);
+        }
 
-        // Trung bình 3 tỷ lệ
-        return remainingJobPercent.add(remainingHighlightPercent).add(remainingTimePercent)
-                .divide(new BigDecimal("3"), 4, RoundingMode.HALF_UP);
+        // Đếm số thành phần hợp lệ để tính trung bình
+        int validComponents = 0;
+        BigDecimal sum = BigDecimal.ZERO;
+
+        if (pkg.getJobPostLimit() > 0) {
+            sum = sum.add(remainingJobPercent);
+            validComponents++;
+        }
+
+        if (pkg.getHighlightJobLimit() > 0) {
+            sum = sum.add(remainingHighlightPercent);
+            validComponents++;
+        }
+
+        if (totalDays > 0) {
+            sum = sum.add(remainingTimePercent);
+            validComponents++;
+        }
+
+        // Tính trung bình dựa trên số thành phần hợp lệ
+        if (validComponents == 0) {
+            return BigDecimal.ZERO; // hoặc throw exception tùy logic nghiệp vụ
+        }
+
+        return sum.divide(new BigDecimal(validComponents), 4, RoundingMode.HALF_UP);
     }
 
     // ========================================

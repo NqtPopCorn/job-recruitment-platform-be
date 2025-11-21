@@ -43,6 +43,27 @@ public class CandidateSubscriptionController {
                 .body(subscriptionService.createPackage(request));
     }
 
+    @PutMapping("/packages/{packageId}")
+    @RequireRole({"admin"})
+    public ResponseEntity<CandidatePackageResponse> updatePackage(
+            @PathVariable Long packageId,
+            @Valid @RequestBody UpdateCandidatePackageRequest request) {
+        return ResponseEntity.ok(subscriptionService.updatePackage(packageId, request));
+    }
+
+    @DeleteMapping("/packages/{packageId}")
+    @RequireRole({"admin"})
+    public ResponseEntity<ApiResponse> deletePackage(@PathVariable Long packageId) {
+        subscriptionService.deletePackage(packageId);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .success(true)
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Package deleted successfully")
+                        .build()
+        );
+    }
+
     // ========================================
     // SUBSCRIPTION ENDPOINTS
     // ========================================

@@ -15,4 +15,8 @@ public interface EmployerAddOnUsageRepository extends JpaRepository<EmployerAddO
 
     @Query("SELECT e FROM EmployerAddOnUsageEntity e WHERE e.status = 'ACTIVE' AND e.endDate < :currentDate")
     List<EmployerAddOnUsageEntity> findExpiredAddOns(LocalDate currentDate);
+
+    boolean existsByAddOnPackageId(Long addOnPackageId);
+
+    boolean existsByAddOnPackageIdAndStatus(Long addOnPackageId, Status status);
 }

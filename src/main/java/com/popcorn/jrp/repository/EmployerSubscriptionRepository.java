@@ -21,4 +21,9 @@ public interface EmployerSubscriptionRepository extends JpaRepository<EmployerSu
 
     @Query("SELECT e FROM EmployerSubscriptionEntity e WHERE e.employerId = :employerId AND e.status = 'ACTIVE'")
     Optional<EmployerSubscriptionEntity> findActiveSubscription(Long employerId);
+
+    boolean existsByServicePackageId(Long packageId);
+
+    boolean existsByServicePackageIdAndStatus(Long packageId, SubscriptionStatus status);
+
 }

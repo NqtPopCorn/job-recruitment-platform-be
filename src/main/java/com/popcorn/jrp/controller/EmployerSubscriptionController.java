@@ -43,6 +43,48 @@ public class EmployerSubscriptionController {
                 .body(subscriptionService.createPackage(request));
     }
 
+    @PutMapping("/packages/{packageId}")
+    @RequireRole({"admin"})
+    public ResponseEntity<EmployerPackageResponse> updatePackage(
+            @PathVariable Long packageId,
+            @Valid @RequestBody UpdateEmployerPackageRequest request) {
+        return ResponseEntity.ok(subscriptionService.updatePackage(packageId, request));
+    }
+
+    @DeleteMapping("/packages/{packageId}")
+    @RequireRole({"admin"})
+    public ResponseEntity<ApiResponse> deletePackage(@PathVariable Long packageId) {
+        subscriptionService.deletePackage(packageId);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .success(true)
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Package deleted successfully")
+                        .build()
+        );
+    }
+
+    @PutMapping("/addons/{addOnId}")
+    @RequireRole({"admin"})
+    public ResponseEntity<AddOnResponse> updateAddOn(
+            @PathVariable Long addOnId,
+            @Valid @RequestBody UpdateAddOnRequest request) {
+        return ResponseEntity.ok(subscriptionService.updateAddOn(addOnId, request));
+    }
+
+    @DeleteMapping("/addons/{addOnId}")
+    @RequireRole({"admin"})
+    public ResponseEntity<ApiResponse> deleteAddOn(@PathVariable Long addOnId) {
+        subscriptionService.deleteAddOn(addOnId);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .success(true)
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Add-on deleted successfully")
+                        .build()
+        );
+    }
+
     // ========================================
     // SUBSCRIPTION ENDPOINTS
     // ========================================
