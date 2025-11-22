@@ -93,6 +93,7 @@ public class AiCandidateServiceImpl implements AiCandidateService {
         currentData.setEmail(candidate.getEmail());
         currentData.setPhone(candidate.getPhone());
         currentData.setLanguages(candidate.getLanguages());
+        currentData.setCity(candidate.getCity());
 
         // Map Sections
         List<AiCvParsingResponse.AiSectionDto> sectionDtos = sections.stream().map(s -> {

@@ -90,6 +90,7 @@ public class GeminiCvService {
               "designation": "String",
               "email": "String",
               "phone": "String",
+              "city": "String",
               "summary": "String",
               "skills": ["String"],
               "languages": ["String"],

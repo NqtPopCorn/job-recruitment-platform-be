@@ -13,6 +13,7 @@ public class AiCvParsingResponse {
     private String summary; // Mapping vào field 'description'
     private List<String> skills;
     private List<String> languages;
+    private String city;
 
     // Mapping cho CandidateSectionEntity
     private List<AiSectionDto> sections;
